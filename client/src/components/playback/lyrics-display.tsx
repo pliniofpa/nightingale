@@ -2,18 +2,15 @@ import { usePlaybackTransportActions, usePlaybackTransportState } from "@/contex
 import { cn } from "@/lib/utils";
 import type { AppConfig } from "@/types/AppConfig";
 import type { Segment, Word } from "@/types/Transcript";
+import {
+  CAPTION_HIDE_SEC,
+  findCurrentSegment,
+  GAP_THRESHOLD_SEC,
+  LYRICS_LEAD,
+  SEGMENT_LINGER,
+  WORD_HIGHLIGHT_LEAD,
+} from "@/utils/playback/lyrics-gap";
 import { memo, useEffect, useRef, useState } from "react";
-
-// Timing offsets: lyrics/words appear slightly before their actual start
-// so the visual transition feels in sync with the audio.
-const LYRICS_LEAD = 0.15;
-const WORD_HIGHLIGHT_LEAD = 0.25;
-
-const COUNTDOWN_DURATION = 3.0;
-const COUNTDOWN_GAP_THRESHOLD = 3.5;
-
-// Grace period after a segment ends before it disappears
-const SEGMENT_LINGER = 0.5;
 
 interface WordStyle {
   rgb: string;
@@ -52,46 +49,6 @@ function interpolateStyle(from: WordStyle, to: WordStyle, t: number): WordStyle 
     rgb: `rgb(${r},${g},${b})`,
     opacity: lerp(from.opacity, to.opacity, p),
   };
-}
-
-// --- Segment search ---
-
-/**
- * Finds the segment index that should be displayed at a given `time`.
- * Uses `hint` (the last known index) to skip already-passed segments.
- * Prefers the *next* segment when the current time falls in the lead-in window.
- */
-function findCurrentSegment(segments: Segment[], time: number, hint: number): number {
-  const start = hint < segments.length && time >= segments[hint].start - LYRICS_LEAD ? hint : 0;
-
-  for (let i = start; i < segments.length; i++) {
-    if (time >= segments[i].end + SEGMENT_LINGER) {
-      const next = i + 1;
-
-      // Through a short pause, keep the finished line current until the next
-      // line's lead-in begins, so the switch happens when the new line starts
-      // rather than when the old one ends.
-      if (
-        next < segments.length &&
-        segments[next].start - segments[i].end < COUNTDOWN_GAP_THRESHOLD &&
-        time < segments[next].start - LYRICS_LEAD
-      ) {
-        return i;
-      }
-
-      continue;
-    }
-
-    // If we're already in the lead-in of the next segment, jump ahead
-    const next = i + 1;
-    if (next < segments.length && time >= segments[next].start - LYRICS_LEAD) {
-      return next;
-    }
-
-    return i;
-  }
-
-  return Math.max(0, segments.length - 1);
 }
 
 // --- Per-frame DOM updates (called via rAF subscriber, no React re-renders) ---
@@ -247,21 +204,34 @@ function LyricsDisplayImpl({
 
       const gapBefore = idx === 0 ? seg.start : seg.start - segments[idx - 1].end;
       const timeUntil = seg.start - time;
+      // Circular countdown bubble beside the lyric line for the final seconds
+      // of a long gap. The HUD caption hides in this window (<= CAPTION_HIDE_SEC),
+      // so the bubble is the single countdown source while the upcoming lyric
+      // previews.
       const showCountdown =
-        gapBefore >= COUNTDOWN_GAP_THRESHOLD && timeUntil > 0 && timeUntil <= COUNTDOWN_DURATION;
+        gapBefore >= GAP_THRESHOLD_SEC && timeUntil > 0 && timeUntil <= CAPTION_HIDE_SEC;
 
       // After a line ends, keep it on screen through a short pause until the
       // next line starts (findCurrentSegment holds idx on the finished line).
       const nextStart = idx + 1 < segments.length ? segments[idx + 1].start : Infinity;
       const bridgeShortGap =
-        time > seg.end + SEGMENT_LINGER && nextStart - seg.end < COUNTDOWN_GAP_THRESHOLD;
+        time > seg.end + SEGMENT_LINGER && nextStart - seg.end < GAP_THRESHOLD_SEC;
 
       const showCurrent = isActive || showCountdown || bridgeShortGap;
       const hasNext = idx + 1 < segments.length;
 
+      // Only preview a second line when it belongs to the same continuous
+      // vocal passage: the current line must not itself be an upcoming
+      // after-break line (inLongGap), and the gap into the next line must be
+      // short. Never preview the next lyric block before or during a longer
+      // instrumental break; once that block starts, its own following line
+      // may preview only when that next gap is short.
+      const inLongGap = gapBefore >= GAP_THRESHOLD_SEC && timeUntil > LYRICS_LEAD;
+      const gapAfter = nextStart - seg.end;
+      const showNext = showCurrent && hasNext && !inLongGap && gapAfter < GAP_THRESHOLD_SEC;
+
       if (containerRef.current) containerRef.current.style.display = showCurrent ? "" : "none";
-      if (nextContainerRef.current)
-        nextContainerRef.current.style.display = showCurrent && hasNext ? "" : "none";
+      if (nextContainerRef.current) nextContainerRef.current.style.display = showNext ? "" : "none";
 
       updateCountdown(countdownRef.current, showCountdown, timeUntil);
       // Bridged finished lines are past every word's end, so treating them as
