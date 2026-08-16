@@ -5,9 +5,9 @@
  * one lyric line and the start of the next. Captions only describe pauses
  * BETWEEN existing lyric blocks, so an extended instrumental intro before the
  * first lyric never shows one. During a long gap the HUD renders a small
- * "Next lyrics in Ns" countdown for the whole gap, then nothing in the final
- * `CAPTION_HIDE_SEC` so the upcoming lyric preview and its circular bubble can
- * take over.
+ * "Next lyrics in Ns" countdown for the whole gap, while the lyric-side
+ * circular bubble counts down the final `BUBBLE_COUNTDOWN_SEC` beside the
+ * upcoming line.
  */
 
 import type { Segment } from "@/types/Transcript";
@@ -21,8 +21,8 @@ export const WORD_HIGHLIGHT_LEAD = 0.25;
 export const SEGMENT_LINGER = 0.5;
 /** A gap at or above this many seconds between lyric lines is a real gap. */
 export const GAP_THRESHOLD_SEC = 3.5;
-/** At or below this remaining gap, the caption hides for the lyric preview. */
-export const CAPTION_HIDE_SEC = 3.0;
+/** Duration of the circular lyric-side countdown bubble at the end of a long gap. */
+export const BUBBLE_COUNTDOWN_SEC = 3.0;
 
 /**
  * Finds the segment index that should be displayed at a given `time`.
@@ -71,7 +71,11 @@ export function findCurrentSegment(segments: Segment[], time: number, hint: numb
  *
  * Handles empty segments, the intro before the first lyric (never captioned),
  * short gaps, the preceding line's active/linger window, and the tail after
- * the final line.
+ * the final line. The caption runs for the whole gap and stops the moment the
+ * upcoming lyric actually starts (`timeUntil <= 0`); because the text uses
+ * `Math.ceil`, it reads `1s` right up to that boundary rather than showing a
+ * separate `0s`. The lyric-side bubble counts down the final
+ * `BUBBLE_COUNTDOWN_SEC` in parallel.
  */
 export function computeLyricGapCaption(
   segments: Segment[],
@@ -91,13 +95,13 @@ export function computeLyricGapCaption(
 
   const gapBefore = seg.start - segments[segIdx - 1].end;
   const timeUntil = seg.start - time;
-  const inGap = gapBefore >= GAP_THRESHOLD_SEC && timeUntil > LYRICS_LEAD;
+  // Keep the caption until the lyric actually starts: `Math.ceil` holds the
+  // text at `1s` right up to the zero crossing, and no `0s` is shown once the
+  // lyric is underway.
+  const inGap = gapBefore >= GAP_THRESHOLD_SEC && timeUntil > 0;
   if (!inGap) {
     return null;
   }
 
-  if (timeUntil > CAPTION_HIDE_SEC) {
-    return `Next lyrics in ${Math.ceil(timeUntil)}s`;
-  }
-  return null;
+  return `Next lyrics in ${Math.ceil(timeUntil)}s`;
 }

@@ -3,14 +3,14 @@ import { cn } from "@/lib/utils";
 import type { AppConfig } from "@/types/AppConfig";
 import type { Segment, Word } from "@/types/Transcript";
 import {
-  CAPTION_HIDE_SEC,
+  BUBBLE_COUNTDOWN_SEC,
   findCurrentSegment,
   GAP_THRESHOLD_SEC,
   LYRICS_LEAD,
   SEGMENT_LINGER,
   WORD_HIGHLIGHT_LEAD,
 } from "@/utils/playback/lyrics-gap";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 interface WordStyle {
   rgb: string;
@@ -181,6 +181,7 @@ function LyricsDisplayImpl({
   );
 
   const hintRef = useRef(0);
+  const renderedIdxRef = useRef(segIdx);
   const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const countdownRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -190,6 +191,7 @@ function LyricsDisplayImpl({
     if (segments.length === 0) return;
 
     let raf = 0;
+    let pendingRaf = 0;
     let cancelled = false;
 
     const apply = (time: number) => {
@@ -199,17 +201,33 @@ function LyricsDisplayImpl({
         setSegIdx(idx);
       }
 
+      // setSegIdx only schedules a re-render; until React commits, the container
+      // refs still render the previous segment. Applying the new index's
+      // visibility to that stale DOM would transiently hide or misplace lines,
+      // so defer per-frame updates until the render has caught up.
+      if (idx !== renderedIdxRef.current) {
+        // Paused: React commits outside the rAF loop, so re-apply on the next
+        // frame once the render for `idx` has committed.
+        if (!animate && !pendingRaf) {
+          pendingRaf = requestAnimationFrame(() => {
+            pendingRaf = 0;
+            if (!cancelled) apply(getCurrentTime());
+          });
+        }
+        return;
+      }
+
       const seg = segments[idx];
       const isActive = time >= seg.start - LYRICS_LEAD && time <= seg.end + SEGMENT_LINGER;
 
       const gapBefore = idx === 0 ? seg.start : seg.start - segments[idx - 1].end;
       const timeUntil = seg.start - time;
       // Circular countdown bubble beside the lyric line for the final seconds
-      // of a long gap. The HUD caption hides in this window (<= CAPTION_HIDE_SEC),
-      // so the bubble is the single countdown source while the upcoming lyric
+      // of a long gap. The HUD caption keeps running for the whole gap, so the
+      // bubble is the lyric-side companion countdown while the upcoming lyric
       // previews.
       const showCountdown =
-        gapBefore >= GAP_THRESHOLD_SEC && timeUntil > 0 && timeUntil <= CAPTION_HIDE_SEC;
+        gapBefore >= GAP_THRESHOLD_SEC && timeUntil > 0 && timeUntil <= BUBBLE_COUNTDOWN_SEC;
 
       // After a line ends, keep it on screen through a short pause until the
       // next line starts (findCurrentSegment holds idx on the finished line).
@@ -249,12 +267,26 @@ function LyricsDisplayImpl({
       return () => {
         cancelled = true;
         cancelAnimationFrame(raf);
+        cancelAnimationFrame(pendingRaf);
       };
     }
 
     apply(getCurrentTime());
-    return subscribe((time) => apply(time));
+    const unsubscribe = subscribe((time) => apply(time));
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(pendingRaf);
+      unsubscribe();
+    };
   }, [segments, subscribe, getCurrentTime, animate]);
+
+  // Keep `renderedIdxRef` in sync with the index React has actually committed
+  // to the DOM. It must be updated here (after commit) rather than during
+  // render so an interrupted concurrent render cannot claim an uncommitted
+  // index, which would let the rAF updater mutate visibility against stale DOM.
+  useLayoutEffect(() => {
+    renderedIdxRef.current = segIdx;
+  }, [segIdx]);
 
   if (segments.length === 0) {
     return null;
