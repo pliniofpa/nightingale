@@ -16,6 +16,7 @@ below.
 ### Improvements
 
 - Long gaps between lyric lines now show a compact countdown beneath the song details, while the circular three-second countdown bubble stays beside the lyric line as the next line approaches. The next lyric block is no longer previewed across an instrumental break.
+- Change "AI generated" to "AI transcribed" in song list.
 
 ## [1.1.0] - 2026-08-14
 
