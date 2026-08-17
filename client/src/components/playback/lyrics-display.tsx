@@ -10,7 +10,7 @@ import {
   SEGMENT_LINGER,
   WORD_HIGHLIGHT_LEAD,
 } from "@/utils/playback/lyrics-gap";
-import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { memo, useLayoutEffect, useRef, useState } from "react";
 
 interface WordStyle {
   rgb: string;
@@ -182,16 +182,17 @@ function LyricsDisplayImpl({
 
   const hintRef = useRef(0);
   const renderedIdxRef = useRef(segIdx);
+  const appliedIdxRef = useRef<number | null>(null);
+  const applyRef = useRef<((time: number) => void) | null>(null);
   const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const countdownRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const nextContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (segments.length === 0) return;
 
     let raf = 0;
-    let pendingRaf = 0;
     let cancelled = false;
 
     const apply = (time: number) => {
@@ -206,14 +207,6 @@ function LyricsDisplayImpl({
       // visibility to that stale DOM would transiently hide or misplace lines,
       // so defer per-frame updates until the render has caught up.
       if (idx !== renderedIdxRef.current) {
-        // Paused: React commits outside the rAF loop, so re-apply on the next
-        // frame once the render for `idx` has committed.
-        if (!animate && !pendingRaf) {
-          pendingRaf = requestAnimationFrame(() => {
-            pendingRaf = 0;
-            if (!cancelled) apply(getCurrentTime());
-          });
-        }
         return;
       }
 
@@ -238,15 +231,13 @@ function LyricsDisplayImpl({
       const showCurrent = isActive || showCountdown || bridgeShortGap;
       const hasNext = idx + 1 < segments.length;
 
-      // Only preview a second line when it belongs to the same continuous
-      // vocal passage: the current line must not itself be an upcoming
-      // after-break line (inLongGap), and the gap into the next line must be
-      // short. Never preview the next lyric block before or during a longer
-      // instrumental break; once that block starts, its own following line
-      // may preview only when that next gap is short.
       const inLongGap = gapBefore >= GAP_THRESHOLD_SEC && timeUntil > LYRICS_LEAD;
       const gapAfter = nextStart - seg.end;
-      const showNext = showCurrent && hasNext && !inLongGap && gapAfter < GAP_THRESHOLD_SEC;
+      // During the body of a long gap, show no lyric preview. In the final
+      // bubble countdown, the upcoming line is already on stage, so preview
+      // its following line when that passage itself has no long gap.
+      const showNext =
+        showCurrent && hasNext && gapAfter < GAP_THRESHOLD_SEC && (!inLongGap || showCountdown);
 
       if (containerRef.current) containerRef.current.style.display = showCurrent ? "" : "none";
       if (nextContainerRef.current) nextContainerRef.current.style.display = showNext ? "" : "none";
@@ -255,7 +246,23 @@ function LyricsDisplayImpl({
       // Bridged finished lines are past every word's end, so treating them as
       // active keeps the already-sung colors instead of dropping to unsung.
       updateWordSpans(wordRefs.current, seg.words, time, isActive || bridgeShortGap);
+      appliedIdxRef.current = idx;
     };
+
+    applyRef.current = apply;
+
+    const cleanup = () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      if (applyRef.current === apply) {
+        applyRef.current = null;
+        appliedIdxRef.current = null;
+      }
+    };
+
+    // Apply immediately in both timing modes so dependency changes do not
+    // leave visibility stale until the first rAF or transport notification.
+    apply(getCurrentTime());
 
     if (animate) {
       const loop = () => {
@@ -264,29 +271,25 @@ function LyricsDisplayImpl({
         raf = requestAnimationFrame(loop);
       };
       raf = requestAnimationFrame(loop);
-      return () => {
-        cancelled = true;
-        cancelAnimationFrame(raf);
-        cancelAnimationFrame(pendingRaf);
-      };
+      return cleanup;
     }
 
-    apply(getCurrentTime());
     const unsubscribe = subscribe((time) => apply(time));
     return () => {
-      cancelled = true;
-      cancelAnimationFrame(pendingRaf);
+      cleanup();
       unsubscribe();
     };
   }, [segments, subscribe, getCurrentTime, animate]);
 
   // Keep `renderedIdxRef` in sync with the index React has actually committed
-  // to the DOM. It must be updated here (after commit) rather than during
-  // render so an interrupted concurrent render cannot claim an uncommitted
-  // index, which would let the rAF updater mutate visibility against stale DOM.
+  // to the DOM, then apply its visibility before the browser can paint. The
+  // rAF loop remains responsible for the normal per-frame updates.
   useLayoutEffect(() => {
     renderedIdxRef.current = segIdx;
-  }, [segIdx]);
+    if (appliedIdxRef.current !== segIdx) {
+      applyRef.current?.(getCurrentTime());
+    }
+  }, [segIdx, getCurrentTime]);
 
   if (segments.length === 0) {
     return null;
