@@ -315,9 +315,7 @@ function PlaybackHudImpl({ title, artist, config, position = "top" }: PlaybackHu
   const showPixabayCredit = isPixabayTheme(themeIndex);
   const hasTouch = useHasTouchInput();
 
-  // Updates the timer text, skip-button visibility, and the lyric-gap caption
-  // via direct DOM mutation (rAF subscriber), only triggering a text update when
-  // the displayed second changes.
+  // Update playback text without triggering React renders every frame.
   useEffect(() => {
     const updateGapCaption = (time: number) => {
       const el = gapCaptionRef.current;

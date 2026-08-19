@@ -202,10 +202,7 @@ function LyricsDisplayImpl({
         setSegIdx(idx);
       }
 
-      // setSegIdx only schedules a re-render; until React commits, the container
-      // refs still render the previous segment. Applying the new index's
-      // visibility to that stale DOM would transiently hide or misplace lines,
-      // so defer per-frame updates until the render has caught up.
+      // Wait for React to render the new segment before mutating its visibility.
       if (idx !== renderedIdxRef.current) {
         return;
       }
@@ -215,10 +212,6 @@ function LyricsDisplayImpl({
 
       const gapBefore = idx === 0 ? seg.start : seg.start - segments[idx - 1].end;
       const timeUntil = seg.start - time;
-      // Circular countdown bubble beside the lyric line for the final seconds
-      // of a long gap. The HUD caption keeps running for the whole gap, so the
-      // bubble is the lyric-side companion countdown while the upcoming lyric
-      // previews.
       const showCountdown =
         gapBefore >= GAP_THRESHOLD_SEC && timeUntil > 0 && timeUntil <= BUBBLE_COUNTDOWN_SEC;
 
@@ -233,9 +226,7 @@ function LyricsDisplayImpl({
 
       const inLongGap = gapBefore >= GAP_THRESHOLD_SEC && timeUntil > LYRICS_LEAD;
       const gapAfter = nextStart - seg.end;
-      // During the body of a long gap, show no lyric preview. In the final
-      // bubble countdown, the upcoming line is already on stage, so preview
-      // its following line when that passage itself has no long gap.
+      // The final countdown may preview a continuous two-line passage.
       const showNext =
         showCurrent && hasNext && gapAfter < GAP_THRESHOLD_SEC && (!inLongGap || showCountdown);
 
@@ -260,8 +251,6 @@ function LyricsDisplayImpl({
       }
     };
 
-    // Apply immediately in both timing modes so dependency changes do not
-    // leave visibility stale until the first rAF or transport notification.
     apply(getCurrentTime());
 
     if (animate) {
@@ -281,9 +270,7 @@ function LyricsDisplayImpl({
     };
   }, [segments, subscribe, getCurrentTime, animate]);
 
-  // Keep `renderedIdxRef` in sync with the index React has actually committed
-  // to the DOM, then apply its visibility before the browser can paint. The
-  // rAF loop remains responsible for the normal per-frame updates.
+  // Synchronize visibility with the committed segment before paint.
   useLayoutEffect(() => {
     renderedIdxRef.current = segIdx;
     if (appliedIdxRef.current !== segIdx) {
