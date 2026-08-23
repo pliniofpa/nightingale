@@ -137,9 +137,14 @@ const listDevices = async (): Promise<MicrophoneInfo[]> => {
   const devices = await navigator.mediaDevices.enumerateDevices();
   return devices
     .filter((d) => d.kind === 'audioinput')
-    .map((device, index) => ({
-      name: device.label.trim() || device.deviceId || `Microphone ${index + 1}`,
-    }));
+    .map((d, idx) => {
+      const name = d.label?.trim() || d.deviceId || `Microphone ${idx + 1}`;
+      return {
+        id: d.deviceId || name,
+        name,
+        host: 'Browser',
+      };
+    });
 };
 
 const findDeviceId = async (preferred: string | null): Promise<string | undefined> => {
