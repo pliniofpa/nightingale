@@ -1,4 +1,4 @@
-import type { VideoFlavor } from "./video-flavor";
+import type { VideoFlavor } from './video-flavor';
 
 function shuffled<T>(items: readonly T[]): T[] {
   const copy = [...items];
@@ -62,7 +62,7 @@ export class PixabayFlavorLibrary {
     const known = new Set(this.poolByFlavor.get(flavor) ?? []);
 
     while (queue.length > 0) {
-      const next = queue.shift() ?? "";
+      const next = queue.shift() ?? '';
       if (next && known.has(next)) {
         this.queueByFlavor.set(flavor, queue);
         return next;

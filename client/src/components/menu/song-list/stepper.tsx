@@ -1,8 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
-import { Spinner } from "@/components/ui/spinner";
-import { MinusIcon, PlusIcon } from "lucide-react";
-import type { MouseEvent } from "react";
+import { MinusIcon, PlusIcon } from 'lucide-react';
+import type { MouseEvent } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { ButtonGroup, ButtonGroupText } from '@/components/ui/button-group';
+import { Spinner } from '@/components/ui/spinner';
 
 interface Props {
   ariaLabel: string;
@@ -47,7 +48,7 @@ export const Stepper = ({
         <MinusIcon />
       </Button>
       <ButtonGroupText className="min-w-12 justify-center bg-background px-2 font-variant-numeric tabular-nums">
-        {loading ? <Spinner className="size-3 will-change-transform" /> : (label ?? "—")}
+        {loading ? <Spinner className="size-3 will-change-transform" /> : (label ?? '—')}
       </ButtonGroupText>
       <Button
         type="button"

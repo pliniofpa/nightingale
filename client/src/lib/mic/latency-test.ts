@@ -1,8 +1,8 @@
-import { microphoneAdapter, type MicrophoneAdapter, type StopListening } from "@/bridge/microphone";
+import { microphoneAdapter, type MicrophoneAdapter, type StopListening } from '@/bridge/microphone';
 import {
   MAX_MIC_LATENCY_COMPENSATION_SEC,
   MIN_MIC_LATENCY_COMPENSATION_SEC,
-} from "@/lib/pitch/constants";
+} from '@/lib/pitch/constants';
 
 const BASELINE_MS = 300;
 const TEST_TIMEOUT_MS = 2200;
@@ -41,13 +41,13 @@ async function createUnlockedAudioContext(): Promise<AudioContext> {
 }
 
 async function playBeep(context: AudioContext): Promise<number> {
-  if (context.state !== "running") {
+  if (context.state !== 'running') {
     await context.resume();
   }
 
   const oscillator = context.createOscillator();
   const gain = context.createGain();
-  oscillator.type = "square";
+  oscillator.type = 'square';
   oscillator.frequency.value = BEEP_FREQ_HZ;
   gain.gain.setValueAtTime(0.0001, context.currentTime);
 
@@ -93,7 +93,7 @@ export async function measureMicLatencySec(
       const timer = window.setTimeout(() => {
         finish(() =>
           reject(
-            new Error("No mic response detected. Increase speaker volume or move mic closer."),
+            new Error('No mic response detected. Increase speaker volume or move mic closer.'),
           ),
         );
       }, TEST_TIMEOUT_MS);

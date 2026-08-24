@@ -1,13 +1,14 @@
-import { SegmentedProgress } from "@/components/ui/segmented-progress";
-import { useCacheStats } from "@/queries/use-cache-stats";
-import { formatBytes, segmentPercent, totalUsedBytes } from "@/utils/stats";
-import { CacheActions } from "./cache-actions";
+import { SegmentedProgress } from '@/components/ui/segmented-progress';
+import { useCacheStats } from '@/queries/use-cache-stats';
+import { formatBytes, segmentPercent, totalUsedBytes } from '@/utils/stats';
+
+import { CacheActions } from './cache-actions';
 
 const rows = [
-  { label: "Songs", color: "bg-blue-500", key: "songs_bytes" as const },
-  { label: "Videos", color: "bg-green-500", key: "videos_bytes" as const },
-  { label: "Models", color: "bg-yellow-500", key: "models_bytes" as const },
-  { label: "Other", color: "bg-gray-500", key: "other_bytes" as const },
+  { label: 'Songs', color: 'bg-blue-500', key: 'songs_bytes' as const },
+  { label: 'Videos', color: 'bg-green-500', key: 'videos_bytes' as const },
+  { label: 'Models', color: 'bg-yellow-500', key: 'models_bytes' as const },
+  { label: 'Other', color: 'bg-gray-500', key: 'other_bytes' as const },
 ];
 
 interface StatsProps {
@@ -20,7 +21,7 @@ export const Stats = ({ cacheFocusedSidebarIndex, registerCacheCallback }: Stats
 
   const total = stats ? totalUsedBytes(stats) : 0n;
 
-  const noStatsLabel = isError ? "Cache stats unavailable" : "…";
+  const noStatsLabel = isError ? 'Cache stats unavailable' : '…';
 
   const label = !stats ? noStatsLabel : `${formatBytes(total)} used`;
 

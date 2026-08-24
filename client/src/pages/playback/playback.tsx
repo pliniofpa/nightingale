@@ -11,10 +11,12 @@
  * playback from the beginning.
  */
 
-import { useConfig } from "@/queries/use-config";
-import type { Song } from "@/types/Song";
-import { Navigate, useLocation } from "react-router";
-import { PlaybackInner } from "./playback-inner";
+import { Navigate, useLocation } from 'react-router';
+
+import { useConfig } from '@/queries/use-config';
+import type { Song } from '@/types/Song';
+
+import { PlaybackInner } from './playback-inner';
 
 export const Playback = () => {
   const { state } = useLocation();

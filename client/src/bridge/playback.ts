@@ -1,5 +1,6 @@
-import type { MediaEndpoint } from "@/types/MediaEndpoint";
-import type { AudioPaths } from "@/types/Transcript";
+import type { MediaEndpoint } from '@/types/MediaEndpoint';
+import type { AudioPaths } from '@/types/Transcript';
+
 import {
   ensureMp3Stems as tauriEnsureMp3Stems,
   ensurePlayableSourceVideo as tauriEnsurePlayableSourceVideo,
@@ -9,10 +10,10 @@ import {
   loadTranscript as tauriLoadTranscript,
   onPixabayVideoDownloaded as tauriOnPixabayVideoDownloaded,
   onStemsReady as tauriOnStemsReady,
-} from "./playback.tauri";
-import { isTauri } from "./runtime";
+} from './playback.tauri';
+import { isTauri } from './runtime';
 
-export type { PixabayVideoDownloaded, StemsReadyEvent } from "./playback.tauri";
+export type { PixabayVideoDownloaded, StemsReadyEvent } from './playback.tauri';
 
 export interface PlaybackAdapter {
   /**
@@ -50,7 +51,7 @@ const ensureEndpoint = async (): Promise<MediaEndpoint> => {
 
 const tauriToMediaUrl = (absolutePath: string): string => {
   if (cachedEndpoint === null) {
-    throw new Error("playbackAdapter.init() must be awaited before toMediaUrl");
+    throw new Error('playbackAdapter.init() must be awaited before toMediaUrl');
   }
   const { port, session_token } = cachedEndpoint;
   return `http://127.0.0.1:${port}/s/${session_token}/local/${encodeURIComponent(absolutePath)}`;

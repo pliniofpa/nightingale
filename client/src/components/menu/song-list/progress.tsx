@@ -1,22 +1,22 @@
-import { LoaderCircleIcon } from "lucide-react";
+import { LoaderCircleIcon } from 'lucide-react';
 
-import { Progress as ShadCnProgress } from "@/components/ui/progress";
-import { useConfig } from "@/queries/use-config";
-import { useSongsMeta } from "@/queries/use-songs";
-import type { LibrarySource } from "@/types/LibrarySource";
+import { Progress as ShadCnProgress } from '@/components/ui/progress';
+import { useConfig } from '@/queries/use-config';
+import { useSongsMeta } from '@/queries/use-songs';
+import type { LibrarySource } from '@/types/LibrarySource';
 
 function sourceLabel(source: LibrarySource | null | undefined): string {
   switch (source?.kind) {
-    case "jellyfin":
-      return "Jellyfin";
-    case "navidrome":
-      return "Navidrome";
-    case "plex":
-      return "Plex Media Server";
-    case "folder":
-      return "library folder";
+    case 'jellyfin':
+      return 'Jellyfin';
+    case 'navidrome':
+      return 'Navidrome';
+    case 'plex':
+      return 'Plex Media Server';
+    case 'folder':
+      return 'library folder';
     default:
-      return "library";
+      return 'library';
   }
 }
 

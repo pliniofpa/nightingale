@@ -1,5 +1,6 @@
-import { useMemo, useRef } from "react";
-import type { MenuNavRefs, UseMenuNavOptions } from "./types";
+import { useMemo, useRef } from 'react';
+
+import type { MenuNavRefs, UseMenuNavOptions } from './types';
 
 export function useMenuNavRefs({ overlayOpen, onBack }: UseMenuNavOptions): MenuNavRefs {
   const onBackRef = useRef(onBack);

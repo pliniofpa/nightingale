@@ -1,5 +1,6 @@
-import { useCallback, type RefObject } from "react";
-import { SONG_SELECTOR } from "./dom";
+import { useCallback, type RefObject } from 'react';
+
+import { SONG_SELECTOR } from './dom';
 
 const BORDER_PADDING = 3;
 

@@ -1,3 +1,5 @@
+import { forwardRef, memo, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+
 import {
   usePlaybackMicActions,
   usePlaybackMicState,
@@ -7,27 +9,27 @@ import {
   usePlaybackTranscriptState,
   usePlaybackTransportActions,
   usePlaybackTransportState,
-} from "@/contexts/playback";
-import { usePlaybackConfigPersist } from "@/hooks/playback/use-playback-config-persist";
-import type { VideoFlavor } from "@/lib/playback/video-flavor";
-import type { AppConfig } from "@/types/AppConfig";
-import { computeLyricGapCaption, findCurrentSegment } from "@/utils/playback/lyrics-gap";
-import { forwardRef, memo, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { isPixabayTheme, themeName } from "./background";
+} from '@/contexts/playback';
+import { usePlaybackConfigPersist } from '@/hooks/playback/use-playback-config-persist';
+import type { VideoFlavor } from '@/lib/playback/video-flavor';
+import type { AppConfig } from '@/types/AppConfig';
+import { computeLyricGapCaption, findCurrentSegment } from '@/utils/playback/lyrics-gap';
+
+import { isPixabayTheme, themeName } from './background';
 
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds) % 60;
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 function formatGuideText(volume: number): string {
   const pct = Math.round(volume * 100);
-  return pct === 0 ? "Guide: OFF" : `Guide: ${pct}% [G +/-]`;
+  return pct === 0 ? 'Guide: OFF' : `Guide: ${pct}% [G +/-]`;
 }
 
 function formatThemeText(themeIndex: number, videoFlavor: VideoFlavor): string {
-  return `Theme: ${themeName(themeIndex, videoFlavor)} [T${isPixabayTheme(themeIndex) ? "/F" : ""}]`;
+  return `Theme: ${themeName(themeIndex, videoFlavor)} [T${isPixabayTheme(themeIndex) ? '/F' : ''}]`;
 }
 
 const SkipButton = forwardRef<HTMLButtonElement, { label: string; onClick: () => void }>(
@@ -36,23 +38,23 @@ const SkipButton = forwardRef<HTMLButtonElement, { label: string; onClick: () =>
       ref={ref}
       onClick={onClick}
       className="pointer-events-auto flex gap-1 rounded-sm border-2 border-white/70 bg-black/10 px-2.5 py-1 text-sm text-white/90 transition-colors hover:bg-black/20"
-      style={{ display: "none" }}
+      style={{ display: 'none' }}
     >
       <span>{label}</span> <span>⏎</span>
     </button>
   ),
 );
 
-function HintText({ children, fontSize = "sm" }: { children: React.ReactNode; fontSize?: string }) {
+function HintText({ children, fontSize = 'sm' }: { children: React.ReactNode; fontSize?: string }) {
   return <p className={`text-${fontSize} text-white/50`}>{children}</p>;
 }
 
 const NOTE_BASE_CLASS = `pointer-events-none absolute z-20 text-[0.6rem] text-white/30`;
-const TOUCH_QUERIES = ["(pointer: coarse)", "(any-pointer: coarse)"];
+const TOUCH_QUERIES = ['(pointer: coarse)', '(any-pointer: coarse)'];
 
 function hasTouchInput(): boolean {
   return (
-    typeof window !== "undefined" &&
+    typeof window !== 'undefined' &&
     (navigator.maxTouchPoints > 0 ||
       TOUCH_QUERIES.some((query) => window.matchMedia(query).matches))
   );
@@ -66,8 +68,8 @@ function useHasTouchInput(): boolean {
     const sync = () => setEnabled(hasTouchInput());
 
     sync();
-    media.forEach((item) => item.addEventListener("change", sync));
-    return () => media.forEach((item) => item.removeEventListener("change", sync));
+    media.forEach((item) => item.addEventListener('change', sync));
+    return () => media.forEach((item) => item.removeEventListener('change', sync));
   }, []);
 
   return enabled;
@@ -123,12 +125,12 @@ function SettingsInfo({
         </HintText>
       )}
       <HintText>
-        Mic: {micUserEnabled ? micName : "OFF"}
-        {showShortcuts ? " [M/N]" : ""}
+        Mic: {micUserEnabled ? micName : 'OFF'}
+        {showShortcuts ? ' [M/N]' : ''}
       </HintText>
       <HintText>
-        Monitor: {micMonitorUserEnabled ? "ON" : "OFF"}
-        {showShortcuts ? " [R]" : ""}
+        Monitor: {micMonitorUserEnabled ? 'ON' : 'OFF'}
+        {showShortcuts ? ' [R]' : ''}
       </HintText>
       <HintText>
         {showShortcuts
@@ -171,7 +173,7 @@ function TouchControls({
     return null;
   }
 
-  const touchLayoutClass = position === "bottom" ? "mb-2 flex-col-reverse" : "mt-2 flex-col";
+  const touchLayoutClass = position === 'bottom' ? 'mb-2 flex-col-reverse' : 'mt-2 flex-col';
 
   return (
     <div className={`flex w-[min(18rem,80vw)] items-end gap-2 ${touchLayoutClass}`}>
@@ -194,7 +196,7 @@ function TouchControls({
         onClick={() => setOpen((prev) => !prev)}
         className="pointer-events-auto rounded-sm border-2 border-white/70 bg-black/10 px-2.5 py-1 text-sm text-white/90 transition-colors hover:bg-black/20 active:bg-black/30"
       >
-        {open ? "Hide controls" : "Playback controls"}
+        {open ? 'Hide controls' : 'Playback controls'}
       </button>
 
       {open && (
@@ -203,7 +205,7 @@ function TouchControls({
           {guideAvailable && (
             <>
               <TouchButton
-                label={guideVolume === 0 ? "Guide On" : "Guide Off"}
+                label={guideVolume === 0 ? 'Guide On' : 'Guide Off'}
                 onClick={() => setPersistedGuideVolume(guideVolume > 0 ? 0 : 0.3)}
               />
               <TouchButton
@@ -216,10 +218,10 @@ function TouchControls({
               />
             </>
           )}
-          <TouchButton label={micUserEnabled ? "Mic Off" : "Mic On"} onClick={handleToggleMic} />
+          <TouchButton label={micUserEnabled ? 'Mic Off' : 'Mic On'} onClick={handleToggleMic} />
           <TouchButton label="Mic Select" onClick={handleCycleMic} />
           <TouchButton
-            label={micMonitorUserEnabled ? "Monitor Off" : "Monitor On"}
+            label={micMonitorUserEnabled ? 'Monitor Off' : 'Monitor On'}
             onClick={handleToggleMicMonitor}
           />
           <TouchButton label="Theme" onClick={cycleTheme} />
@@ -234,7 +236,7 @@ function TouchControls({
   );
 }
 
-type PlaybackHudPosition = "top" | "bottom";
+type PlaybackHudPosition = 'top' | 'bottom';
 
 function Disclaimer({
   source,
@@ -257,14 +259,14 @@ function Disclaimer({
   }
 
   // USDX and provided LRC timings are authored, not AI-generated.
-  if (source === "usdx" || source === "lrc") {
+  if (source === 'usdx' || source === 'lrc') {
     return null;
   }
 
   const text =
-    source === "lyrics"
-      ? "Timing is AI-generated and may not be perfectly accurate"
-      : "Lyrics and timing are AI-generated and may not be perfectly accurate";
+    source === 'lyrics'
+      ? 'Timing is AI-generated and may not be perfectly accurate'
+      : 'Lyrics and timing are AI-generated and may not be perfectly accurate';
 
   return <DisclaimerNote position={position}>{text}</DisclaimerNote>;
 }
@@ -286,7 +288,7 @@ function DisclaimerNote({
 }
 
 function notePositionClass(hudPosition: PlaybackHudPosition): string {
-  return hudPosition === "bottom" ? "top-2" : "bottom-2";
+  return hudPosition === 'bottom' ? 'top-2' : 'bottom-2';
 }
 
 interface PlaybackHudProps {
@@ -296,7 +298,7 @@ interface PlaybackHudProps {
   position?: PlaybackHudPosition;
 }
 
-function PlaybackHudImpl({ title, artist, config, position = "top" }: PlaybackHudProps) {
+function PlaybackHudImpl({ title, artist, config, position = 'top' }: PlaybackHudProps) {
   const { duration, guideVolume, guideAvailable } = usePlaybackTransportState();
   const { subscribe, getCurrentTime } = usePlaybackTransportActions();
   const { themeIndex, videoFlavor } = usePlaybackThemeState();
@@ -321,7 +323,7 @@ function PlaybackHudImpl({ title, artist, config, position = "top" }: PlaybackHu
       const el = gapCaptionRef.current;
       if (!el) return;
       if (segments.length === 0) {
-        el.style.display = "none";
+        el.style.display = 'none';
         return;
       }
       const idx = findCurrentSegment(segments, time, gapHintRef.current);
@@ -329,9 +331,9 @@ function PlaybackHudImpl({ title, artist, config, position = "top" }: PlaybackHu
       const caption = computeLyricGapCaption(segments, time, idx);
       if (caption) {
         el.textContent = caption;
-        el.style.display = "";
+        el.style.display = '';
       } else {
-        el.style.display = "none";
+        el.style.display = 'none';
       }
     };
 
@@ -352,10 +354,10 @@ function PlaybackHudImpl({ title, artist, config, position = "top" }: PlaybackHu
 
       if (skipIntroRef.current) {
         skipIntroRef.current.style.display =
-          time < firstSegmentStart - introSkipLeadSec ? "" : "none";
+          time < firstSegmentStart - introSkipLeadSec ? '' : 'none';
       }
       if (skipOutroRef.current) {
-        skipOutroRef.current.style.display = time > lastSegmentEnd + 1 ? "" : "none";
+        skipOutroRef.current.style.display = time > lastSegmentEnd + 1 ? '' : 'none';
       }
       updateGapCaption(time);
     });
@@ -370,11 +372,11 @@ function PlaybackHudImpl({ title, artist, config, position = "top" }: PlaybackHu
   ]);
 
   const hudPositionClass =
-    position === "bottom"
-      ? "bottom-[calc(2rem+env(safe-area-inset-bottom))] items-end md:bottom-3"
-      : "top-[4.25rem] items-start md:top-3";
-  const hudFlowClass = position === "bottom" ? "flex-col-reverse" : "flex-col";
-  const skipButtonsClass = position === "bottom" ? "mb-2" : "mt-2";
+    position === 'bottom'
+      ? 'bottom-[calc(2rem+env(safe-area-inset-bottom))] items-end md:bottom-3'
+      : 'top-[4.25rem] items-start md:top-3';
+  const hudFlowClass = position === 'bottom' ? 'flex-col-reverse' : 'flex-col';
+  const skipButtonsClass = position === 'bottom' ? 'mb-2' : 'mt-2';
 
   return (
     <>
@@ -402,15 +404,15 @@ function PlaybackHudImpl({ title, artist, config, position = "top" }: PlaybackHu
             role="status"
             aria-live="polite"
             className={`truncate text-xs font-medium text-white/60 md:text-sm ${
-              position === "bottom" ? "order-first" : ""
+              position === 'bottom' ? 'order-first' : ''
             }`}
-            style={{ display: "none" }}
+            style={{ display: 'none' }}
           />
         </div>
 
         <div className={`flex min-w-0 items-end ${hudFlowClass}`}>
-          <div className={`text-base md:text-lg ${pitchScore ? "text-white" : "text-white/50"}`}>
-            Score: {pitchScore ?? "--"}
+          <div className={`text-base md:text-lg ${pitchScore ? 'text-white' : 'text-white/50'}`}>
+            Score: {pitchScore ?? '--'}
           </div>
           <div className="hidden sm:block">
             <SettingsInfo

@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSetAtom } from "jotai";
-import { toast } from "sonner";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSetAtom } from 'jotai';
+import { toast } from 'sonner';
 
 import {
   clearLibrarySource,
@@ -9,10 +9,10 @@ import {
   selectFolderPath,
   setLibrarySource,
   triggerScan,
-} from "@/bridge/source";
-import { libraryFilterAtom } from "@/hooks/use-library-filter";
-import { searchAtom } from "@/hooks/use-search";
-import { EMPTY_LIBRARY_FILTER } from "@/lib/library-menu-filter";
+} from '@/bridge/source';
+import { libraryFilterAtom } from '@/hooks/use-library-filter';
+import { searchAtom } from '@/hooks/use-search';
+import { EMPTY_LIBRARY_FILTER } from '@/lib/library-menu-filter';
 import {
   ANALYSIS_QUEUE,
   CONFIG,
@@ -22,14 +22,14 @@ import {
   PLEX_HEALTH,
   SONGS,
   SONGS_META,
-} from "@/queries/keys";
-import type { AppConfig } from "@/types/AppConfig";
-import type { JellyfinHealth } from "@/types/JellyfinHealth";
-import type { JellyfinLoginResult } from "@/types/JellyfinLoginResult";
-import type { NavidromeHealth } from "@/types/NavidromeHealth";
-import type { NavidromeLoginResult } from "@/types/NavidromeLoginResult";
-import type { PlexHealth } from "@/types/PlexHealth";
-import type { PlexServer } from "@/types/PlexServer";
+} from '@/queries/keys';
+import type { AppConfig } from '@/types/AppConfig';
+import type { JellyfinHealth } from '@/types/JellyfinHealth';
+import type { JellyfinLoginResult } from '@/types/JellyfinLoginResult';
+import type { NavidromeHealth } from '@/types/NavidromeHealth';
+import type { NavidromeLoginResult } from '@/types/NavidromeLoginResult';
+import type { PlexHealth } from '@/types/PlexHealth';
+import type { PlexServer } from '@/types/PlexServer';
 
 const useInvalidateLibrary = () => {
   const queryClient = useQueryClient();
@@ -55,7 +55,7 @@ const useResetLibraryNavigation = () => {
 
   return () => {
     setLibraryFilter(EMPTY_LIBRARY_FILTER);
-    setSearch("");
+    setSearch('');
   };
 };
 
@@ -71,7 +71,7 @@ export const useSelectFolderSource = () => {
       if (!path) {
         return null;
       }
-      return setLibrarySource({ kind: "folder", path });
+      return setLibrarySource({ kind: 'folder', path });
     },
     onSuccess: (config) => {
       if (!config) {
@@ -147,7 +147,7 @@ export const useConnectJellyfin = () => {
     mutationFn: async ({ selectedIds, ...params }) => {
       const login = await jellyfinLogin(params);
       const config = await setLibrarySource({
-        kind: "jellyfin",
+        kind: 'jellyfin',
         base_url: login.server_url,
         user_id: login.user_id,
         username: login.username,
@@ -206,7 +206,7 @@ export const useConnectNavidrome = () => {
     mutationFn: async ({ selectedIds: _selectedIds, ...params }) => {
       const login = await navidromeLogin(params);
       const config = await setLibrarySource({
-        kind: "navidrome",
+        kind: 'navidrome',
         base_url: login.server_url,
         username: login.username,
         password: login.password,
@@ -242,10 +242,10 @@ export const useConnectPlex = () => {
   >({
     mutationFn: async ({ server, sectionIds }) => {
       if (sectionIds.length === 0) {
-        throw new Error("Select at least one music library");
+        throw new Error('Select at least one music library');
       }
       const config = await setLibrarySource({
-        kind: "plex",
+        kind: 'plex',
         base_url: server.server_url,
         server_name: server.server_name,
         machine_id: server.server_id,

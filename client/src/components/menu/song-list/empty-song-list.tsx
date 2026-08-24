@@ -1,8 +1,8 @@
-import { Disc3Icon, FolderIcon, MusicIcon } from "lucide-react";
+import { Disc3Icon, FolderIcon, MusicIcon } from 'lucide-react';
 
-import { JellyfinIcon } from "@/components/icons/jellyfin";
-import { PlexIcon } from "@/components/icons/plex";
-import { Button } from "@/components/ui/button";
+import { JellyfinIcon } from '@/components/icons/jellyfin';
+import { PlexIcon } from '@/components/icons/plex';
+import { Button } from '@/components/ui/button';
 import {
   Empty,
   EmptyContent,
@@ -10,9 +10,9 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import { useDialog } from "@/hooks/use-dialog";
-import { useLibrarySourceActions } from "@/hooks/use-library-source-actions";
+} from '@/components/ui/empty';
+import { useDialog } from '@/hooks/use-dialog';
+import { useLibrarySourceActions } from '@/hooks/use-library-source-actions';
 
 export const EmptySongList = () => {
   const { selectFolder, isPending, libraryPinned } = useLibrarySourceActions();
@@ -50,13 +50,13 @@ export const EmptySongList = () => {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent className="max-w-lg flex-col justify-center gap-2 sm:flex-row sm:flex-wrap">
-        <Button variant="outline" onClick={() => setMode("plex-connect")} disabled={isPending}>
+        <Button variant="outline" onClick={() => setMode('plex-connect')} disabled={isPending}>
           <PlexIcon /> Connect Plex
         </Button>
-        <Button variant="outline" onClick={() => setMode("navidrome-connect")} disabled={isPending}>
+        <Button variant="outline" onClick={() => setMode('navidrome-connect')} disabled={isPending}>
           <Disc3Icon /> Connect Navidrome
         </Button>
-        <Button variant="outline" onClick={() => setMode("jellyfin-connect")} disabled={isPending}>
+        <Button variant="outline" onClick={() => setMode('jellyfin-connect')} disabled={isPending}>
           <JellyfinIcon /> Connect Jellyfin
         </Button>
         <Button variant="outline" onClick={() => selectFolder()} disabled={isPending}>

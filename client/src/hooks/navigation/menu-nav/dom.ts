@@ -1,9 +1,9 @@
-export const SIDEBAR_SUB_SELECTOR = "[data-sidebar-sub-index]";
-export const SIDEBAR_NAV_SELECTOR = "[data-sidebar-nav-index]";
-export const ACTIONS_SELECTOR = "[data-actions-focus]";
-export const SONG_SELECTOR = "[data-song-index]";
+export const SIDEBAR_SUB_SELECTOR = '[data-sidebar-sub-index]';
+export const SIDEBAR_NAV_SELECTOR = '[data-sidebar-nav-index]';
+export const ACTIONS_SELECTOR = '[data-actions-focus]';
+export const SONG_SELECTOR = '[data-song-index]';
 
-export type SongGridDirection = "up" | "down" | "left" | "right";
+export type SongGridDirection = 'up' | 'down' | 'left' | 'right';
 
 interface SongGridPosition {
   index: number;
@@ -26,7 +26,7 @@ export function blurActiveTextInput() {
   const active = document.activeElement;
   if (
     active instanceof HTMLElement &&
-    (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable)
+    (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)
   ) {
     active.blur();
   }
@@ -64,7 +64,7 @@ export function getHoveredSongIndex(target: Element | null): number | null {
 }
 
 export function isSongGrid(container: HTMLElement | null): container is HTMLElement {
-  return container?.dataset.songLayout === "grid";
+  return container?.dataset.songLayout === 'grid';
 }
 
 export function getSongGridTarget(
@@ -100,16 +100,16 @@ export function getSongGridTarget(
   const currentRow = rowTops.findIndex((top) => Math.abs(top - current.top) < 2);
   if (currentRow < 0) return null;
 
-  if (direction === "left" || direction === "right") {
+  if (direction === 'left' || direction === 'right') {
     const row = positions
       .filter((position) => Math.abs(position.top - current.top) < 2)
       .sort((a, b) => a.left - b.left);
     const column = row.findIndex((position) => position.index === currentIndex);
-    const targetColumn = direction === "left" ? column - 1 : column + 1;
+    const targetColumn = direction === 'left' ? column - 1 : column + 1;
     return row[targetColumn]?.index ?? null;
   }
 
-  const targetRowIndex = direction === "up" ? currentRow - 1 : currentRow + 1;
+  const targetRowIndex = direction === 'up' ? currentRow - 1 : currentRow + 1;
   const targetTop = rowTops[targetRowIndex];
   if (targetTop === undefined) return null;
 

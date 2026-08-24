@@ -1,16 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
-import { Field, FieldGroup } from "@/components/ui/field";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { setFullScreen, isFullScreen as tauriIsFullScreen } from "@/bridge/fullScreen";
-import { useMicDevices } from "@/queries/use-mic-devices";
-import { useConfigMutation } from "@/mutations/use-config-mutation";
-import { useConfig } from "@/queries/use-config";
-import type { AppConfig } from "@/types/AppConfig";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
+
+import { setFullScreen, isFullScreen as tauriIsFullScreen } from '@/bridge/fullScreen';
 import {
   ALIGN_BACKENDS,
   ASR_ENGINES,
@@ -24,17 +15,27 @@ import {
   VOCAL_THRESHOLD_MAX,
   getAnalysisNav,
   type SettingsTab,
-} from "@/components/menu/settings/constants";
-import { MicLatencyField } from "@/components/menu/settings/mic-latency-field";
+} from '@/components/menu/settings/constants';
+import { MicLatencyField } from '@/components/menu/settings/mic-latency-field';
 import {
   Hint,
   NumberButtonGroup,
   PageHeader,
   SettingsSelect,
-} from "@/components/menu/settings/settings-controls";
-import { useSettingsNavigation } from "@/hooks/navigation/use-settings-navigation";
+} from '@/components/menu/settings/settings-controls';
+import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
+import { Field, FieldGroup } from '@/components/ui/field';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useSettingsNavigation } from '@/hooks/navigation/use-settings-navigation';
+import { useConfigMutation } from '@/mutations/use-config-mutation';
+import { useConfig } from '@/queries/use-config';
+import { useMicDevices } from '@/queries/use-mic-devices';
+import type { AppConfig } from '@/types/AppConfig';
 
-const DEFAULT_MIC_ID = "__default__";
+const DEFAULT_MIC_ID = '__default__';
 
 export const SettingsPage = () => {
   const micDevices = useMicDevices();
@@ -43,7 +44,7 @@ export const SettingsPage = () => {
   const { mutate } = useConfigMutation();
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [tab, setTab] = useState<SettingsTab>("general");
+  const [tab, setTab] = useState<SettingsTab>('general');
   const [isFullScreen, setIsFullScreen] = useState<boolean | null | undefined>(config?.fullscreen);
   const [micMonitorGain, setMicMonitorGain] = useState(
     config?.mic_monitor_gain ?? DEFAULTS.mic_monitor_gain,
@@ -55,14 +56,14 @@ export const SettingsPage = () => {
     config?.vocal_detection_threshold_pct ?? DEFAULTS.vocal_detection_threshold_pct,
   );
 
-  const close = () => navigate("/");
+  const close = () => navigate('/');
   const asrEngine = config?.asr_engine ?? DEFAULTS.asr_engine;
-  const isParakeet = asrEngine === "parakeet";
+  const isParakeet = asrEngine === 'parakeet';
   const analysisNav = getAnalysisNav(isParakeet);
 
   const micOptions = useMemo(
     () => [
-      { value: DEFAULT_MIC_ID, label: "Default" },
+      { value: DEFAULT_MIC_ID, label: 'Default' },
       ...micDevices.map(({ deviceId, label }) => ({ value: deviceId, label })),
     ],
     [micDevices],
@@ -155,7 +156,7 @@ export const SettingsPage = () => {
                 value={settingsTab.value}
                 className={getFocusClassName(NAV.tabSegment, slot)}
                 onKeyDown={(event) => {
-                  if (event.key === "Enter") setTab(settingsTab.value);
+                  if (event.key === 'Enter') setTab(settingsTab.value);
                 }}
               >
                 {settingsTab.label}
@@ -169,14 +170,14 @@ export const SettingsPage = () => {
                 <Label>Window</Label>
                 <ButtonGroup>
                   <Button
-                    variant={isFullScreen === true ? "outline" : "default"}
+                    variant={isFullScreen === true ? 'outline' : 'default'}
                     onClick={() => toggleWindowMode(false)}
                     className={getFocusClassName(NAV.general.window, 0)}
                   >
                     Windowed
                   </Button>
                   <Button
-                    variant={isFullScreen === false ? "outline" : "default"}
+                    variant={isFullScreen === false ? 'outline' : 'default'}
                     onClick={() => toggleWindowMode(true)}
                     className={getFocusClassName(NAV.general.window, 1)}
                   >
@@ -237,7 +238,7 @@ export const SettingsPage = () => {
                   onValueChange={(lyrics_vertical_position) =>
                     mutate({
                       lyrics_vertical_position:
-                        lyrics_vertical_position as AppConfig["lyrics_vertical_position"],
+                        lyrics_vertical_position as AppConfig['lyrics_vertical_position'],
                     })
                   }
                 />
@@ -256,7 +257,7 @@ export const SettingsPage = () => {
                   onValueChange={(lyrics_horizontal_position) =>
                     mutate({
                       lyrics_horizontal_position:
-                        lyrics_horizontal_position as AppConfig["lyrics_horizontal_position"],
+                        lyrics_horizontal_position as AppConfig['lyrics_horizontal_position'],
                     })
                   }
                 />
@@ -343,14 +344,14 @@ export const SettingsPage = () => {
                 <Hint>Automatically queue every unanalyzed song after scans finish</Hint>
                 <ButtonGroup>
                   <Button
-                    variant={config?.auto_analyze === true ? "outline" : "default"}
+                    variant={config?.auto_analyze === true ? 'outline' : 'default'}
                     onClick={() => mutate({ auto_analyze: false })}
                     className={getFocusClassName(analysisNav.autoAnalyze, 0)}
                   >
                     Off
                   </Button>
                   <Button
-                    variant={config?.auto_analyze === true ? "default" : "outline"}
+                    variant={config?.auto_analyze === true ? 'default' : 'outline'}
                     onClick={() => mutate({ auto_analyze: true })}
                     className={getFocusClassName(analysisNav.autoAnalyze, 1)}
                   >

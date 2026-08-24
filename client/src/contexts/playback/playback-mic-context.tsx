@@ -6,14 +6,6 @@
  * to gate hardware capture, and persists user toggles to the app config.
  */
 
-import { useMicCapture, useMicPitch } from "@/hooks/use-mic-pitch";
-import { useMicDevices } from "@/queries/use-mic-devices";
-import { useMicReactive, type MicReactiveRef } from "@/hooks/use-mic-reactive";
-import { usePitchScoring } from "@/hooks/use-pitch-scoring";
-import { usePlaybackConfigPersist } from "@/hooks/playback/use-playback-config-persist";
-import { DEFAULT_MIC_LATENCY_COMPENSATION_SEC } from "@/lib/pitch/constants";
-import type { PitchSeries } from "@/lib/pitch/state";
-import type { AppConfig } from "@/types/AppConfig";
 import {
   createContext,
   useCallback,
@@ -23,12 +15,22 @@ import {
   useRef,
   useState,
   type ReactNode,
-} from "react";
-import { toast } from "sonner";
+} from 'react';
+import { toast } from 'sonner';
+
+import { usePlaybackConfigPersist } from '@/hooks/playback/use-playback-config-persist';
+import { useMicCapture, useMicPitch } from '@/hooks/use-mic-pitch';
+import { useMicReactive, type MicReactiveRef } from '@/hooks/use-mic-reactive';
+import { usePitchScoring } from '@/hooks/use-pitch-scoring';
+import { DEFAULT_MIC_LATENCY_COMPENSATION_SEC } from '@/lib/pitch/constants';
+import type { PitchSeries } from '@/lib/pitch/state';
+import { useMicDevices } from '@/queries/use-mic-devices';
+import type { AppConfig } from '@/types/AppConfig';
+
 import {
   usePlaybackTransportActions,
   usePlaybackTransportState,
-} from "./playback-transport-context";
+} from './playback-transport-context';
 
 export interface PlaybackMicState {
   micUserEnabled: boolean;
@@ -148,7 +150,7 @@ export function PlaybackMicProvider({ config, children }: PlaybackMicProviderPro
       micUserEnabled,
       micMonitorUserEnabled,
       selectedMicId,
-      micName: selectedMicId ?? "Default",
+      micName: selectedMicId ?? 'Default',
       pitchScore: micReady ? score : null,
       rawScore: score,
       series,
@@ -186,7 +188,7 @@ export function PlaybackMicProvider({ config, children }: PlaybackMicProviderPro
 export function usePlaybackMicState(): PlaybackMicState {
   const ctx = useContext(MicStateContext);
   if (!ctx) {
-    throw new Error("usePlaybackMicState must be used within a PlaybackMicProvider");
+    throw new Error('usePlaybackMicState must be used within a PlaybackMicProvider');
   }
   return ctx;
 }
@@ -194,7 +196,7 @@ export function usePlaybackMicState(): PlaybackMicState {
 export function usePlaybackMicActions(): PlaybackMicActions {
   const ctx = useContext(MicActionsContext);
   if (!ctx) {
-    throw new Error("usePlaybackMicActions must be used within a PlaybackMicProvider");
+    throw new Error('usePlaybackMicActions must be used within a PlaybackMicProvider');
   }
   return ctx;
 }

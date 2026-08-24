@@ -1,7 +1,8 @@
-import { ANALYSIS_QUEUE, LYRICS, MENU, SONGS, SONGS_META } from "@/queries/keys";
-import { saveLyrics } from "@/bridge/lyrics";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
+import { saveLyrics } from '@/bridge/lyrics';
+import { ANALYSIS_QUEUE, LYRICS, MENU, SONGS, SONGS_META } from '@/queries/keys';
 
 export interface SaveLyricsInput {
   hash: string;

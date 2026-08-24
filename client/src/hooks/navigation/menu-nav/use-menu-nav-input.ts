@@ -1,8 +1,10 @@
-import { useCallback } from "react";
-import type { NavAction } from "@/contexts/nav-input-context";
-import { useNavInput } from "../use-nav-input";
-import { blurActiveTextInput, getSongGridTarget, isSongGrid, type SongGridDirection } from "./dom";
-import type { MenuNavHookOptions } from "./types";
+import { useCallback } from 'react';
+
+import type { NavAction } from '@/contexts/nav-input-context';
+
+import { useNavInput } from '../use-nav-input';
+import { blurActiveTextInput, getSongGridTarget, isSongGrid, type SongGridDirection } from './dom';
+import type { MenuNavHookOptions } from './types';
 
 const CONFIRM_COOLDOWN_MS = 140;
 
@@ -23,7 +25,7 @@ export function useMenuNavInput({ menuFocus, refs, lock, scrollToSong }: UseMenu
         if (
           refs.overlayOpenRef.current ||
           !hasInput(action) ||
-          menuFocus.focus.panel === "songDetails"
+          menuFocus.focus.panel === 'songDetails'
         ) {
           return;
         }
@@ -72,30 +74,30 @@ export function useMenuNavInput({ menuFocus, refs, lock, scrollToSong }: UseMenu
 }
 
 function handleConfirmAction(
-  { actionsRef, focus }: Pick<MenuNavHookOptions["menuFocus"], "actionsRef" | "focus">,
-  refs: MenuNavHookOptions["refs"],
+  { actionsRef, focus }: Pick<MenuNavHookOptions['menuFocus'], 'actionsRef' | 'focus'>,
+  refs: MenuNavHookOptions['refs'],
 ) {
   const now = performance.now();
   if (!focus.active) return;
   if (now - refs.lastConfirmAtRef.current < CONFIRM_COOLDOWN_MS) return;
   refs.lastConfirmAtRef.current = now;
 
-  if (focus.panel === "songList") {
+  if (focus.panel === 'songList') {
     if (focus.actionsFocused) actionsRef.current.onConfirmActions?.();
     else actionsRef.current.onConfirmSong?.(focus.songIndex);
     return;
   }
 
-  if (focus.panel === "sidebar") {
+  if (focus.panel === 'sidebar') {
     actionsRef.current.onConfirmSidebar?.(focus.sidebarIndex);
   }
 }
 
 function getGridDirection(action: NavAction): SongGridDirection | null {
-  if (action.up) return "up";
-  if (action.down) return "down";
-  if (action.left) return "left";
-  if (action.right) return "right";
+  if (action.up) return 'up';
+  if (action.down) return 'down';
+  if (action.left) return 'left';
+  if (action.right) return 'right';
   return null;
 }
 
@@ -106,12 +108,12 @@ function handleSongGridAction(
     actionsRef,
     scrollRef,
     setFocus,
-  }: Pick<MenuNavHookOptions["menuFocus"], "focus" | "actionsRef" | "scrollRef" | "setFocus">,
+  }: Pick<MenuNavHookOptions['menuFocus'], 'focus' | 'actionsRef' | 'scrollRef' | 'setFocus'>,
   scrollToSong: (index: number) => void,
 ): boolean {
   const direction = getGridDirection(action);
   const container = scrollRef.current;
-  if (!direction || focus.panel !== "songList" || focus.actionsFocused || !isSongGrid(container)) {
+  if (!direction || focus.panel !== 'songList' || focus.actionsFocused || !isSongGrid(container)) {
     return false;
   }
 
@@ -122,7 +124,7 @@ function handleSongGridAction(
       active: true,
       songIndex: targetIndex,
       actionsFocused: false,
-      source: "nav",
+      source: 'nav',
     }));
     scrollToSong(targetIndex);
     return true;
@@ -132,16 +134,16 @@ function handleSongGridAction(
     let panel = previous.panel;
     let actionsFocused = false;
 
-    if (direction === "left") panel = "sidebar";
-    else if (direction === "right" && actionsRef.current.hasSongDetails) panel = "songDetails";
-    else if (direction === "up") actionsFocused = true;
+    if (direction === 'left') panel = 'sidebar';
+    else if (direction === 'right' && actionsRef.current.hasSongDetails) panel = 'songDetails';
+    else if (direction === 'up') actionsFocused = true;
 
     return {
       ...previous,
       active: true,
       panel,
       actionsFocused,
-      source: "nav",
+      source: 'nav',
     };
   });
   return true;
@@ -149,12 +151,12 @@ function handleSongGridAction(
 
 function handleHorizontalAction(
   action: NavAction,
-  { actionsRef, setFocus }: Pick<MenuNavHookOptions["menuFocus"], "actionsRef" | "setFocus">,
+  { actionsRef, setFocus }: Pick<MenuNavHookOptions['menuFocus'], 'actionsRef' | 'setFocus'>,
 ): boolean {
   let handled = false;
 
   setFocus((prev) => {
-    if (prev.panel === "sidebar") {
+    if (prev.panel === 'sidebar') {
       const subCount = actionsRef.current.sidebarSubCountByIndex.get(prev.sidebarIndex);
       if (subCount && subCount > 1) {
         const delta = action.left ? -1 : 1;
@@ -165,7 +167,7 @@ function handleHorizontalAction(
         }
 
         handled = true;
-        return { ...prev, sidebarSubIndex: nextSub, active: true, source: "nav" };
+        return { ...prev, sidebarSubIndex: nextSub, active: true, source: 'nav' };
       }
     }
 
@@ -179,19 +181,19 @@ function handleHorizontalAction(
   if (action.left) {
     setFocus((prev) => ({
       ...prev,
-      panel: prev.panel === "songList" ? "sidebar" : prev.panel,
+      panel: prev.panel === 'songList' ? 'sidebar' : prev.panel,
       actionsFocused: false,
       active: true,
-      source: "nav",
+      source: 'nav',
     }));
     return true;
   }
 
   setFocus((prev) => {
     let panel = prev.panel;
-    if (prev.panel === "sidebar") panel = "songList";
-    else if (prev.panel === "songList" && actionsRef.current.hasSongDetails) {
-      panel = "songDetails";
+    if (prev.panel === 'sidebar') panel = 'songList';
+    else if (prev.panel === 'songList' && actionsRef.current.hasSongDetails) {
+      panel = 'songDetails';
     }
 
     return {
@@ -199,7 +201,7 @@ function handleHorizontalAction(
       panel,
       actionsFocused: false,
       active: true,
-      source: "nav",
+      source: 'nav',
     };
   });
   return true;
@@ -207,13 +209,13 @@ function handleHorizontalAction(
 
 function handleVerticalAction(
   action: NavAction,
-  { actionsRef, setFocus }: Pick<MenuNavHookOptions["menuFocus"], "actionsRef" | "setFocus">,
+  { actionsRef, setFocus }: Pick<MenuNavHookOptions['menuFocus'], 'actionsRef' | 'setFocus'>,
   scrollToSong: (index: number) => void,
 ) {
   setFocus((prev) => {
-    const next = { ...prev, active: true, source: "nav" as const };
+    const next = { ...prev, active: true, source: 'nav' as const };
 
-    if (prev.panel === "songList") {
+    if (prev.panel === 'songList') {
       const songCount = actionsRef.current.songCount;
 
       if (prev.actionsFocused) {
@@ -235,7 +237,7 @@ function handleVerticalAction(
           scrollToSong(prev.songIndex + 1);
         }
       }
-    } else if (prev.panel === "sidebar") {
+    } else if (prev.panel === 'sidebar') {
       const sidebarCount = actionsRef.current.sidebarCount;
       if (sidebarCount <= 0) {
         next.sidebarIndex = 0;

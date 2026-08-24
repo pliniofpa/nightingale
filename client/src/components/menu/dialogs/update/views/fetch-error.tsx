@@ -1,5 +1,6 @@
-import { WifiOffIcon } from "lucide-react";
-import { GENERIC_DESCRIPTION, PairFooter, type FocusCtx, type ViewParts } from "../parts";
+import { WifiOffIcon } from 'lucide-react';
+
+import { GENERIC_DESCRIPTION, PairFooter, type FocusCtx, type ViewParts } from '../parts';
 
 interface Args {
   ctx: FocusCtx;
@@ -11,7 +12,7 @@ interface Args {
 
 export const fetchErrorView = ({ ctx, error, isOffline, onClose, onRetry }: Args): ViewParts => {
   const headline = isOffline ? "Couldn't reach the update server." : "Couldn't check for updates.";
-  const hint = isOffline ? "Check your internet connection and try again." : error.message;
+  const hint = isOffline ? 'Check your internet connection and try again.' : error.message;
 
   return {
     description: GENERIC_DESCRIPTION,

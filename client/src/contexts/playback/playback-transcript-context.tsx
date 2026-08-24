@@ -8,11 +8,12 @@
  * separate piece of useState wiring.
  */
 
-import { usePlaybackTransportActions } from "@/contexts/playback/playback-transport-context";
-import { usePlaybackTranscript } from "@/hooks/playback/use-playback-transcript";
-import type { Segment } from "@/types/Transcript";
-import { INTRO_SKIP_LEAD_SEC } from "@/utils/playback/transcript-segments";
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+
+import { usePlaybackTransportActions } from '@/contexts/playback/playback-transport-context';
+import { usePlaybackTranscript } from '@/hooks/playback/use-playback-transcript';
+import type { Segment } from '@/types/Transcript';
+import { INTRO_SKIP_LEAD_SEC } from '@/utils/playback/transcript-segments';
 
 export interface PlaybackTranscriptState {
   segments: Segment[];
@@ -100,7 +101,7 @@ export function PlaybackTranscriptProvider({
 export function usePlaybackTranscriptState(): PlaybackTranscriptState {
   const ctx = useContext(TranscriptStateContext);
   if (!ctx) {
-    throw new Error("usePlaybackTranscriptState must be used within a PlaybackTranscriptProvider");
+    throw new Error('usePlaybackTranscriptState must be used within a PlaybackTranscriptProvider');
   }
   return ctx;
 }
@@ -109,7 +110,7 @@ export function usePlaybackTranscriptActions(): PlaybackTranscriptActions {
   const ctx = useContext(TranscriptActionsContext);
   if (!ctx) {
     throw new Error(
-      "usePlaybackTranscriptActions must be used within a PlaybackTranscriptProvider",
+      'usePlaybackTranscriptActions must be used within a PlaybackTranscriptProvider',
     );
   }
   return ctx;

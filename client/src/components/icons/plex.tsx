@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import type { SVGProps } from 'react';
 
 /** Plex tile and chevron. Both inherit button text color. */
 export const PlexIcon = (props: SVGProps<SVGSVGElement>) => (

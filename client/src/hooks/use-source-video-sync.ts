@@ -1,6 +1,7 @@
-import type { TimeSubscriber } from "@/hooks/use-audio-player";
-import { useLatestRef } from "@/hooks/use-latest-ref";
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+
+import type { TimeSubscriber } from '@/hooks/use-audio-player';
+import { useLatestRef } from '@/hooks/use-latest-ref';
 
 const DRIFT_LARGE_SEC = 0.75;
 const DRIFT_CORRECT_SEC = 0.5;
@@ -49,14 +50,14 @@ function correctDrift(
   video: HTMLVideoElement,
   target: number,
   lastSyncRef: { current: number },
-  mode: "throttled" | "aggressive",
+  mode: 'throttled' | 'aggressive',
 ): void {
   const drift = Math.abs(video.currentTime - target);
   if (drift <= DRIFT_CORRECT_SEC) return;
 
   const now = performance.now();
   const shouldSnap =
-    mode === "aggressive" ||
+    mode === 'aggressive' ||
     drift > DRIFT_LARGE_SEC ||
     now - lastSyncRef.current > DRIFT_THROTTLE_MS;
 
@@ -120,14 +121,14 @@ function runInitialSeek(
       }
     }, INITIAL_SEEK_WATCHDOG_INTERVAL_MS);
 
-    video.addEventListener("seeked", tryFinalize);
-    video.addEventListener("canplay", tryFinalize);
+    video.addEventListener('seeked', tryFinalize);
+    video.addEventListener('canplay', tryFinalize);
     video.currentTime = seekTarget;
 
     cleanup = () => {
       window.clearInterval(watchdog);
-      video.removeEventListener("seeked", tryFinalize);
-      video.removeEventListener("canplay", tryFinalize);
+      video.removeEventListener('seeked', tryFinalize);
+      video.removeEventListener('canplay', tryFinalize);
     };
   };
 
@@ -135,8 +136,8 @@ function runInitialSeek(
     start();
   } else {
     const onMeta = () => start();
-    video.addEventListener("loadedmetadata", onMeta, { once: true });
-    cleanup = () => video.removeEventListener("loadedmetadata", onMeta);
+    video.addEventListener('loadedmetadata', onMeta, { once: true });
+    cleanup = () => video.removeEventListener('loadedmetadata', onMeta);
   }
 
   return () => {
@@ -205,7 +206,7 @@ export function useSourceVideoSync({
     applyPlaybackRate(video, currentRatio());
     if (!readyRef.current) return;
 
-    correctDrift(video, toSourceTime(getCurrentTime()), lastSyncRef, "aggressive");
+    correctDrift(video, toSourceTime(getCurrentTime()), lastSyncRef, 'aggressive');
   }, [currentRatio, getCurrentTime, tempoRatio, toSourceTime, videoRef]);
 
   useEffect(() => {
@@ -213,7 +214,7 @@ export function useSourceVideoSync({
       const video = videoRef.current;
       if (!video || !readyRef.current) return;
 
-      correctDrift(video, toSourceTime(time), lastSyncRef, "throttled");
+      correctDrift(video, toSourceTime(time), lastSyncRef, 'throttled');
     });
   }, [subscribe, toSourceTime, videoRef]);
 

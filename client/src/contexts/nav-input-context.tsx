@@ -1,5 +1,6 @@
-import { createContext, useCallback, useEffect, useRef, type ReactNode } from "react";
-import { useGamepad, type GamepadSnapshot } from "@/hooks/navigation/use-gamepad";
+import { createContext, useCallback, useEffect, useRef, type ReactNode } from 'react';
+
+import { useGamepad, type GamepadSnapshot } from '@/hooks/navigation/use-gamepad';
 
 export type NavAction = {
   up: boolean;
@@ -19,7 +20,7 @@ export interface NavInputContextValue {
 
 export const NavInputContext = createContext<NavInputContextValue | null>(null);
 
-const IGNORED_ELEMENTS = new Set(["INPUT", "TEXTAREA", "SELECT"]);
+const IGNORED_ELEMENTS = new Set(['INPUT', 'TEXTAREA', 'SELECT']);
 
 function isTextInput(el: Element | null): boolean {
   if (!el) return false;
@@ -42,17 +43,17 @@ function blurActiveElement() {
 
 function keyToAction(key: string): Partial<NavAction> | null {
   switch (key) {
-    case "ArrowUp":
+    case 'ArrowUp':
       return { up: true };
-    case "ArrowDown":
+    case 'ArrowDown':
       return { down: true };
-    case "ArrowLeft":
+    case 'ArrowLeft':
       return { left: true };
-    case "ArrowRight":
+    case 'ArrowRight':
       return { right: true };
-    case "Enter":
+    case 'Enter':
       return { confirm: true };
-    case "Escape":
+    case 'Escape':
       return { back: true };
     default:
       return null;
@@ -92,8 +93,8 @@ export function NavInputProvider({ children }: { children: ReactNode }) {
       fire(partial);
     };
 
-    window.addEventListener("keydown", onKeyDown, true);
-    return () => window.removeEventListener("keydown", onKeyDown, true);
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => window.removeEventListener('keydown', onKeyDown, true);
   }, [fire]);
 
   const onGamepad = useCallback(

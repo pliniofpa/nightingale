@@ -1,6 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Grid2X2Icon, ListIcon } from 'lucide-react';
+import { useRef } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -9,15 +11,15 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useLibraryFilter } from "@/hooks/use-library-filter";
-import { useSearch } from "@/hooks/use-search";
-import { Grid2X2Icon, ListIcon } from "lucide-react";
-import { useRef } from "react";
-import { BulkActionsMenu } from "./bulk-actions-menu";
+} from '@/components/ui/select';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { useLibraryFilter } from '@/hooks/use-library-filter';
+import { useSearch } from '@/hooks/use-search';
+
+import { BulkActionsMenu } from './bulk-actions-menu';
 
 const DEBOUNCE_MS = 500;
-export type SongListView = "table" | "grid";
+export type SongListView = 'table' | 'grid';
 
 interface FiltersProps {
   view: SongListView;
@@ -48,11 +50,11 @@ export const Filters = ({ view, onViewChange, isSavingView }: FiltersProps) => {
         />
       </div>
       <Select
-        value={status ?? "all"}
+        value={status ?? 'all'}
         onValueChange={(value) =>
           setLibraryFilter((current) => ({
             ...current,
-            status: value === "all" ? null : value,
+            status: value === 'all' ? null : value,
           }))
         }
       >
@@ -72,11 +74,11 @@ export const Filters = ({ view, onViewChange, isSavingView }: FiltersProps) => {
         </SelectContent>
       </Select>
       <Select
-        value={transcript_source ?? "all"}
+        value={transcript_source ?? 'all'}
         onValueChange={(value) =>
           setLibraryFilter((current) => ({
             ...current,
-            transcript_source: value === "all" ? null : value,
+            transcript_source: value === 'all' ? null : value,
           }))
         }
       >
@@ -101,23 +103,23 @@ export const Filters = ({ view, onViewChange, isSavingView }: FiltersProps) => {
           aria-label="Song list view"
         >
           <Button
-            variant={view === "table" ? "secondary" : "ghost"}
+            variant={view === 'table' ? 'secondary' : 'ghost'}
             size="icon-sm"
             disabled={isSavingView}
-            onClick={() => onViewChange("table")}
+            onClick={() => onViewChange('table')}
             aria-label="Table view"
-            aria-pressed={view === "table"}
+            aria-pressed={view === 'table'}
             title="Table view"
           >
             <ListIcon />
           </Button>
           <Button
-            variant={view === "grid" ? "secondary" : "ghost"}
+            variant={view === 'grid' ? 'secondary' : 'ghost'}
             size="icon-sm"
             disabled={isSavingView}
-            onClick={() => onViewChange("grid")}
+            onClick={() => onViewChange('grid')}
             aria-label="Card grid view"
-            aria-pressed={view === "grid"}
+            aria-pressed={view === 'grid'}
             title="Card grid view"
           >
             <Grid2X2Icon />

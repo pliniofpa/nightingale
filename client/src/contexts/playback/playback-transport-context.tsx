@@ -8,8 +8,6 @@
  * when reactive fields like `isPlaying` or `guideVolume` change.
  */
 
-import { type AudioPlayer, type TimeSubscriber, useAudioPlayer } from "@/hooks/use-audio-player";
-import { ensureMp3Stems, onStemsReady } from "@/bridge/playback";
 import {
   createContext,
   useCallback,
@@ -19,9 +17,12 @@ import {
   useRef,
   useState,
   type ReactNode,
-} from "react";
-import { useNavigate } from "react-router";
-import { toast } from "sonner";
+} from 'react';
+import { useNavigate } from 'react-router';
+import { toast } from 'sonner';
+
+import { ensureMp3Stems, onStemsReady } from '@/bridge/playback';
+import { type AudioPlayer, type TimeSubscriber, useAudioPlayer } from '@/hooks/use-audio-player';
 
 export interface PlaybackTransportState {
   isReady: boolean;
@@ -39,9 +40,9 @@ export interface PlaybackTransportActions {
   getCurrentTime: () => number;
   seek: (time: number) => void;
   setGuideVolume: (volume: number) => void;
-  getVocalsBuffer: AudioPlayer["getVocalsBuffer"];
-  getScoringBuffer: AudioPlayer["getScoringBuffer"];
-  getAudioContext: AudioPlayer["getAudioContext"];
+  getVocalsBuffer: AudioPlayer['getVocalsBuffer'];
+  getScoringBuffer: AudioPlayer['getScoringBuffer'];
+  getAudioContext: AudioPlayer['getAudioContext'];
   /** Raw audio-engine pause; does NOT raise the `paused` UI flag. */
   pauseAudio: () => void;
   handlePause: () => void;
@@ -86,7 +87,7 @@ export function PlaybackTransportProvider({
       if (event.file_hash !== fileHash) return;
       if (event.error) {
         toast.error(`Stem conversion failed: ${event.error}`);
-        navigate("/", { replace: true });
+        navigate('/', { replace: true });
       } else {
         setStemsReady(true);
       }
@@ -110,7 +111,7 @@ export function PlaybackTransportProvider({
   useEffect(() => {
     if (audio.error) {
       toast.error(audio.error);
-      navigate("/", { replace: true });
+      navigate('/', { replace: true });
     }
   }, [audio.error, navigate]);
 
@@ -126,7 +127,7 @@ export function PlaybackTransportProvider({
 
   const handleExit = useCallback(() => {
     audio.cleanup();
-    navigate("/", { replace: true });
+    navigate('/', { replace: true });
   }, [audio.cleanup, navigate]);
 
   const stateValue = useMemo<PlaybackTransportState>(
@@ -193,7 +194,7 @@ export function PlaybackTransportProvider({
 export function usePlaybackTransportState(): PlaybackTransportState {
   const ctx = useContext(TransportStateContext);
   if (!ctx) {
-    throw new Error("usePlaybackTransportState must be used within a PlaybackTransportProvider");
+    throw new Error('usePlaybackTransportState must be used within a PlaybackTransportProvider');
   }
   return ctx;
 }
@@ -201,7 +202,7 @@ export function usePlaybackTransportState(): PlaybackTransportState {
 export function usePlaybackTransportActions(): PlaybackTransportActions {
   const ctx = useContext(TransportActionsContext);
   if (!ctx) {
-    throw new Error("usePlaybackTransportActions must be used within a PlaybackTransportProvider");
+    throw new Error('usePlaybackTransportActions must be used within a PlaybackTransportProvider');
   }
   return ctx;
 }

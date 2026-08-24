@@ -1,11 +1,11 @@
-import { Loader2Icon } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
+import { Loader2Icon } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
-import { openUrl } from "@/bridge/opener";
-import { plexBeginPin, plexManualLogin, plexPollPin } from "@/bridge/source";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { openUrl } from '@/bridge/opener';
+import { plexBeginPin, plexManualLogin, plexPollPin } from '@/bridge/source';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -13,37 +13,37 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Field, FieldGroup } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Field, FieldGroup } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useDialog } from "@/hooks/use-dialog";
-import { useDialogNav } from "@/hooks/navigation/use-dialog-nav";
-import { cn } from "@/lib/utils";
-import { useConnectPlex } from "@/mutations/use-source-mutations";
-import type { PlexPinStart } from "@/types/PlexPinStart";
-import type { PlexServer } from "@/types/PlexServer";
+} from '@/components/ui/select';
+import { useDialogNav } from '@/hooks/navigation/use-dialog-nav';
+import { useDialog } from '@/hooks/use-dialog';
+import { cn } from '@/lib/utils';
+import { useConnectPlex } from '@/mutations/use-source-mutations';
+import type { PlexPinStart } from '@/types/PlexPinStart';
+import type { PlexServer } from '@/types/PlexServer';
 
 export const PlexConnectDialog = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { mode, close } = useDialog();
-  const open = mode === "plex-connect";
+  const open = mode === 'plex-connect';
   const [advanced, setAdvanced] = useState(false);
   const [pin, setPin] = useState<PlexPinStart | null>(null);
   const [servers, setServers] = useState<PlexServer[]>([]);
   const [serverIndex, setServerIndex] = useState(0);
   const [sectionIds, setSectionIds] = useState<string[]>([]);
-  const [manualUrl, setManualUrl] = useState("");
-  const [manualToken, setManualToken] = useState("");
+  const [manualUrl, setManualUrl] = useState('');
+  const [manualToken, setManualToken] = useState('');
   const [busy, setBusy] = useState(false);
-  const [signInPhase, setSignInPhase] = useState<"waiting" | "discovering">("waiting");
+  const [signInPhase, setSignInPhase] = useState<'waiting' | 'discovering'>('waiting');
   const polling = useRef(false);
   const connect = useConnectPlex();
 
@@ -58,8 +58,8 @@ export const PlexConnectDialog = () => {
   });
   const navClass = (index: number) =>
     cn(
-      "focus-visible:ring-0 focus-visible:border-transparent",
-      focusedIndex === index && "ring-2 ring-primary",
+      'focus-visible:ring-0 focus-visible:border-transparent',
+      focusedIndex === index && 'ring-2 ring-primary',
     );
 
   useEffect(() => {
@@ -69,10 +69,10 @@ export const PlexConnectDialog = () => {
     setServers([]);
     setServerIndex(0);
     setSectionIds([]);
-    setManualUrl("");
-    setManualToken("");
+    setManualUrl('');
+    setManualToken('');
     setBusy(false);
-    setSignInPhase("waiting");
+    setSignInPhase('waiting');
     connect.reset();
     // mutation refs are stable across renders
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -90,20 +90,20 @@ export const PlexConnectDialog = () => {
       if (polling.current) return;
       polling.current = true;
       const discoveryTimer = window.setTimeout(() => {
-        if (!cancelled) setSignInPhase("discovering");
+        if (!cancelled) setSignInPhase('discovering');
       }, 1_500);
       try {
         const result = await plexPollPin({ pinId: pin.pin_id, clientId: pin.client_id });
         if (cancelled) return;
         if (!result.authorized) {
-          setSignInPhase("waiting");
+          setSignInPhase('waiting');
           return;
         }
         setPin(null);
         setServers(result.servers);
         setServerIndex(0);
         if (result.servers.length === 0) {
-          toast.error("Plex sign-in succeeded, but no reachable media servers were discovered.");
+          toast.error('Plex sign-in succeeded, but no reachable media servers were discovered.');
         }
       } catch (error) {
         if (!cancelled) {
@@ -148,12 +148,12 @@ export const PlexConnectDialog = () => {
     setBusy(true);
     try {
       const discovered = await plexManualLogin({
-        baseUrl: manualUrl.trim().replace(/\/+$/, ""),
+        baseUrl: manualUrl.trim().replace(/\/+$/, ''),
         accessToken: manualToken,
       });
       setServers([discovered]);
       setServerIndex(0);
-      setManualToken("");
+      setManualToken('');
     } catch (error) {
       toast.error(`Could not reach Plex: ${(error as Error).message}`);
     } finally {
@@ -168,7 +168,7 @@ export const PlexConnectDialog = () => {
       {
         onSuccess: () => {
           toast.success(
-            `Library now reads ${selectedSummary.join(", ")} from ${server.server_name}`,
+            `Library now reads ${selectedSummary.join(', ')} from ${server.server_name}`,
           );
           close();
         },
@@ -196,14 +196,14 @@ export const PlexConnectDialog = () => {
             <Loader2Icon className="mt-0.5 size-3.5 shrink-0 animate-spin text-primary" />
             <div className="space-y-0.5">
               <p className="font-medium text-foreground">
-                {signInPhase === "waiting"
-                  ? "Waiting for approval in Plex…"
-                  : "Signed in. Looking for your Plex server…"}
+                {signInPhase === 'waiting'
+                  ? 'Waiting for approval in Plex…'
+                  : 'Signed in. Looking for your Plex server…'}
               </p>
               <p className="text-muted-foreground">
-                {signInPhase === "waiting"
+                {signInPhase === 'waiting'
                   ? `Approve code ${pin.code} in the browser. You can keep using this window.`
-                  : "Checking the addresses Plex advertised. Slow or unreachable addresses can take a moment."}
+                  : 'Checking the addresses Plex advertised. Slow or unreachable addresses can take a moment.'}
               </p>
             </div>
           </div>
@@ -253,7 +253,7 @@ export const PlexConnectDialog = () => {
                       value={String(index)}
                     >
                       {candidate.server_name}
-                      {candidate.owned ? "" : " (shared)"}
+                      {candidate.owned ? '' : ' (shared)'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -317,7 +317,7 @@ export const PlexConnectDialog = () => {
                   className={navClass(2)}
                 >
                   {busy && <Loader2Icon className="animate-spin" />}
-                  {pin ? "Open Plex sign-in" : "Sign in with Plex"}
+                  {pin ? 'Open Plex sign-in' : 'Sign in with Plex'}
                 </Button>
               </>
             )}

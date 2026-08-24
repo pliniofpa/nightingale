@@ -1,8 +1,9 @@
-import type { Song } from "@/types/Song";
-import { SONG_COLUMNS } from "../song-columns";
-import type { SongItemProps } from "../types";
-import { SongTableRow } from "./song-table-row";
-import { useBestScoresBySongForActiveProfile } from "@/hooks/use-best-scores-by-song";
+import { useBestScoresBySongForActiveProfile } from '@/hooks/use-best-scores-by-song';
+import type { Song } from '@/types/Song';
+
+import { SONG_COLUMNS } from '../song-columns';
+import type { SongItemProps } from '../types';
+import { SongTableRow } from './song-table-row';
 
 interface SongTableProps {
   songs: Song[];

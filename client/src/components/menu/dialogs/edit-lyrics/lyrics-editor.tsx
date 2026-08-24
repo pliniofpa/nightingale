@@ -1,7 +1,9 @@
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
-import { type KeyboardEvent, type Ref } from "react";
-import { NO_FOCUS_RING_CLASS, RING_CLASS } from "./parts";
+import { type KeyboardEvent, type Ref } from 'react';
+
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
+
+import { NO_FOCUS_RING_CLASS, RING_CLASS } from './parts';
 
 const TEXTAREA_ROWS = 16;
 
@@ -29,7 +31,7 @@ export const LyricsEditor = ({
   // Pressing Escape while typing should release the textarea back to the
   // virtual focus ring rather than closing the dialog.
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === "Escape") {
+    if (event.key === 'Escape') {
       event.preventDefault();
       event.stopPropagation();
       event.currentTarget.blur();
@@ -44,18 +46,18 @@ export const LyricsEditor = ({
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         rows={TEXTAREA_ROWS}
-        placeholder={loadingInitial ? "Loading lyrics…" : "Enter lyrics, one line per row"}
+        placeholder={loadingInitial ? 'Loading lyrics…' : 'Enter lyrics, one line per row'}
         disabled={disabled}
         className={cn(
-          "min-h-0 flex-1 overflow-y-auto bg-card font-mono whitespace-pre [field-sizing:fixed]",
+          'min-h-0 flex-1 overflow-y-auto bg-card font-mono whitespace-pre [field-sizing:fixed]',
           NO_FOCUS_RING_CLASS,
           focused && RING_CLASS,
         )}
         spellCheck={false}
       />
       <p className="mt-2 text-[11px] text-muted-foreground">
-        {lineCount} {lineCount === 1 ? "line" : "lines"}
-        {isDirty ? " • unsaved changes" : ""}
+        {lineCount} {lineCount === 1 ? 'line' : 'lines'}
+        {isDirty ? ' • unsaved changes' : ''}
       </p>
     </>
   );

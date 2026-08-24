@@ -1,19 +1,21 @@
-import { Button } from "@/components/ui/button";
+import { useRef } from 'react';
+
+import { openUrl } from '@/bridge/opener';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { useDialog } from "@/hooks/use-dialog";
-import { useDialogNav } from "@/hooks/navigation/use-dialog-nav";
-import { openUrl } from "@/bridge/opener";
-import { useRef } from "react";
-import { cn } from "@/lib/utils";
-import { version } from "../../../../package.json";
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { useDialogNav } from '@/hooks/navigation/use-dialog-nav';
+import { useDialog } from '@/hooks/use-dialog';
+import { cn } from '@/lib/utils';
+
+import { version } from '../../../../package.json';
 
 const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
@@ -28,15 +30,15 @@ const DiscordIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 const attributions = [
-  { name: "Video backgrounds", value: "Pixabay (pixabay.com)" },
-  { name: "Lyrics data", value: "LRCLIB (lrclib.net)" },
+  { name: 'Video backgrounds', value: 'Pixabay (pixabay.com)' },
+  { name: 'Lyrics data', value: 'LRCLIB (lrclib.net)' },
   {
-    name: "Stem separation",
-    value: "UVR — MIT / Demucs by Meta Research — MIT",
+    name: 'Stem separation',
+    value: 'UVR — MIT / Demucs by Meta Research — MIT',
   },
-  { name: "Speech recognition", value: "WhisperX / OpenAI Whisper, NVIDIA Parakeet" },
-  { name: "Forced alignment", value: "WhisperX, torchaudio, Qwen3-ForcedAligner" },
-  { name: "CJK romanization", value: "fugashi, pypinyin, hangul-romanize, ToJyutping" },
+  { name: 'Speech recognition', value: 'WhisperX / OpenAI Whisper, NVIDIA Parakeet' },
+  { name: 'Forced alignment', value: 'WhisperX, torchaudio, Qwen3-ForcedAligner' },
+  { name: 'CJK romanization', value: 'fugashi, pypinyin, hangul-romanize, ToJyutping' },
 ];
 
 export const InfoDialog = () => {
@@ -44,7 +46,7 @@ export const InfoDialog = () => {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const open = mode === "about";
+  const open = mode === 'about';
 
   const { focusedIndex } = useDialogNav({
     open,
@@ -64,10 +66,10 @@ export const InfoDialog = () => {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                onClick={() => openUrl("https://github.com/rzru/nightingale")}
+                onClick={() => openUrl('https://github.com/rzru/nightingale')}
                 className={cn(
-                  "focus-visible:ring-0 focus-visible:border-transparent",
-                  focusedIndex === 0 && "outline-2 outline-primary outline-offset-2",
+                  'focus-visible:ring-0 focus-visible:border-transparent',
+                  focusedIndex === 0 && 'outline-2 outline-primary outline-offset-2',
                 )}
               >
                 <GithubIcon className="size-4" />
@@ -75,10 +77,10 @@ export const InfoDialog = () => {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                onClick={() => openUrl("https://discord.gg/68Vgng9vYp")}
+                onClick={() => openUrl('https://discord.gg/68Vgng9vYp')}
                 className={cn(
-                  "focus-visible:ring-0 focus-visible:border-transparent",
-                  focusedIndex === 1 && "ring-2 ring-primary",
+                  'focus-visible:ring-0 focus-visible:border-transparent',
+                  focusedIndex === 1 && 'ring-2 ring-primary',
                 )}
               >
                 <DiscordIcon className="size-4" />
@@ -110,8 +112,8 @@ export const InfoDialog = () => {
               variant="outline"
               onClick={close}
               className={cn(
-                "focus-visible:ring-0 focus-visible:border-transparent",
-                focusedIndex === 2 && "ring-2 ring-primary",
+                'focus-visible:ring-0 focus-visible:border-transparent',
+                focusedIndex === 2 && 'ring-2 ring-primary',
               )}
             >
               Close

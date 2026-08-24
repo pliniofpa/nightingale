@@ -1,18 +1,18 @@
-import { KeyShift } from "@/types/KeyShift";
+import { KeyShift } from '@/types/KeyShift';
 
 export const NOTE_NAMES = [
-  "C",
-  "C#",
-  "D",
-  "D#",
-  "E",
-  "F",
-  "F#",
-  "G",
-  "G#",
-  "A",
-  "A#",
-  "B",
+  'C',
+  'C#',
+  'D',
+  'D#',
+  'E',
+  'F',
+  'F#',
+  'G',
+  'G#',
+  'A',
+  'A#',
+  'B',
 ] as const;
 
 type NoteName = (typeof NOTE_NAMES)[number];

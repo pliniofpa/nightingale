@@ -1,6 +1,11 @@
-import { onSetupError, onSetupProgress, triggerSetup } from "@/bridge/setup";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavInput } from "@/hooks/navigation/use-nav-input";
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import logoSrc from '@/assets/images/logo_square.png';
+import { exit, EXIT_SUPPORTED } from '@/bridge/exit';
+import { getServerFlags } from '@/bridge/server-flags';
+import { onSetupError, onSetupProgress, triggerSetup } from '@/bridge/setup';
+import { selectFolderPath } from '@/bridge/source';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,26 +15,22 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { exit, EXIT_SUPPORTED } from "@/bridge/exit";
-import { Progress } from "@/components/ui/progress";
-import type { SetupProgress } from "@/types/SetupProgress";
-import type { SetupStep } from "@/types/SetupStep";
-import logoSrc from "@/assets/images/logo_square.png";
-import { useShouldRunSetup } from "@/hooks/use-should-run-setup";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { selectFolderPath } from "@/bridge/source";
-import { getServerFlags } from "@/bridge/server-flags";
-import { useConfig } from "@/queries/use-config";
-import { ANALYSIS_QUEUE, CONFIG, MENU, SONGS, SONGS_META } from "@/queries/keys";
-import { useQueryClient } from "@tanstack/react-query";
-import type { CachePaths } from "@/types/CachePaths";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { useNavInput } from '@/hooks/navigation/use-nav-input';
+import { useShouldRunSetup } from '@/hooks/use-should-run-setup';
+import { ANALYSIS_QUEUE, CONFIG, MENU, SONGS, SONGS_META } from '@/queries/keys';
+import { useConfig } from '@/queries/use-config';
+import type { CachePaths } from '@/types/CachePaths';
+import type { SetupProgress } from '@/types/SetupProgress';
+import type { SetupStep } from '@/types/SetupStep';
 
-interface ExtendedSetupProgress extends Omit<SetupProgress, "step"> {
-  step: SetupStep | "init" | "error" | "changedatafolder";
+interface ExtendedSetupProgress extends Omit<SetupProgress, 'step'> {
+  step: SetupStep | 'init' | 'error' | 'changedatafolder';
 }
 
 type InitialStepProps = {
@@ -42,13 +43,13 @@ const InitialStep = ({ toNextStep }: InitialStepProps) => {
       <AlertDialogHeader>
         <AlertDialogTitle>Welcome to Nightingale!</AlertDialogTitle>
         <AlertDialogDescription>
-          Before you get started, we need to install a few dependencies: <code>ffmpeg</code>,{" "}
+          Before you get started, we need to install a few dependencies: <code>ffmpeg</code>,{' '}
           <code>uv</code>, <code>python 3.10</code>, Python packages, and <code>CUDA</code> wheels
           (NVIDIA GPUs only).
         </AlertDialogDescription>
         <AlertDialogDescription>
-          This may take a few minutes.{" "}
-          {EXIT_SUPPORTED ? "You can exit at any time if you'd prefer not to continue." : ""}
+          This may take a few minutes.{' '}
+          {EXIT_SUPPORTED ? "You can exit at any time if you'd prefer not to continue." : ''}
         </AlertDialogDescription>
         <AlertDialogDescription>This only happens once.</AlertDialogDescription>
       </AlertDialogHeader>
@@ -73,10 +74,10 @@ type ChangeDataStepProps = {
 };
 
 const cacheFolderLabels: Array<[CachePathKey, string, string]> = [
-  ["songs", "Songs cache", "Stems, lyrics, transcripts, covers"],
-  ["videos", "Video cache", "Downloaded and converted videos"],
-  ["models", "Models cache", "AI and ASR model files"],
-  ["vendor", "Vendor tools", "ffmpeg, uv, Python, virtualenv"],
+  ['songs', 'Songs cache', 'Stems, lyrics, transcripts, covers'],
+  ['videos', 'Video cache', 'Downloaded and converted videos'],
+  ['models', 'Models cache', 'AI and ASR model files'],
+  ['vendor', 'Vendor tools', 'ffmpeg, uv, Python, virtualenv'],
 ];
 
 const FolderPicker = ({
@@ -89,7 +90,7 @@ const FolderPicker = ({
   buttonLabel?: string;
 }) => (
   <div className="grid w-full justify-self-stretch grid-cols-[minmax(0,1fr)_auto] gap-2">
-    <Input value={value ?? ""} disabled className="min-w-0 w-full" />
+    <Input value={value ?? ''} disabled className="min-w-0 w-full" />
     <Button
       variant="outline"
       className="w-fit whitespace-nowrap"
@@ -103,7 +104,7 @@ const FolderPicker = ({
         onChange(folder);
       }}
     >
-      {value ? "Change Folder" : (buttonLabel ?? "Choose Folder")}
+      {value ? 'Change Folder' : (buttonLabel ?? 'Choose Folder')}
     </Button>
   </div>
 );
@@ -123,7 +124,7 @@ const ChangeDataFolderStep = ({
       <>
         <AlertDialogDescription className="mb-2">
           Choose where Nightingale stores app data. We will store cache, videos, models, vendor
-          tools, and the library database in this folder. Only <code>config.json</code> and{" "}
+          tools, and the library database in this folder. Only <code>config.json</code> and{' '}
           <code>nightingale.log</code> stay in the default <code>~/.nightingale</code> path.
         </AlertDialogDescription>
         {!separateCacheFolders && <FolderPicker value={folder} onChange={setFolder} />}
@@ -242,9 +243,9 @@ const FinalStep = ({ onFinish, folder, vendorFolder }: FinalStepProps) => (
 );
 
 const defaultProgress = {
-  step: "init" as const,
+  step: 'init' as const,
   percent: 0,
-  action: "",
+  action: '',
 };
 
 export const Setup = () => {
@@ -320,7 +321,7 @@ export const Setup = () => {
 
     onSetupProgress((progress) => {
       setSetupProgress(progress);
-      if (progress.step === "finish") {
+      if (progress.step === 'finish') {
         void invalidatePostSetupState();
       }
     }).then((fn) => {
@@ -328,7 +329,7 @@ export const Setup = () => {
     });
 
     onSetupError((error) => {
-      setSetupProgress({ step: "error", percent: 0, action: error });
+      setSetupProgress({ step: 'error', percent: 0, action: error });
     }).then((fn) => {
       unlistenError = fn;
     });
@@ -349,7 +350,7 @@ export const Setup = () => {
         }
 
         if (navAction.back) {
-          if (step === "finish") {
+          if (step === 'finish') {
             setShouldRunSetup(false);
           } else if (EXIT_SUPPORTED) {
             exit();
@@ -359,12 +360,12 @@ export const Setup = () => {
         }
 
         if (navAction.confirm) {
-          if (step === "init") {
+          if (step === 'init') {
             startSetup();
-          } else if (step === "finish") {
+          } else if (step === 'finish') {
             void invalidatePostSetupState();
             setShouldRunSetup(false);
-          } else if (step === "error" && EXIT_SUPPORTED) {
+          } else if (step === 'error' && EXIT_SUPPORTED) {
             exit();
           }
         }
@@ -375,17 +376,17 @@ export const Setup = () => {
 
   const Step = useMemo(() => {
     switch (step) {
-      case "init":
+      case 'init':
         return () => (
           <InitialStep
             toNextStep={() =>
               dataPathPinned
                 ? startSetup()
-                : setSetupProgress({ ...setupProgress, step: "changedatafolder" })
+                : setSetupProgress({ ...setupProgress, step: 'changedatafolder' })
             }
           />
         );
-      case "changedatafolder":
+      case 'changedatafolder':
         return () => (
           <ChangeDataFolderStep
             folder={overrideFolder ?? undefined}
@@ -397,17 +398,17 @@ export const Setup = () => {
             onStart={startSetup}
           />
         );
-      case "clearvendor":
-      case "ffmpeg":
-      case "migratedata":
-      case "uv":
-      case "python":
-      case "venv":
-      case "dependencies":
-      case "extractscripts":
-      case "videos":
+      case 'clearvendor':
+      case 'ffmpeg':
+      case 'migratedata':
+      case 'uv':
+      case 'python':
+      case 'venv':
+      case 'dependencies':
+      case 'extractscripts':
+      case 'videos':
         return () => <LoadStep action={action} percent={percent} />;
-      case "finish":
+      case 'finish':
         return () => (
           <FinalStep
             folder={overrideFolder ?? undefined}
@@ -419,7 +420,7 @@ export const Setup = () => {
             }}
           />
         );
-      case "error":
+      case 'error':
         return () => <ErrorStep error={action} />;
     }
   }, [

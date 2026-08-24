@@ -1,8 +1,10 @@
-import { useMenuFocus } from "@/contexts/menu-focus-context";
-import { useDialog } from "@/hooks/use-dialog";
-import { useDialogNav } from "@/hooks/navigation/use-dialog-nav";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { getDetailsFocusables, getNavigationRows, type NavigationRow } from "./nav-dom";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+
+import { useMenuFocus } from '@/contexts/menu-focus-context';
+import { useDialogNav } from '@/hooks/navigation/use-dialog-nav';
+import { useDialog } from '@/hooks/use-dialog';
+
+import { getDetailsFocusables, getNavigationRows, type NavigationRow } from './nav-dom';
 
 export function useSongDetailsNav(onClose: () => void) {
   const { focus, setFocus, actionsRef } = useMenuFocus();
@@ -16,13 +18,13 @@ export function useSongDetailsNav(onClose: () => void) {
     setFocus((previous) => ({
       ...previous,
       active: true,
-      panel: "songList",
-      source: "nav",
+      panel: 'songList',
+      source: 'nav',
     }));
     onClose();
   };
 
-  const detailsPanelOpen = mode === null && focus.panel === "songDetails";
+  const detailsPanelOpen = mode === null && focus.panel === 'songDetails';
   const navigationStops = useMemo(() => navigationRows.map((row) => row.size), [navigationRows]);
   const focusableCount = useMemo(
     () => navigationRows.reduce((total, row) => total + row.size, 0),
@@ -37,7 +39,7 @@ export function useSongDetailsNav(onClose: () => void) {
     resetOnOpen: false,
     onBack: closeDetails,
     onAction: (segment, slot, action) => {
-      setFocus((previous) => ({ ...previous, active: true, source: "nav" }));
+      setFocus((previous) => ({ ...previous, active: true, source: 'nav' }));
 
       const horizontalRow = navigationRows[segment]?.horizontal ?? false;
       if (horizontalRow && action.right) return false;
@@ -47,10 +49,10 @@ export function useSongDetailsNav(onClose: () => void) {
         setFocus((previous) => ({
           ...previous,
           active: true,
-          panel: "songList",
-          source: "nav",
+          panel: 'songList',
+          source: 'nav',
         }));
-        if (!window.matchMedia("(min-width: 1280px)").matches) onClose();
+        if (!window.matchMedia('(min-width: 1280px)').matches) onClose();
         return true;
       }
 
@@ -63,8 +65,8 @@ export function useSongDetailsNav(onClose: () => void) {
     return () => {
       actionsRef.current.hasSongDetails = false;
       setFocus((previous) => {
-        if (previous.panel !== "songDetails") return previous;
-        return { ...previous, panel: "songList", active: true, source: "nav" };
+        if (previous.panel !== 'songDetails') return previous;
+        return { ...previous, panel: 'songList', active: true, source: 'nav' };
       });
     };
   }, [actionsRef, setFocus]);
@@ -89,9 +91,9 @@ export function useSongDetailsNav(onClose: () => void) {
 
     const target = focusables[focusedIndex];
     if (!target) return;
-    target.dataset.songDetailsFocused = "true";
+    target.dataset.songDetailsFocused = 'true';
     target.focus({ preventScroll: true });
-    target.scrollIntoView({ block: "nearest" });
+    target.scrollIntoView({ block: 'nearest' });
   }, [detailsPanelOpen, focus.active, focusedIndex, focusableCount]);
 
   return { detailsRef, closeDetails };

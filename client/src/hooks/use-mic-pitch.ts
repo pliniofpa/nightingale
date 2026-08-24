@@ -1,13 +1,14 @@
+import { useEffect, useRef, useState } from 'react';
+
 import {
   microphoneAdapter,
   type MicCaptureOptions,
   type MicrophoneAdapter,
-} from "@/bridge/microphone";
-import { useMicSamples } from "@/hooks/use-mic-samples";
-import { SampleRing } from "@/lib/mic/sample-ring";
-import { PITCH_WINDOW_SAMPLES } from "@/lib/pitch/constants";
-import { createMicPitchDetector, detectPitchFromSamplesMic } from "@/lib/pitch/detect";
-import { useEffect, useRef, useState } from "react";
+} from '@/bridge/microphone';
+import { useMicSamples } from '@/hooks/use-mic-samples';
+import { SampleRing } from '@/lib/mic/sample-ring';
+import { PITCH_WINDOW_SAMPLES } from '@/lib/pitch/constants';
+import { createMicPitchDetector, detectPitchFromSamplesMic } from '@/lib/pitch/detect';
 
 /** ~30 Hz pitch updates: more than enough for vocal pitch tracking. */
 const PITCH_TICK_MS = 33;

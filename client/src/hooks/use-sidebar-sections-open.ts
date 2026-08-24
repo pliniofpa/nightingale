@@ -1,5 +1,6 @@
-import { atom, useAtom } from "jotai";
-import type { LibraryMenuSection } from "@/lib/library-menu-filter";
+import { atom, useAtom } from 'jotai';
+
+import type { LibraryMenuSection } from '@/lib/library-menu-filter';
 
 const INITIAL_SECTIONS_OPEN: Record<LibraryMenuSection, boolean> = {
   hot: true,

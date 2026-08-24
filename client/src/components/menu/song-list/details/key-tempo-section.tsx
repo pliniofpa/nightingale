@@ -1,5 +1,6 @@
-import type { Song } from "@/types/Song";
-import { Shifts } from "../shifts";
+import type { Song } from '@/types/Song';
+
+import { Shifts } from '../shifts';
 
 interface KeyTempoSectionProps {
   song: Song;
@@ -20,7 +21,7 @@ export const KeyTempoSection = ({
   onTempoChange,
   onKeyOffsetChange,
 }: KeyTempoSectionProps) => {
-  const sectionClass = supportsShifts ? "px-4 pt-4 pb-2" : "px-4 py-4";
+  const sectionClass = supportsShifts ? 'px-4 pt-4 pb-2' : 'px-4 py-4';
 
   return (
     <section className={sectionClass} aria-labelledby="song-adjustments-heading">

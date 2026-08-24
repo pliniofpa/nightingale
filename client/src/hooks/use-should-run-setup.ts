@@ -1,6 +1,7 @@
-import { isAppReady } from "@/bridge/setup";
-import { atom, useAtom } from "jotai";
-import { useEffect } from "react";
+import { atom, useAtom } from 'jotai';
+import { useEffect } from 'react';
+
+import { isAppReady } from '@/bridge/setup';
 
 const shouldRunSetupAtom = atom(false);
 

@@ -1,28 +1,30 @@
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import { useMenuFocus } from "@/contexts/menu-focus-context";
-import { useLibraryFilter } from "@/hooks/use-library-filter";
-import { usePersistentScroll } from "@/hooks/use-persistent-scroll";
-import { useSearch } from "@/hooks/use-search";
-import { useConfigMutation } from "@/mutations/use-config-mutation";
-import { useConfig } from "@/queries/use-config";
-import { useAnalysisQueue, useSongs } from "@/queries/use-songs";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Filters, type SongListView } from "./filters";
-import { Progress } from "./progress";
-import { songKey } from "./shared/song-key";
-import { SongDetailsSidebar } from "./song-details-sidebar";
-import type { SongItemProps } from "./types";
-import { SongGrid } from "./views/song-grid";
-import { SongTable } from "./views/song-table";
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
+import { Separator } from '@/components/ui/separator';
+import { useMenuFocus } from '@/contexts/menu-focus-context';
+import { useLibraryFilter } from '@/hooks/use-library-filter';
+import { usePersistentScroll } from '@/hooks/use-persistent-scroll';
+import { useSearch } from '@/hooks/use-search';
+import { cn } from '@/lib/utils';
+import { useConfigMutation } from '@/mutations/use-config-mutation';
+import { useConfig } from '@/queries/use-config';
+import { useAnalysisQueue, useSongs } from '@/queries/use-songs';
+
+import { Filters, type SongListView } from './filters';
+import { Progress } from './progress';
+import { songKey } from './shared/song-key';
+import { SongDetailsSidebar } from './song-details-sidebar';
+import type { SongItemProps } from './types';
+import { SongGrid } from './views/song-grid';
+import { SongTable } from './views/song-table';
 
 export const SongList = () => {
   const { data: queue } = useAnalysisQueue();
   const { data: config } = useConfig();
   const { mutate: saveConfig, isPending: isSavingView } = useConfigMutation();
   const { focus, actionsRef, setFocus, selectedSongKeyRef } = useMenuFocus();
-  const { setScrollContainer, resetScroll } = usePersistentScroll("songList");
+  const { setScrollContainer, resetScroll } = usePersistentScroll('songList');
   const { search } = useSearch();
   const { artist, album, playlist, query, status, transcript_source } = useLibraryFilter();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useSongs();
@@ -31,7 +33,7 @@ export const SongList = () => {
   // restores the open sidebar and the selected row/card highlight.
   const [selectedKey, setSelectedKey] = useState<string | null>(() => selectedSongKeyRef.current);
 
-  const view: SongListView = config?.song_list_view === "grid" ? "grid" : "table";
+  const view: SongListView = config?.song_list_view === 'grid' ? 'grid' : 'table';
   const songs = useMemo(() => data?.pages.flatMap((page) => page.processed) ?? [], [data]);
   const foundSong = songs.find((song) => songKey(song) === selectedKey) ?? null;
   // Keep the details sidebar open even when the selected song temporarily drops
@@ -100,14 +102,14 @@ export const SongList = () => {
       ([entry]) => {
         if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) fetchNextPage();
       },
-      { rootMargin: "200px" },
+      { rootMargin: '200px' },
     );
 
     observer.observe(element);
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, view]);
 
-  const isSongListActive = focus.active && focus.panel === "songList";
+  const isSongListActive = focus.active && focus.panel === 'songList';
   const hasActiveFilter = Boolean(
     search.trim() || artist || album || playlist || query || status || transcript_source,
   );
@@ -127,8 +129,8 @@ export const SongList = () => {
     <div className="flex min-h-0 w-full flex-1 overflow-hidden">
       <main
         className={cn(
-          "min-w-0 flex-1 flex-col gap-3 p-3 sm:p-4",
-          selectedSong ? "hidden xl:flex" : "flex",
+          'min-w-0 flex-1 flex-col gap-3 p-3 sm:p-4',
+          selectedSong ? 'hidden xl:flex' : 'flex',
         )}
       >
         <Filters
@@ -141,11 +143,11 @@ export const SongList = () => {
         {showEmptyState ? (
           <Empty className="px-4">
             <EmptyHeader>
-              <EmptyTitle>{hasActiveFilter ? "No results" : "No songs found"}</EmptyTitle>
+              <EmptyTitle>{hasActiveFilter ? 'No results' : 'No songs found'}</EmptyTitle>
               <EmptyDescription>
                 {hasActiveFilter
-                  ? "No songs match your search or filters. Try adjusting them."
-                  : "This library is empty or still being scanned."}
+                  ? 'No songs match your search or filters. Try adjusting them.'
+                  : 'This library is empty or still being scanned.'}
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -155,7 +157,7 @@ export const SongList = () => {
             data-song-layout={view}
             className="themed-scrollbar song-table-shell min-h-0 max-w-full flex-1 overflow-x-hidden overflow-y-auto pb-[max(0.75rem,env(safe-area-inset-bottom))]"
           >
-            {view === "table" ? (
+            {view === 'table' ? (
               <SongTable songs={songs} getItemProps={getItemProps} />
             ) : (
               <SongGrid songs={songs} getItemProps={getItemProps} />

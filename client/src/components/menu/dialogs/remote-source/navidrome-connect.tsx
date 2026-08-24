@@ -1,5 +1,5 @@
-import { RemoteSourceConnectDialog } from "@/components/menu/dialogs/remote-source/connect";
-import { useConnectNavidrome, useNavidromeLogin } from "@/mutations/use-source-mutations";
+import { RemoteSourceConnectDialog } from '@/components/menu/dialogs/remote-source/connect';
+import { useConnectNavidrome, useNavidromeLogin } from '@/mutations/use-source-mutations';
 
 export const NavidromeConnectDialog = () => (
   <RemoteSourceConnectDialog

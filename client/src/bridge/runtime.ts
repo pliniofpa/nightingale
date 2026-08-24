@@ -9,10 +9,10 @@
  * page reload, which matches Tauri's existing semantics (no IPC hot-swap).
  */
 
-import { Channel as TauriChannel, invoke as tauriInvoke } from "@tauri-apps/api/core";
-import { listen as tauriListen, type UnlistenFn } from "@tauri-apps/api/event";
+import { Channel as TauriChannel, invoke as tauriInvoke } from '@tauri-apps/api/core';
+import { listen as tauriListen, type UnlistenFn } from '@tauri-apps/api/event';
 
-export const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+export const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
 export type EventCallback<T> = (event: { payload: T }) => void;
 
@@ -32,13 +32,13 @@ class WebChannel<T> {
 
 const apiCall = async <T>(name: string, args: InvokeArgs): Promise<T> => {
   const res = await fetch(`/api/cmd/${name}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(args ?? {}),
   });
 
   if (!res.ok) {
-    const body = await res.text().catch(() => "");
+    const body = await res.text().catch(() => '');
     throw new Error(body || `HTTP ${res.status}`);
   }
 
@@ -59,7 +59,7 @@ let connecting: Promise<WebSocket> | null = null;
 const wsListeners = new Map<string, Set<WsListener>>();
 
 const wsUrl = (): string => {
-  const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 
   return `${proto}//${window.location.host}/ws`;
 };

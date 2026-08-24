@@ -1,11 +1,13 @@
-import { cn } from "@/lib/utils";
-import { memo } from "react";
-import { formatSeconds } from "@/utils/format-duration";
-import { AlbumArt } from "../shared/album-art";
-import { LanguageBadge } from "../shared/language-badge";
-import { StatusBadge } from "../shared/status-badge";
-import type { SongItemProps } from "../types";
-import { Stars } from "@/components/shared/stars";
+import { memo } from 'react';
+
+import { Stars } from '@/components/shared/stars';
+import { cn } from '@/lib/utils';
+import { formatSeconds } from '@/utils/format-duration';
+
+import { AlbumArt } from '../shared/album-art';
+import { LanguageBadge } from '../shared/language-badge';
+import { StatusBadge } from '../shared/status-badge';
+import type { SongItemProps } from '../types';
 
 interface SongGridCardProps extends SongItemProps {
   bestScore?: number;
@@ -19,8 +21,8 @@ export const SongGridCard = memo(
       aria-pressed={isSelected}
       onClick={onSelect}
       className={cn(
-        "group flex min-h-32 min-w-0 cursor-pointer items-start gap-3 rounded-lg border bg-card p-3 text-left outline-none transition-colors hover:border-ring hover:bg-muted/40 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
-        (isFocused || isSelected) && "border-ring bg-muted ring-2 ring-ring/30",
+        'group flex min-h-32 min-w-0 cursor-pointer items-start gap-3 rounded-lg border bg-card p-3 text-left outline-none transition-colors hover:border-ring hover:bg-muted/40 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30',
+        (isFocused || isSelected) && 'border-ring bg-muted ring-2 ring-ring/30',
       )}
     >
       <AlbumArt
@@ -31,8 +33,8 @@ export const SongGridCard = memo(
       />
       <div className="flex min-w-0 flex-1 self-stretch flex-col py-0.5">
         <div className="line-clamp-2 text-sm leading-snug font-semibold">{song.title}</div>
-        <p className="mt-1 truncate text-xs text-muted-foreground">{song.artist || "—"}</p>
-        <p className="truncate text-xs text-muted-foreground">{song.album || "—"}</p>
+        <p className="mt-1 truncate text-xs text-muted-foreground">{song.artist || '—'}</p>
+        <p className="truncate text-xs text-muted-foreground">{song.album || '—'}</p>
         {bestScore === undefined ? null : <Stars score={bestScore} size="sm" className="mt-1" />}
         <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
           <span className="text-xs tabular-nums text-muted-foreground">

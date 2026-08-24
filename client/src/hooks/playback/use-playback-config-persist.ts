@@ -3,11 +3,12 @@
  * without listing `config` in callback dependency arrays.
  */
 
-import { saveConfig } from "@/bridge/config";
-import { CONFIG } from "@/queries/keys";
-import { useQueryClient } from "@tanstack/react-query";
-import type { AppConfig } from "@/types/AppConfig";
-import { useCallback, useRef } from "react";
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useRef } from 'react';
+
+import { saveConfig } from '@/bridge/config';
+import { CONFIG } from '@/queries/keys';
+import type { AppConfig } from '@/types/AppConfig';
 
 export function usePlaybackConfigPersist(config: AppConfig | null) {
   const queryClient = useQueryClient();

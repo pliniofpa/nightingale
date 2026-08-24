@@ -1,6 +1,8 @@
-import { Progress } from "@/components/ui/progress";
-import prettyBytes from "pretty-bytes";
-import { GENERIC_DESCRIPTION, type ViewParts } from "../parts";
+import prettyBytes from 'pretty-bytes';
+
+import { Progress } from '@/components/ui/progress';
+
+import { GENERIC_DESCRIPTION, type ViewParts } from '../parts';
 
 interface Args {
   downloaded: number;
@@ -16,7 +18,7 @@ export const downloadingView = ({ downloaded, contentLength, version }: Args): V
 
   const sizeLabel = contentLength
     ? `${prettyBytes(downloaded)} of ${prettyBytes(contentLength)}${
-        percent !== null ? ` (${percent}%)` : ""
+        percent !== null ? ` (${percent}%)` : ''
       }`
     : prettyBytes(downloaded);
 

@@ -1,11 +1,12 @@
-import { useMenuFocus } from "@/contexts/menu-focus-context";
-import { useMenuNavInput } from "./menu-nav/use-menu-nav-input";
-import { useMenuNavRefs } from "./menu-nav/use-menu-nav-refs";
-import { useMouseMenuFocus } from "./menu-nav/use-mouse-menu-focus";
-import { useNavLock } from "./menu-nav/use-nav-lock";
-import { useScrollToSong } from "./menu-nav/use-scroll-to-song";
-import { useTabPanelSwitch } from "./menu-nav/use-tab-panel-switch";
-import type { UseMenuNavOptions } from "./menu-nav/types";
+import { useMenuFocus } from '@/contexts/menu-focus-context';
+
+import type { UseMenuNavOptions } from './menu-nav/types';
+import { useMenuNavInput } from './menu-nav/use-menu-nav-input';
+import { useMenuNavRefs } from './menu-nav/use-menu-nav-refs';
+import { useMouseMenuFocus } from './menu-nav/use-mouse-menu-focus';
+import { useNavLock } from './menu-nav/use-nav-lock';
+import { useScrollToSong } from './menu-nav/use-scroll-to-song';
+import { useTabPanelSwitch } from './menu-nav/use-tab-panel-switch';
 
 export function useMenuNav({ overlayOpen, onBack }: UseMenuNavOptions) {
   const menuFocus = useMenuFocus();

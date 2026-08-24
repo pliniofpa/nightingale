@@ -1,6 +1,7 @@
-import { atom, useAtom } from "jotai";
-import { EMPTY_LIBRARY_FILTER } from "@/lib/library-menu-filter";
-import type { LibraryMenuFilters } from "@/types/LibraryMenuFilters";
+import { atom, useAtom } from 'jotai';
+
+import { EMPTY_LIBRARY_FILTER } from '@/lib/library-menu-filter';
+import type { LibraryMenuFilters } from '@/types/LibraryMenuFilters';
 
 export const libraryFilterAtom = atom<LibraryMenuFilters>(EMPTY_LIBRARY_FILTER);
 
@@ -19,5 +20,5 @@ export const useLibraryFilter = () => {
   };
 };
 
-export type { LibraryMenuFilters } from "@/types/LibraryMenuFilters";
-export type { LibraryMenuSection } from "@/lib/library-menu-filter";
+export type { LibraryMenuFilters } from '@/types/LibraryMenuFilters';
+export type { LibraryMenuSection } from '@/lib/library-menu-filter';

@@ -4,23 +4,24 @@
  * plays the success chime, and exposes the props the result dialog needs.
  */
 
-import successSoundUrl from "@/assets/sounds/success.mp3";
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
+import { toast } from 'sonner';
+
+import successSoundUrl from '@/assets/sounds/success.mp3';
+import { addScore } from '@/bridge/profile';
 import {
   usePlaybackMicState,
   usePlaybackTranscriptActions,
   usePlaybackTranscriptState,
   usePlaybackTransportActions,
   usePlaybackTransportState,
-} from "@/contexts/playback";
-import { PROFILES } from "@/queries/keys";
-import { useProfiles } from "@/queries/use-profiles";
-import { addScore } from "@/bridge/profile";
-import type { ScoreRecord } from "@/types/ScoreRecord";
-import type { Song } from "@/types/Song";
-import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
-import { toast } from "sonner";
+} from '@/contexts/playback';
+import { PROFILES } from '@/queries/keys';
+import { useProfiles } from '@/queries/use-profiles';
+import type { ScoreRecord } from '@/types/ScoreRecord';
+import type { Song } from '@/types/Song';
 
 export interface PlaybackResult {
   open: boolean;
@@ -70,7 +71,7 @@ export function usePlaybackResult(song: Song): PlaybackResult {
     const shouldShowResult = finalScore > 0;
 
     if (!shouldShowResult) {
-      navigate("/", { replace: true });
+      navigate('/', { replace: true });
       return;
     }
 
@@ -84,7 +85,7 @@ export function usePlaybackResult(song: Song): PlaybackResult {
         setShowResult(true);
       } catch (e) {
         toast.error(`Could not save score: ${e instanceof Error ? e.message : String(e)}`);
-        navigate("/", { replace: true });
+        navigate('/', { replace: true });
       }
     })();
   }, [
@@ -108,7 +109,7 @@ export function usePlaybackResult(song: Song): PlaybackResult {
 
     return () => {
       audioEl.pause();
-      audioEl.src = "";
+      audioEl.src = '';
     };
   }, [showResult]);
 

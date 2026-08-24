@@ -1,10 +1,11 @@
+import { useEffect, useRef } from 'react';
+
 import {
   microphoneAdapter,
   type MicSampleFrame,
   type MicrophoneAdapter,
   type StopListening,
-} from "@/bridge/microphone";
-import { useEffect, useRef } from "react";
+} from '@/bridge/microphone';
 
 const defaultAdapter = microphoneAdapter;
 

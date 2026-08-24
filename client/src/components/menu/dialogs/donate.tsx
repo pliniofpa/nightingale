@@ -1,4 +1,8 @@
-import { Button } from "@/components/ui/button";
+import { ChevronRightIcon, CoffeeIcon, HeartIcon, RepeatIcon } from 'lucide-react';
+import { useEffect, useRef, type ComponentType, type SVGProps } from 'react';
+
+import { openUrl } from '@/bridge/opener';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -6,20 +10,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { openUrl } from "@/bridge/opener";
-import { useDialog } from "@/hooks/use-dialog";
-import { useDialogNav } from "@/hooks/navigation/use-dialog-nav";
-import { useDonationSeen } from "@/hooks/use-donation-seen";
-import { cn } from "@/lib/utils";
-import { ChevronRightIcon, CoffeeIcon, HeartIcon, RepeatIcon } from "lucide-react";
-import { useEffect, useRef, type ComponentType, type SVGProps } from "react";
+} from '@/components/ui/dialog';
+import { useDialogNav } from '@/hooks/navigation/use-dialog-nav';
+import { useDialog } from '@/hooks/use-dialog';
+import { useDonationSeen } from '@/hooks/use-donation-seen';
+import { cn } from '@/lib/utils';
 
-const PATREON_URL = "https://www.patreon.com/cw/nightingalekaraoke";
-const KOFI_URL = "https://ko-fi.com/nightingalekaraoke";
+const PATREON_URL = 'https://www.patreon.com/cw/nightingalekaraoke';
+const KOFI_URL = 'https://ko-fi.com/nightingalekaraoke';
 
-const RING = "ring-2 ring-primary";
-const NO_FOCUS_RING = "focus-visible:ring-0 focus-visible:border-transparent";
+const RING = 'ring-2 ring-primary';
+const NO_FOCUS_RING = 'focus-visible:ring-0 focus-visible:border-transparent';
 
 interface DonationCardProps {
   icon: ComponentType<SVGProps<SVGSVGElement>>;
@@ -45,8 +46,8 @@ const DonationCard = ({
     onClick={() => openUrl(href)}
     onMouseEnter={onHover}
     className={cn(
-      "group flex w-full items-start gap-3 rounded-md border border-foreground/10 bg-muted/30 p-3 text-left transition-colors",
-      "hover:bg-muted/60 hover:border-pink-500/40",
+      'group flex w-full items-start gap-3 rounded-md border border-foreground/10 bg-muted/30 p-3 text-left transition-colors',
+      'hover:bg-muted/60 hover:border-pink-500/40',
       NO_FOCUS_RING,
       focused && RING,
     )}
@@ -67,7 +68,7 @@ export const DonateDialog = () => {
   const { mode, close } = useDialog();
   const { markSeen } = useDonationSeen();
 
-  const open = mode === "donate";
+  const open = mode === 'donate';
 
   const containerRef = useRef<HTMLDivElement>(null);
   const wasOpenRef = useRef(false);

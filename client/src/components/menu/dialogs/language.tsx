@@ -1,4 +1,7 @@
-import { Button } from "@/components/ui/button";
+import { useEffect, useRef, useState } from 'react';
+
+import { realign, reanalyzeTranscript, songsByHashes } from '@/bridge/analysis';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -6,9 +9,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Field, FieldGroup } from "@/components/ui/field";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Field, FieldGroup } from '@/components/ui/field';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -17,17 +20,15 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { DialogMode, useDialog } from "@/hooks/use-dialog";
-import { useDialogNav } from "@/hooks/navigation/use-dialog-nav";
-import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-import { LANGUAGES } from "@/lib/languages";
-import { realign, reanalyzeTranscript, songsByHashes } from "@/bridge/analysis";
-import { Song } from "@/types/Song";
+} from '@/components/ui/select';
+import { useDialogNav } from '@/hooks/navigation/use-dialog-nav';
+import { DialogMode, useDialog } from '@/hooks/use-dialog';
+import { LANGUAGES } from '@/lib/languages';
+import { cn } from '@/lib/utils';
+import { Song } from '@/types/Song';
 
-export function isLanguageDialogMode(mode: DialogMode): mode is { mode: "language"; song: Song } {
-  return mode !== null && typeof mode === "object" && mode.mode === "language";
+export function isLanguageDialogMode(mode: DialogMode): mode is { mode: 'language'; song: Song } {
+  return mode !== null && typeof mode === 'object' && mode.mode === 'language';
 }
 
 export const SelectLanguageDialog = () => {
@@ -39,11 +40,11 @@ export const SelectLanguageDialog = () => {
   const currentLanguage = languageDialog?.song.language ?? undefined;
 
   const [language, setLanguage] = useState<string | undefined>(currentLanguage);
-  const [analysisMode, setAnalysisMode] = useState<"force" | "realign">("force");
+  const [analysisMode, setAnalysisMode] = useState<'force' | 'realign'>('force');
 
   useEffect(() => {
     setLanguage(currentLanguage);
-    setAnalysisMode("force");
+    setAnalysisMode('force');
   }, [currentLanguage, open]);
 
   const { focusedIndex } = useDialogNav({
@@ -77,8 +78,8 @@ export const SelectLanguageDialog = () => {
                 <SelectTrigger
                   id="language-select"
                   className={cn(
-                    "focus-visible:ring-0 focus-visible:border-transparent",
-                    focusedIndex === 0 && "ring-2 ring-primary",
+                    'focus-visible:ring-0 focus-visible:border-transparent',
+                    focusedIndex === 0 && 'ring-2 ring-primary',
                   )}
                 >
                   <SelectValue placeholder="Select language" />
@@ -99,13 +100,13 @@ export const SelectLanguageDialog = () => {
               <Label htmlFor="analysis-mode-select">Mode</Label>
               <Select
                 value={analysisMode}
-                onValueChange={(mode) => setAnalysisMode(mode as "force" | "realign")}
+                onValueChange={(mode) => setAnalysisMode(mode as 'force' | 'realign')}
               >
                 <SelectTrigger
                   id="analysis-mode-select"
                   className={cn(
-                    "focus-visible:ring-0 focus-visible:border-transparent",
-                    focusedIndex === 1 && "ring-2 ring-primary",
+                    'focus-visible:ring-0 focus-visible:border-transparent',
+                    focusedIndex === 1 && 'ring-2 ring-primary',
                   )}
                 >
                   <SelectValue />
@@ -126,19 +127,19 @@ export const SelectLanguageDialog = () => {
                 variant="outline"
                 onClick={close}
                 className={cn(
-                  "focus-visible:ring-0 focus-visible:border-transparent",
-                  focusedIndex === 2 && "ring-2 ring-primary",
+                  'focus-visible:ring-0 focus-visible:border-transparent',
+                  focusedIndex === 2 && 'ring-2 ring-primary',
                 )}
               >
                 Cancel
               </Button>
             </DialogClose>
             <Button
-              disabled={!language || (language === song.language && analysisMode === "force")}
+              disabled={!language || (language === song.language && analysisMode === 'force')}
               onClick={() => {
                 if (language) {
                   const target = songsByHashes([song.file_hash]);
-                  if (analysisMode === "realign") {
+                  if (analysisMode === 'realign') {
                     realign(target, language);
                   } else {
                     reanalyzeTranscript(target, language);
@@ -148,8 +149,8 @@ export const SelectLanguageDialog = () => {
                 close();
               }}
               className={cn(
-                "focus-visible:ring-0 focus-visible:border-transparent",
-                focusedIndex === 3 && "ring-2 ring-primary",
+                'focus-visible:ring-0 focus-visible:border-transparent',
+                focusedIndex === 3 && 'ring-2 ring-primary',
               )}
             >
               Select

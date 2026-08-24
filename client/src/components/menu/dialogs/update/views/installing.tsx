@@ -1,5 +1,6 @@
-import { Spinner } from "@/components/ui/spinner";
-import { GENERIC_DESCRIPTION, type ViewParts } from "../parts";
+import { Spinner } from '@/components/ui/spinner';
+
+import { GENERIC_DESCRIPTION, type ViewParts } from '../parts';
 
 export const installingView = (): ViewParts => ({
   description: GENERIC_DESCRIPTION,

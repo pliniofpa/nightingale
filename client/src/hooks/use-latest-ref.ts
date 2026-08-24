@@ -1,5 +1,5 @@
-import { useLayoutEffect, useRef } from "react";
-import type { MutableRefObject } from "react";
+import { useLayoutEffect, useRef } from 'react';
+import type { MutableRefObject } from 'react';
 
 /**
  * Mirrors the latest render's `value` into a ref so closures captured by

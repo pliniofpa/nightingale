@@ -1,14 +1,14 @@
-import { useConfig } from "@/queries/use-config";
-import { useJellyfinHealth } from "@/queries/use-jellyfin-health";
-import { useNavidromeHealth } from "@/queries/use-navidrome-health";
-import { usePlexHealth } from "@/queries/use-plex-health";
+import { getServerFlags } from '@/bridge/server-flags';
+import { getSource } from '@/lib/library-source';
 import {
   useDisconnectSource,
   useRescan,
   useSelectFolderSource,
-} from "@/mutations/use-source-mutations";
-import { getSource } from "@/lib/library-source";
-import { getServerFlags } from "@/bridge/server-flags";
+} from '@/mutations/use-source-mutations';
+import { useConfig } from '@/queries/use-config';
+import { useJellyfinHealth } from '@/queries/use-jellyfin-health';
+import { useNavidromeHealth } from '@/queries/use-navidrome-health';
+import { usePlexHealth } from '@/queries/use-plex-health';
 
 /**
  * Coordinated source actions used by the sidebar + empty-state. Wraps the
@@ -30,10 +30,10 @@ export const useLibrarySourceActions = () => {
   const { libraryPinned } = getServerFlags();
 
   const hasSource = !!config?.library_source;
-  const jellyfinSource = getSource(config, "jellyfin");
-  const navidromeSource = getSource(config, "navidrome");
-  const plexSource = getSource(config, "plex");
-  const isFolderSource = config?.library_source?.kind === "folder";
+  const jellyfinSource = getSource(config, 'jellyfin');
+  const navidromeSource = getSource(config, 'navidrome');
+  const plexSource = getSource(config, 'plex');
+  const isFolderSource = config?.library_source?.kind === 'folder';
   const isJellyfinSource = jellyfinSource !== null;
   const isNavidromeSource = navidromeSource !== null;
   const isPlexSource = plexSource !== null;

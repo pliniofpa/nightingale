@@ -1,8 +1,9 @@
-import type { MicReactiveRef } from "@/hooks/use-mic-reactive";
-import type { MicReactiveEvent } from "@/lib/mic/reactive-analyzer";
-import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
-import * as THREE from "three";
+import { useFrame } from '@react-three/fiber';
+import { useMemo, useRef } from 'react';
+import * as THREE from 'three';
+
+import type { MicReactiveRef } from '@/hooks/use-mic-reactive';
+import type { MicReactiveEvent } from '@/lib/mic/reactive-analyzer';
 
 const WAVE_BINS = 256;
 
@@ -27,15 +28,15 @@ interface ReactiveBinding {
 }
 
 const REACTIVE_BINDINGS: readonly ReactiveBinding[] = [
-  { uniform: "uVolume", field: "volume", neutral: 0 },
-  { uniform: "uLow", field: "low", neutral: 0 },
-  { uniform: "uMid", field: "mid", neutral: 0 },
-  { uniform: "uHigh", field: "high", neutral: 0 },
-  { uniform: "uCentroid", field: "centroid", neutral: NEUTRAL_CENTROID },
-  { uniform: "uPitch", field: "pitch", neutral: NEUTRAL_PITCH },
-  { uniform: "uEnergy", field: "energy", neutral: 0 },
-  { uniform: "uHue", field: "hue", neutral: 0 },
-  { uniform: "uFlow", field: "flow", neutral: 0 },
+  { uniform: 'uVolume', field: 'volume', neutral: 0 },
+  { uniform: 'uLow', field: 'low', neutral: 0 },
+  { uniform: 'uMid', field: 'mid', neutral: 0 },
+  { uniform: 'uHigh', field: 'high', neutral: 0 },
+  { uniform: 'uCentroid', field: 'centroid', neutral: NEUTRAL_CENTROID },
+  { uniform: 'uPitch', field: 'pitch', neutral: NEUTRAL_PITCH },
+  { uniform: 'uEnergy', field: 'energy', neutral: 0 },
+  { uniform: 'uHue', field: 'hue', neutral: 0 },
+  { uniform: 'uFlow', field: 'flow', neutral: 0 },
 ];
 
 type Uniform = { value: number | THREE.DataTexture };

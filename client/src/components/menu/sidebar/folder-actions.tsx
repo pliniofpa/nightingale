@@ -1,11 +1,11 @@
-import { useEffect, useRef } from "react";
-import { LibraryBigIcon } from "lucide-react";
+import { LibraryBigIcon } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
-import { SidebarGroup, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
-import { useMenuFocus } from "@/contexts/menu-focus-context";
-import { useSourceButtons } from "@/hooks/use-source-buttons";
+import { SidebarGroup, SidebarMenu, SidebarMenuItem } from '@/components/ui/sidebar';
+import { useMenuFocus } from '@/contexts/menu-focus-context';
+import { useSourceButtons } from '@/hooks/use-source-buttons';
 
-import { SourceActionButton } from "./source-action-button";
+import { SourceActionButton } from './source-action-button';
 
 interface FolderActionsProps {
   focusedSidebarIndex: number;
@@ -43,7 +43,7 @@ export const FolderActions = ({ focusedSidebarIndex, registerCallback }: FolderA
   }, [actionsRef, focusedSidebarIndex, registerCallback, buttons.length]);
 
   const isClusterFocused =
-    focus.active && focus.panel === "sidebar" && focus.sidebarIndex === focusedSidebarIndex;
+    focus.active && focus.panel === 'sidebar' && focus.sidebarIndex === focusedSidebarIndex;
 
   return (
     <SidebarGroup>

@@ -1,23 +1,24 @@
-import type { Song } from "@/types/Song";
-import { atom, useAtom } from "jotai";
+import { atom, useAtom } from 'jotai';
 
-export type ClearCacheTarget = "all" | "videos" | "models";
+import type { Song } from '@/types/Song';
+
+export type ClearCacheTarget = 'all' | 'videos' | 'models';
 
 export type DialogMode =
-  | "exit"
-  | "create-profile"
-  | "select-profile"
-  | "leaderboards"
-  | "about"
-  | "update"
-  | "donate"
-  | "jellyfin-connect"
-  | "navidrome-connect"
-  | "plex-connect"
-  | { mode: "language"; song: Song }
-  | { mode: "edit-lyrics"; song: Song }
-  | { mode: "song-leaderboard"; song: Song }
-  | { mode: "clear-cache"; target: ClearCacheTarget }
+  | 'exit'
+  | 'create-profile'
+  | 'select-profile'
+  | 'leaderboards'
+  | 'about'
+  | 'update'
+  | 'donate'
+  | 'jellyfin-connect'
+  | 'navidrome-connect'
+  | 'plex-connect'
+  | { mode: 'language'; song: Song }
+  | { mode: 'edit-lyrics'; song: Song }
+  | { mode: 'song-leaderboard'; song: Song }
+  | { mode: 'clear-cache'; target: ClearCacheTarget }
   | null;
 
 const dialogAtom = atom<DialogMode>(null);

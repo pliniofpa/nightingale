@@ -1,9 +1,11 @@
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { LrclibCandidate } from "@/types/LrclibCandidate";
-import { formatSeconds } from "@/utils/edit-lyrics";
-import { Loader2Icon } from "lucide-react";
-import { ringFor } from "./parts";
+import { Loader2Icon } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import type { LrclibCandidate } from '@/types/LrclibCandidate';
+import { formatSeconds } from '@/utils/edit-lyrics';
+
+import { ringFor } from './parts';
 
 interface LrclibMatchesProps {
   candidates: LrclibCandidate[];
@@ -36,7 +38,7 @@ export const LrclibMatches = ({
   }
 
   if (isError) {
-    return <p className="text-destructive">{errorMessage ?? "Failed to load LRCLIB matches"}</p>;
+    return <p className="text-destructive">{errorMessage ?? 'Failed to load LRCLIB matches'}</p>;
   }
 
   if (candidates.length === 0) {
@@ -53,10 +55,10 @@ export const LrclibMatches = ({
         <span className="truncate text-sm font-medium">{candidate.track_name}</span>
         <span className="truncate text-xs text-muted-foreground">
           {candidate.artist_name}
-          {candidate.album_name ? ` • ${candidate.album_name}` : ""} •{" "}
+          {candidate.album_name ? ` • ${candidate.album_name}` : ''} •{' '}
           {formatSeconds(candidate.duration_secs)}
-          {" • "}
-          {candidate.lines.length} {candidate.lines.length === 1 ? "line" : "lines"}
+          {' • '}
+          {candidate.lines.length} {candidate.lines.length === 1 ? 'line' : 'lines'}
           {hasLrc && <span className="text-primary"> • LRC available</span>}
         </span>
         <div className="mt-1.5 flex items-center gap-2">
@@ -72,7 +74,7 @@ export const LrclibMatches = ({
           )}
           <Button
             size="xs"
-            variant={hasLrc ? "outline" : "default"}
+            variant={hasLrc ? 'outline' : 'default'}
             onClick={() => onSelect(candidate)}
             className={cn(ringFor(isFocused(hasLrc ? 1 : 0)))}
           >
@@ -83,7 +85,7 @@ export const LrclibMatches = ({
 
       <div className="min-h-0 flex-1 overflow-y-auto rounded-md border border-border">
         <pre className="px-3 py-2 font-mono text-[11px] leading-relaxed whitespace-pre-wrap">
-          {hasLrc ? candidate.synced_lyrics : candidate.lines.join("\n")}
+          {hasLrc ? candidate.synced_lyrics : candidate.lines.join('\n')}
         </pre>
       </div>
     </div>

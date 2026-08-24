@@ -1,5 +1,6 @@
-import { CheckCircle2Icon } from "lucide-react";
-import { GENERIC_DESCRIPTION, InfoLine, SoloFooter, type FocusCtx, type ViewParts } from "../parts";
+import { CheckCircle2Icon } from 'lucide-react';
+
+import { GENERIC_DESCRIPTION, InfoLine, SoloFooter, type FocusCtx, type ViewParts } from '../parts';
 
 interface Args {
   ctx: FocusCtx;

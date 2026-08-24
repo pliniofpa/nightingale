@@ -1,7 +1,7 @@
-import { atomWithStorage } from "jotai/utils";
-import { useAtom } from "jotai";
+import { useAtom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 
-const donationSeenAtom = atomWithStorage<boolean>("nightingale:donation_seen", false);
+const donationSeenAtom = atomWithStorage<boolean>('nightingale:donation_seen', false);
 
 export const useDonationSeen = () => {
   const [seen, setSeen] = useAtom(donationSeenAtom);

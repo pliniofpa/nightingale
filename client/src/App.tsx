@@ -1,18 +1,20 @@
-import { BrowserRouter, Routes, Route } from "react-router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import "./App.css";
-import { Toaster } from "./components/ui/sonner";
-import { TauriAppShell } from "./components/window/title-bar";
-import { NavInputProvider } from "./contexts/nav-input-context";
-import { MenuFocusProvider } from "./contexts/menu-focus-context";
-import { MenuIndex, MenuLayout } from "./pages/menu/menu";
-import { SettingsPage } from "./pages/menu/settings";
-import { Playback } from "./pages/playback/playback";
-import { ThemeProvider } from "./contexts/theme-context";
-import { useConfig } from "./queries/use-config";
-import { useUpdate } from "./queries/use-update";
-import { TooltipProvider } from "./components/ui/tooltip";
-import { UPDATES_SUPPORTED } from "./bridge/platform";
+import './App.css';
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter, Routes, Route } from 'react-router';
+
+import { UPDATES_SUPPORTED } from './bridge/platform';
+import { Toaster } from './components/ui/sonner';
+import { TooltipProvider } from './components/ui/tooltip';
+import { TauriAppShell } from './components/window/title-bar';
+import { MenuFocusProvider } from './contexts/menu-focus-context';
+import { NavInputProvider } from './contexts/nav-input-context';
+import { ThemeProvider } from './contexts/theme-context';
+import { MenuIndex, MenuLayout } from './pages/menu/menu';
+import { SettingsPage } from './pages/menu/settings';
+import { Playback } from './pages/playback/playback';
+import { useConfig } from './queries/use-config';
+import { useUpdate } from './queries/use-update';
 
 const queryClient = new QueryClient();
 
@@ -44,7 +46,7 @@ const ThemeWrapper = () => {
   const { data: config } = useConfig();
 
   return (
-    <ThemeProvider defaultTheme={config?.dark_mode === false ? "light" : "dark"}>
+    <ThemeProvider defaultTheme={config?.dark_mode === false ? 'light' : 'dark'}>
       <TooltipProvider>
         <TauriAppShell>
           <InnerWrapper />

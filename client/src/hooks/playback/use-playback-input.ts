@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useRef } from 'react';
+
 import {
   usePlaybackMicActions,
   usePlaybackThemeActions,
@@ -5,11 +7,10 @@ import {
   usePlaybackTranscriptState,
   usePlaybackTransportActions,
   usePlaybackTransportState,
-} from "@/contexts/playback";
-import { useNavInput } from "@/hooks/navigation/use-nav-input";
-import { usePlaybackConfigPersist } from "@/hooks/playback/use-playback-config-persist";
-import type { AppConfig } from "@/types/AppConfig";
-import { useCallback, useEffect, useRef } from "react";
+} from '@/contexts/playback';
+import { useNavInput } from '@/hooks/navigation/use-nav-input';
+import { usePlaybackConfigPersist } from '@/hooks/playback/use-playback-config-persist';
+import type { AppConfig } from '@/types/AppConfig';
 
 /**
  * Wires keyboard + gamepad input for the playback session. Reads everything it
@@ -72,7 +73,7 @@ export function usePlaybackInput(config: AppConfig | null) {
   // Keyboard-only shortcuts (G, T, F, M, N, R, +/-, Space)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === " ") {
+      if (e.key === ' ') {
         e.preventDefault();
         if (paused) {
           handleContinue();
@@ -85,18 +86,18 @@ export function usePlaybackInput(config: AppConfig | null) {
       if (paused) return;
 
       switch (e.key) {
-        case "t":
-        case "T":
+        case 't':
+        case 'T':
           cycleTheme();
           break;
 
-        case "f":
-        case "F":
+        case 'f':
+        case 'F':
           cycleFlavor();
           break;
 
-        case "g":
-        case "G": {
+        case 'g':
+        case 'G': {
           if (!guideAvailable) break;
           const nextVol = guideVolume > 0 ? 0 : 0.3;
           setGuideVolume(nextVol);
@@ -104,8 +105,8 @@ export function usePlaybackInput(config: AppConfig | null) {
           break;
         }
 
-        case "=":
-        case "+": {
+        case '=':
+        case '+': {
           if (!guideAvailable) break;
           const next = Math.min(1, guideVolume + 0.1);
           setGuideVolume(next);
@@ -113,7 +114,7 @@ export function usePlaybackInput(config: AppConfig | null) {
           break;
         }
 
-        case "-": {
+        case '-': {
           if (!guideAvailable) break;
           const next = Math.max(0, guideVolume - 0.1);
           setGuideVolume(next);
@@ -121,25 +122,25 @@ export function usePlaybackInput(config: AppConfig | null) {
           break;
         }
 
-        case "m":
-        case "M":
+        case 'm':
+        case 'M':
           handleToggleMic();
           break;
 
-        case "n":
-        case "N":
+        case 'n':
+        case 'N':
           handleCycleMic();
           break;
 
-        case "r":
-        case "R":
+        case 'r':
+        case 'R':
           handleToggleMicMonitor();
           break;
       }
     };
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, [
     paused,
     guideVolume,

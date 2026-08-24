@@ -1,7 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-import { ARIA_DISABLED_CLASS, ringFor } from "./parts";
+import { Button } from '@/components/ui/button';
+import { DialogFooter } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+
+import { ARIA_DISABLED_CLASS, ringFor } from './parts';
 
 interface EditLyricsFooterProps {
   onCancel: () => void;
@@ -48,7 +49,7 @@ export const EditLyricsFooter = ({
         aria-disabled={!canSave}
         className={cn(ARIA_DISABLED_CLASS, ringFor(saveFocused))}
       >
-        {saving ? "Saving…" : saveLabel}
+        {saving ? 'Saving…' : saveLabel}
       </Button>
     </DialogFooter>
   );

@@ -1,12 +1,14 @@
-import { Button } from "@/components/ui/button";
-import type { QueuedStatus } from "@/types/QueuedStatus";
-import type { Song } from "@/types/Song";
-import { XIcon } from "lucide-react";
-import { formatSeconds } from "@/utils/format-duration";
-import { AlbumArt } from "../shared/album-art";
-import { LanguageBadge, isDisplayableLanguage } from "../shared/language-badge";
-import { StatusBadge } from "../shared/status-badge";
-import { Stars } from "@/components/shared/stars";
+import { XIcon } from 'lucide-react';
+
+import { Stars } from '@/components/shared/stars';
+import { Button } from '@/components/ui/button';
+import type { QueuedStatus } from '@/types/QueuedStatus';
+import type { Song } from '@/types/Song';
+import { formatSeconds } from '@/utils/format-duration';
+
+import { AlbumArt } from '../shared/album-art';
+import { LanguageBadge, isDisplayableLanguage } from '../shared/language-badge';
+import { StatusBadge } from '../shared/status-badge';
 
 interface SongDetailsHeaderProps {
   song: Song;
@@ -45,10 +47,10 @@ export const SongDetailsHeader = ({
           {song.title}
         </h2>
         <p className="mt-1 truncate text-xs text-muted-foreground">
-          {song.artist || "Unknown band"}
+          {song.artist || 'Unknown band'}
         </p>
         <p className="mt-0.5 truncate text-xs text-muted-foreground">
-          {song.album || "Unknown album"}
+          {song.album || 'Unknown album'}
         </p>
         {bestScore === undefined ? null : <Stars score={bestScore} size="sm" className="mt-1" />}
       </div>

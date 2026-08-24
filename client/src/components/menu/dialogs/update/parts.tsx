@@ -1,17 +1,19 @@
-import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-import type { LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
-import { version as currentVersion } from "../../../../../package.json";
+import type { LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { DialogFooter } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+
+import { version as currentVersion } from '../../../../../package.json';
 
 export const CURRENT_VERSION = currentVersion;
-export const RELEASES_URL = "https://github.com/rzru/nightingale/releases/latest";
-export const SELF_HOSTED_DOCS_URL = "https://nightingale.cafe/docs/self-hosted.html#updating";
-export const GENERIC_DESCRIPTION = "Keep Nightingale up to date with the latest improvements.";
+export const RELEASES_URL = 'https://github.com/rzru/nightingale/releases/latest';
+export const SELF_HOSTED_DOCS_URL = 'https://nightingale.cafe/docs/self-hosted.html#updating';
+export const GENERIC_DESCRIPTION = 'Keep Nightingale up to date with the latest improvements.';
 
-const RING = "ring-2 ring-primary";
-const NO_FOCUS_RING = "focus-visible:ring-0 focus-visible:border-transparent";
+const RING = 'ring-2 ring-primary';
+const NO_FOCUS_RING = 'focus-visible:ring-0 focus-visible:border-transparent';
 
 export interface FocusCtx {
   open: boolean;
@@ -52,7 +54,7 @@ interface PairFooterProps {
 
 export const PairFooter = ({
   ctx,
-  closeLabel = "Close",
+  closeLabel = 'Close',
   onClose,
   primaryLabel,
   primaryIcon: Icon,

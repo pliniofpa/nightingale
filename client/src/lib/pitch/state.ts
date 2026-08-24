@@ -4,8 +4,8 @@ import {
   PUSH_INTERVAL_SEC,
   SEMITONE_TOLERANCE,
   SMOOTHING,
-} from "./constants";
-import { createPitchDetector, detectPitchFromSamplesRef } from "./detect";
+} from './constants';
+import { createPitchDetector, detectPitchFromSamplesRef } from './detect';
 
 export interface PitchSeries {
   refPitches: (number | null)[];

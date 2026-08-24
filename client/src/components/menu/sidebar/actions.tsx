@@ -1,25 +1,3 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import { EXIT_SUPPORTED } from "@/bridge/exit";
-import { useMenuFocus } from "@/contexts/menu-focus-context";
-import { useCurrentProfile } from "@/hooks/use-current-profile";
-import { useDialog } from "@/hooks/use-dialog";
-import { useDonationSeen } from "@/hooks/use-donation-seen";
-import { useShouldRunSetup } from "@/hooks/use-should-run-setup";
 import {
   ChevronsUpDownIcon,
   CogIcon,
@@ -30,12 +8,35 @@ import {
   RefreshCcwDotIcon,
   TrophyIcon,
   UserIcon,
-} from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { useNavInput } from "@/hooks/navigation/use-nav-input";
-import { useUpdate } from "@/queries/use-update";
-import { useNavigate } from "react-router";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+} from 'lucide-react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useNavigate } from 'react-router';
+
+import { EXIT_SUPPORTED } from '@/bridge/exit';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from '@/components/ui/sidebar';
+import { useMenuFocus } from '@/contexts/menu-focus-context';
+import { useNavInput } from '@/hooks/navigation/use-nav-input';
+import { useCurrentProfile } from '@/hooks/use-current-profile';
+import { useDialog } from '@/hooks/use-dialog';
+import { useDonationSeen } from '@/hooks/use-donation-seen';
+import { useIsMobile } from '@/hooks/use-is-mobile';
+import { useShouldRunSetup } from '@/hooks/use-should-run-setup';
+import { useUpdate } from '@/queries/use-update';
 
 interface ActionsProps {
   registerCallback: (callback: (() => void) | null) => void;
@@ -51,7 +52,7 @@ export const Actions = ({ registerCallback, focusedSidebarIndex }: ActionsProps)
   const { setShouldRunSetup } = useShouldRunSetup();
 
   const update = useUpdate();
-  const updateAvailable = update.status === "available";
+  const updateAvailable = update.status === 'available';
 
   const { seen: donationSeen } = useDonationSeen();
   const showDonationBadge = !donationSeen;
@@ -121,10 +122,10 @@ export const Actions = ({ registerCallback, focusedSidebarIndex }: ActionsProps)
       const focused = document.activeElement;
 
       if (action.up || action.down) {
-        const key = action.up ? "ArrowUp" : "ArrowDown";
+        const key = action.up ? 'ArrowUp' : 'ArrowDown';
 
         if (focused) {
-          focused.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+          focused.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
         }
       }
 
@@ -136,7 +137,7 @@ export const Actions = ({ registerCallback, focusedSidebarIndex }: ActionsProps)
     }, []),
   );
 
-  const isSidebarActive = focus.active && focus.panel === "sidebar";
+  const isSidebarActive = focus.active && focus.panel === 'sidebar';
 
   return (
     <SidebarMenu>
@@ -149,25 +150,25 @@ export const Actions = ({ registerCallback, focusedSidebarIndex }: ActionsProps)
               data-sidebar-nav-index={focusedSidebarIndex}
               className={`data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:ring-primary ${
                 isSidebarActive && focus.sidebarIndex === focusedSidebarIndex
-                  ? "ring-2 ring-primary bg-sidebar-accent"
-                  : ""
+                  ? 'ring-2 ring-primary bg-sidebar-accent'
+                  : ''
               }`}
             >
               <div className="relative">
                 <Avatar>
                   <AvatarFallback>
-                    {profile ? profile.slice(0, 2).toLocaleUpperCase() : "NP"}
+                    {profile ? profile.slice(0, 2).toLocaleUpperCase() : 'NP'}
                   </AvatarFallback>
                 </Avatar>
                 {avatarBadge}
               </div>
-              <span className="truncate font-medium">{profile ?? "No Selected Profile"}</span>
+              <span className="truncate font-medium">{profile ?? 'No Selected Profile'}</span>
               <ChevronsUpDownIcon className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            side={isMobile ? "top" : "right"}
-            align={isMobile ? "start" : "end"}
+            side={isMobile ? 'top' : 'right'}
+            align={isMobile ? 'start' : 'end'}
             collisionPadding={8}
             className="min-w-56"
           >
@@ -184,16 +185,16 @@ export const Actions = ({ registerCallback, focusedSidebarIndex }: ActionsProps)
               <DropdownMenuItem
                 onClick={() => {
                   if (profile) {
-                    return setMode("select-profile");
+                    return setMode('select-profile');
                   }
 
-                  setMode("create-profile");
+                  setMode('create-profile');
                 }}
               >
                 <UserIcon />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMode("leaderboards")}>
+              <DropdownMenuItem onClick={() => setMode('leaderboards')}>
                 <TrophyIcon />
                 Leaderboards
               </DropdownMenuItem>
@@ -203,13 +204,13 @@ export const Actions = ({ registerCallback, focusedSidebarIndex }: ActionsProps)
                   if (isMobile) {
                     setOpen(false);
                   }
-                  navigate("/settings");
+                  navigate('/settings');
                 }}
               >
                 <CogIcon />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMode("update")}>
+              <DropdownMenuItem onClick={() => setMode('update')}>
                 <DownloadIcon />
                 <span>Update</span>
                 {updateAvailable && (
@@ -219,7 +220,7 @@ export const Actions = ({ registerCallback, focusedSidebarIndex }: ActionsProps)
                   />
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMode("donate")}>
+              <DropdownMenuItem onClick={() => setMode('donate')}>
                 <HeartIcon />
                 <span>Donate</span>
                 {showDonationBadge && (
@@ -229,12 +230,12 @@ export const Actions = ({ registerCallback, focusedSidebarIndex }: ActionsProps)
                   />
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMode("about")}>
+              <DropdownMenuItem onClick={() => setMode('about')}>
                 <InfoIcon />
                 About
               </DropdownMenuItem>
               {EXIT_SUPPORTED && (
-                <DropdownMenuItem onClick={() => setMode("exit")}>
+                <DropdownMenuItem onClick={() => setMode('exit')}>
                   <DoorOpenIcon />
                   Exit
                 </DropdownMenuItem>

@@ -1,7 +1,7 @@
-import type { AppConfig } from "@/types/AppConfig";
-import type { LibrarySource } from "@/types/LibrarySource";
+import type { AppConfig } from '@/types/AppConfig';
+import type { LibrarySource } from '@/types/LibrarySource';
 
-const isKind = <K extends LibrarySource["kind"]>(
+const isKind = <K extends LibrarySource['kind']>(
   src: LibrarySource | null | undefined,
   kind: K,
 ): src is Extract<LibrarySource, { kind: K }> => src?.kind === kind;
@@ -12,7 +12,7 @@ const isKind = <K extends LibrarySource["kind"]>(
  * `config?.library_source?.kind === "..." ? ... : null` and so adding a new
  * source kind (Navidrome, Subsonic) is automatically covered by TS.
  */
-export const getSource = <K extends LibrarySource["kind"]>(
+export const getSource = <K extends LibrarySource['kind']>(
   config: AppConfig | null | undefined,
   kind: K,
 ): Extract<LibrarySource, { kind: K }> | null => {

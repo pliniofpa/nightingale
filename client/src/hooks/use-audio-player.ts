@@ -8,9 +8,10 @@
  * pair because BufferSourceNode is one-shot: pause/seek recreate sources rather than mutating time.
  */
 
-import type { PlaybackAdapter } from "@/bridge/playback";
-import { playbackAdapter } from "@/bridge/playback";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import type { PlaybackAdapter } from '@/bridge/playback';
+import { playbackAdapter } from '@/bridge/playback';
 
 export type TimeSubscriber = (time: number) => void;
 
@@ -225,7 +226,7 @@ export function useAudioPlayer(
           return;
         }
 
-        if (ctx.state === "suspended") {
+        if (ctx.state === 'suspended') {
           await ctx.resume();
         }
 

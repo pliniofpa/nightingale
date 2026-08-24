@@ -1,6 +1,6 @@
-import type { MicCaptureOptions } from "@/types/MicCaptureOptions";
-import type { MicrophoneInfo } from "@/types/MicrophoneInfo";
-import type { MicSampleFrame } from "@/types/MicSampleFrame";
+import type { MicCaptureOptions } from '@/types/MicCaptureOptions';
+import type { MicrophoneInfo } from '@/types/MicrophoneInfo';
+import type { MicSampleFrame } from '@/types/MicSampleFrame';
 
 export type { MicCaptureOptions, MicSampleFrame };
 
@@ -38,9 +38,9 @@ export const subscribeMicSamples = (cb: MicSamplesCallback): StopListening => {
   };
 };
 
-import { isTauri } from "./runtime";
-import { tauriMicrophoneAdapter } from "./microphone.tauri";
-import { setWebMicMonitorGain, webMicrophoneAdapter } from "./microphone.web";
+import { tauriMicrophoneAdapter } from './microphone.tauri';
+import { setWebMicMonitorGain, webMicrophoneAdapter } from './microphone.web';
+import { isTauri } from './runtime';
 
 export { tauriMicrophoneAdapter, webMicrophoneAdapter };
 

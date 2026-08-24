@@ -1,15 +1,17 @@
+import { useCallback, useEffect, useRef, useState, type PropsWithChildren } from 'react';
+
 import {
   Sidebar as ShadCnSidebar,
   SidebarFooter,
   SidebarProvider,
   SidebarSeparator,
-} from "@/components/ui/sidebar";
-import { Stats } from "./stats";
-import { Header } from "./header";
-import { MainNavigation } from "./main-navigation";
-import { Actions } from "./actions";
-import { useMenuFocus } from "@/contexts/menu-focus-context";
-import { useCallback, useEffect, useRef, useState, type PropsWithChildren } from "react";
+} from '@/components/ui/sidebar';
+import { useMenuFocus } from '@/contexts/menu-focus-context';
+
+import { Actions } from './actions';
+import { Header } from './header';
+import { MainNavigation } from './main-navigation';
+import { Stats } from './stats';
 
 const THEME_SLOT_INDEX = 0;
 const FOLDER_SLOT_INDEX = THEME_SLOT_INDEX + 1;

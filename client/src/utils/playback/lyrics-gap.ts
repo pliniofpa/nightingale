@@ -1,4 +1,4 @@
-import type { Segment } from "@/types/Transcript";
+import type { Segment } from '@/types/Transcript';
 
 // Small timing leads keep lyric transitions visually in sync with the audio.
 export const LYRICS_LEAD = 0.15;

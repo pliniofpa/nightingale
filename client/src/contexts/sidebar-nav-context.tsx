@@ -4,13 +4,14 @@
  * `useSidebarRowFocus` instead of receiving five chrome props.
  */
 
-import { useMenuFocus } from "@/contexts/menu-focus-context";
-import type { LibraryMenuSection } from "@/lib/library-menu-filter";
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useMemo, type ReactNode } from 'react';
+
+import { useMenuFocus } from '@/contexts/menu-focus-context';
+import type { LibraryMenuSection } from '@/lib/library-menu-filter';
 
 export type SidebarNavRow =
-  | { kind: "collapse"; section: LibraryMenuSection }
-  | { kind: "item"; section: LibraryMenuSection; value: string };
+  | { kind: 'collapse'; section: LibraryMenuSection }
+  | { kind: 'item'; section: LibraryMenuSection; value: string };
 
 interface SidebarNavContextValue {
   collapseIndexBySection: Map<LibraryMenuSection, number>;
@@ -32,7 +33,7 @@ export function SidebarNavProvider({ rows, baseIndex = 0, children }: SidebarNav
 
     rows.forEach((row, localIndex) => {
       const index = localIndex + baseIndex;
-      if (row.kind === "collapse") {
+      if (row.kind === 'collapse') {
         collapseIndexBySection.set(row.section, index);
         return;
       }
@@ -63,7 +64,7 @@ export interface SidebarRowFocus {
 export function useSidebarRowFocus(section: LibraryMenuSection, value?: string): SidebarRowFocus {
   const ctx = useContext(SidebarNavContext);
   if (!ctx) {
-    throw new Error("useSidebarRowFocus must be used within a SidebarNavProvider");
+    throw new Error('useSidebarRowFocus must be used within a SidebarNavProvider');
   }
   const { focus } = useMenuFocus();
 
@@ -71,7 +72,7 @@ export function useSidebarRowFocus(section: LibraryMenuSection, value?: string):
   const itemIndex =
     value !== undefined ? ctx.itemIndexBySection.get(section)?.get(value) : undefined;
 
-  const isSidebarActive = focus.active && focus.panel === "sidebar";
+  const isSidebarActive = focus.active && focus.panel === 'sidebar';
 
   return {
     isSidebarActive,

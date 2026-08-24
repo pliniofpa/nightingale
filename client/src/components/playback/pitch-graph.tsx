@@ -1,9 +1,10 @@
-import { usePlaybackMicState } from "@/contexts/playback";
-import { PITCH_BUFFER_SIZE } from "@/lib/pitch/constants";
-import type { PitchSeries } from "@/lib/pitch/state";
-import { freqToSemitone, snapToRefOctave } from "@/lib/pitch/state";
-import type { Rgb } from "@/types/Rgb";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
+
+import { usePlaybackMicState } from '@/contexts/playback';
+import { PITCH_BUFFER_SIZE } from '@/lib/pitch/constants';
+import type { PitchSeries } from '@/lib/pitch/state';
+import { freqToSemitone, snapToRefOctave } from '@/lib/pitch/state';
+import type { Rgb } from '@/types/Rgb';
 
 interface CanvasLayout {
   width: number;
@@ -148,8 +149,8 @@ function strokeUniformSegment(
 
   ctx.strokeStyle = rgbaString(points[0].color, points[0].alpha);
   ctx.lineWidth = lineWidth;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
   ctx.stroke();
 }
 
@@ -169,8 +170,8 @@ function strokeGradientSegment(
 
   ctx.strokeStyle = gradient;
   ctx.lineWidth = lineWidth;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
   ctx.stroke();
 }
 
@@ -281,8 +282,8 @@ function useWindowSize(): { height: number; width: number } {
   useEffect(() => {
     const onResize = () => setSize({ height: window.innerHeight, width: window.innerWidth });
 
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
   return size;
@@ -290,10 +291,10 @@ function useWindowSize(): { height: number; width: number } {
 
 interface PitchGraphProps {
   series: PitchSeries;
-  position?: "top" | "bottom";
+  position?: 'top' | 'bottom';
 }
 
-export function PitchGraph({ series, position = "top" }: PitchGraphProps) {
+export function PitchGraph({ series, position = 'top' }: PitchGraphProps) {
   const { micReady: visible } = usePlaybackMicState();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { height: windowHeight, width: windowWidth } = useWindowSize();
@@ -302,7 +303,7 @@ export function PitchGraph({ series, position = "top" }: PitchGraphProps) {
     if (!visible) return;
 
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
+    const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
     const layout = computeLayout(windowHeight, windowWidth);
@@ -313,7 +314,7 @@ export function PitchGraph({ series, position = "top" }: PitchGraphProps) {
 
   if (!visible) return null;
 
-  const positionClass = position === "bottom" ? "bottom-2 sm:bottom-3" : "top-2 sm:top-3";
+  const positionClass = position === 'bottom' ? 'bottom-2 sm:bottom-3' : 'top-2 sm:top-3';
 
   return (
     <div

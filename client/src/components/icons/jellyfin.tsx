@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import type { SVGProps } from 'react';
 
 /**
  * Outlined Jellyfin monogram (the recognisable two-stack triangle). Strokes

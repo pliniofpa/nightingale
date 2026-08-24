@@ -1,4 +1,4 @@
-import type { Song } from "@/types/Song";
+import type { Song } from '@/types/Song';
 
 /**
  * A selection identity that survives the analyzer's file_hash rekey.
@@ -9,4 +9,4 @@ import type { Song } from "@/types/Song";
  * never rekey, so their file_hash is already stable.
  */
 export const songKey = (song: Song): string =>
-  "item_id" in song.origin ? `${song.origin.kind}:${song.origin.item_id}` : song.file_hash;
+  'item_id' in song.origin ? `${song.origin.kind}:${song.origin.item_id}` : song.file_hash;

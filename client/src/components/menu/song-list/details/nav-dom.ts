@@ -1,6 +1,6 @@
-import { DIALOG_FOCUSABLE_SELECTOR } from "@/hooks/navigation/use-dialog-nav";
+import { DIALOG_FOCUSABLE_SELECTOR } from '@/hooks/navigation/use-dialog-nav';
 
-const NAV_GROUP_SELECTOR = "[data-song-details-nav-group]";
+const NAV_GROUP_SELECTOR = '[data-song-details-nav-group]';
 
 export interface NavigationRow {
   size: number;

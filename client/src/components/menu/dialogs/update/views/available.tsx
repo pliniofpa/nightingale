@@ -1,8 +1,10 @@
-import { Separator } from "@/components/ui/separator";
-import type { Update } from "@tauri-apps/plugin-updater";
-import { DownloadIcon } from "lucide-react";
-import { CURRENT_VERSION, PairFooter, type FocusCtx, type ViewParts } from "../parts";
-import { ReleaseNotes } from "../release-notes";
+import type { Update } from '@tauri-apps/plugin-updater';
+import { DownloadIcon } from 'lucide-react';
+
+import { Separator } from '@/components/ui/separator';
+
+import { CURRENT_VERSION, PairFooter, type FocusCtx, type ViewParts } from '../parts';
+import { ReleaseNotes } from '../release-notes';
 
 interface Args {
   ctx: FocusCtx;
@@ -22,9 +24,9 @@ const formatPubDate = (date: string | undefined): string | null => {
   }
 
   return parsed.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
 };
 
@@ -33,7 +35,7 @@ export const availableView = ({ ctx, update, onClose, onInstall }: Args): ViewPa
   const notes = update.body?.trim();
 
   return {
-    description: "A new version of Nightingale is available.",
+    description: 'A new version of Nightingale is available.',
     body: (
       <div className="flex flex-col gap-3">
         <div className="flex items-start gap-2">
@@ -44,7 +46,7 @@ export const availableView = ({ ctx, update, onClose, onInstall }: Args): ViewPa
             </p>
             <p className="text-[0.7rem] text-muted-foreground">
               You're on v{CURRENT_VERSION}
-              {pubDate ? ` · Released ${pubDate}` : ""}
+              {pubDate ? ` · Released ${pubDate}` : ''}
             </p>
           </div>
         </div>

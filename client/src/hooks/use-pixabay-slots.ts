@@ -1,13 +1,14 @@
-import { playbackAdapter } from "@/bridge/playback";
-import { useLatestRef } from "@/hooks/use-latest-ref";
-import { PixabayFlavorLibrary } from "@/lib/playback/pixabay-flavor-library";
-import { getNextFlavor, type VideoFlavor } from "@/lib/playback/video-flavor";
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+
+import { playbackAdapter } from '@/bridge/playback';
 import {
   fetchPixabayVideos,
   onPixabayVideoDownloaded,
   type PixabayVideoDownloaded,
-} from "@/bridge/playback";
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+} from '@/bridge/playback';
+import { useLatestRef } from '@/hooks/use-latest-ref';
+import { PixabayFlavorLibrary } from '@/lib/playback/pixabay-flavor-library';
+import { getNextFlavor, type VideoFlavor } from '@/lib/playback/video-flavor';
 
 const SLOT_COUNT = 3;
 const STALL_TIMEOUT_MS = 4000;
@@ -43,7 +44,7 @@ function safePlay(video: HTMLVideoElement): void {
 }
 
 function emptySlotStrings(): string[] {
-  return Array.from({ length: SLOT_COUNT }, () => "");
+  return Array.from({ length: SLOT_COUNT }, () => '');
 }
 
 function emptySlotFlavors(): (VideoFlavor | null)[] {
@@ -112,7 +113,7 @@ export function usePixabaySlots(flavor: VideoFlavor, isPlaying: boolean): UsePix
       const video = videoRefs[slot].current;
       if (video) {
         video.addEventListener(
-          "canplay",
+          'canplay',
           () => {
             library.markReady(url);
           },
@@ -143,7 +144,7 @@ export function usePixabaySlots(flavor: VideoFlavor, isPlaying: boolean): UsePix
       const video = videoRefs[slot].current;
       if (!video) return;
 
-      video.addEventListener("canplay", tryActivate, { once: true });
+      video.addEventListener('canplay', tryActivate, { once: true });
     },
     [activateSlot, flavorRef, library, videoRefs],
   );
@@ -353,7 +354,7 @@ export function usePixabaySlots(flavor: VideoFlavor, isPlaying: boolean): UsePix
     const onTimeUpdate = () => {
       lastTime = video.currentTime;
     };
-    video.addEventListener("timeupdate", onTimeUpdate);
+    video.addEventListener('timeupdate', onTimeUpdate);
 
     const stallTimer = window.setInterval(() => {
       if (!video.paused && video.currentTime === lastTime) {
@@ -362,7 +363,7 @@ export function usePixabaySlots(flavor: VideoFlavor, isPlaying: boolean): UsePix
     }, STALL_TIMEOUT_MS);
 
     return () => {
-      video.removeEventListener("timeupdate", onTimeUpdate);
+      video.removeEventListener('timeupdate', onTimeUpdate);
       window.clearInterval(stallTimer);
     };
   }, [activeIdx, handleEnded, videoRefs]);

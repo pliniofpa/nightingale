@@ -1,7 +1,7 @@
-import type { LibraryMenuItem } from "@/types/LibraryMenuItem";
-import type { LibraryMenuFilters } from "@/types/LibraryMenuFilters";
+import type { LibraryMenuFilters } from '@/types/LibraryMenuFilters';
+import type { LibraryMenuItem } from '@/types/LibraryMenuItem';
 
-export type LibraryMenuSection = "hot" | "no_metadata" | "artists" | "albums" | "playlists";
+export type LibraryMenuSection = 'hot' | 'no_metadata' | 'artists' | 'albums' | 'playlists';
 
 export const EMPTY_LIBRARY_FILTER: LibraryMenuFilters = {
   artist: null,
@@ -15,15 +15,15 @@ export const EMPTY_LIBRARY_FILTER: LibraryMenuFilters = {
 
 const HOT_FILTERS: Record<string, LibraryMenuFilters> = {
   all: { ...EMPTY_LIBRARY_FILTER },
-  queued: { ...EMPTY_LIBRARY_FILTER, query: "queued" },
-  analysed: { ...EMPTY_LIBRARY_FILTER, query: "analysed" },
-  videos: { ...EMPTY_LIBRARY_FILTER, query: "videos" },
-  usdx: { ...EMPTY_LIBRARY_FILTER, query: "usdx" },
+  queued: { ...EMPTY_LIBRARY_FILTER, query: 'queued' },
+  analysed: { ...EMPTY_LIBRARY_FILTER, query: 'analysed' },
+  videos: { ...EMPTY_LIBRARY_FILTER, query: 'videos' },
+  usdx: { ...EMPTY_LIBRARY_FILTER, query: 'usdx' },
 };
 
 const NO_METADATA_FILTERS: Record<string, LibraryMenuFilters> = {
-  unknown_artist: { ...EMPTY_LIBRARY_FILTER, artist: "unknown_artist" },
-  unknown_album: { ...EMPTY_LIBRARY_FILTER, album: "unknown_album" },
+  unknown_artist: { ...EMPTY_LIBRARY_FILTER, artist: 'unknown_artist' },
+  unknown_album: { ...EMPTY_LIBRARY_FILTER, album: 'unknown_album' },
 };
 
 export function libraryFilterFromMenuSelection(
@@ -31,15 +31,15 @@ export function libraryFilterFromMenuSelection(
   item: LibraryMenuItem,
 ): LibraryMenuFilters {
   switch (section) {
-    case "hot":
+    case 'hot':
       return HOT_FILTERS[item.value] ?? EMPTY_LIBRARY_FILTER;
-    case "no_metadata":
+    case 'no_metadata':
       return NO_METADATA_FILTERS[item.value] ?? EMPTY_LIBRARY_FILTER;
-    case "artists":
+    case 'artists':
       return { ...EMPTY_LIBRARY_FILTER, artist: item.value };
-    case "albums":
+    case 'albums':
       return { ...EMPTY_LIBRARY_FILTER, album: item.value };
-    case "playlists":
+    case 'playlists':
       return { ...EMPTY_LIBRARY_FILTER, playlist: item.value };
   }
 }

@@ -1,5 +1,9 @@
-import { loadSongsByHashes } from "@/bridge/songs";
-import { Button } from "@/components/ui/button";
+import { useQuery } from '@tanstack/react-query';
+import { TrophyIcon } from 'lucide-react';
+import { useMemo, useRef } from 'react';
+
+import { loadSongsByHashes } from '@/bridge/songs';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -7,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -15,21 +19,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { useDialog, type DialogMode } from "@/hooks/use-dialog";
-import { useDialogNav } from "@/hooks/navigation/use-dialog-nav";
-import { cn } from "@/lib/utils";
-import { useProfiles } from "@/queries/use-profiles";
-import type { ScoreRecord } from "@/types/ScoreRecord";
-import type { Song } from "@/types/Song";
-import { topScoresForSong } from "@/utils/playback/result";
-import { useQuery } from "@tanstack/react-query";
-import { TrophyIcon } from "lucide-react";
-import { useMemo, useRef } from "react";
+} from '@/components/ui/table';
+import { useDialogNav } from '@/hooks/navigation/use-dialog-nav';
+import { useDialog, type DialogMode } from '@/hooks/use-dialog';
+import { cn } from '@/lib/utils';
+import { useProfiles } from '@/queries/use-profiles';
+import type { ScoreRecord } from '@/types/ScoreRecord';
+import type { Song } from '@/types/Song';
+import { topScoresForSong } from '@/utils/playback/result';
 
 const TOP_LIMIT = 10;
-const RING = "ring-2 ring-primary";
-const NO_FOCUS_RING = "focus-visible:ring-0 focus-visible:border-transparent";
+const RING = 'ring-2 ring-primary';
+const NO_FOCUS_RING = 'focus-visible:ring-0 focus-visible:border-transparent';
 const EMPTY_SCORES: ScoreRecord[] = [];
 
 function topScoreRecords(records: ScoreRecord[]): ScoreRecord[] {
@@ -40,18 +41,18 @@ function topScoreRecords(records: ScoreRecord[]): ScoreRecord[] {
     .map(({ record }) => record);
 }
 
-type SongLeaderboardMode = Extract<DialogMode, { mode: "song-leaderboard" }>;
-type LeaderboardMode = "leaderboards" | SongLeaderboardMode;
+type SongLeaderboardMode = Extract<DialogMode, { mode: 'song-leaderboard' }>;
+type LeaderboardMode = 'leaderboards' | SongLeaderboardMode;
 
 function isLeaderboardMode(mode: DialogMode): mode is LeaderboardMode {
   return (
-    mode === "leaderboards" ||
-    (typeof mode === "object" && mode !== null && mode.mode === "song-leaderboard")
+    mode === 'leaderboards' ||
+    (typeof mode === 'object' && mode !== null && mode.mode === 'song-leaderboard')
   );
 }
 
 function useRetainedLeaderboardMode(mode: DialogMode): LeaderboardMode {
-  const retainedMode = useRef<LeaderboardMode>("leaderboards");
+  const retainedMode = useRef<LeaderboardMode>('leaderboards');
 
   if (isLeaderboardMode(mode)) {
     retainedMode.current = mode;
@@ -71,13 +72,13 @@ function LeaderboardSongName({ song, loading, songHash }: LeaderboardSongNamePro
     return (
       <div className="min-w-0">
         <div className="truncate font-medium">{song.title || songHash}</div>
-        <div className="truncate text-muted-foreground">{song.artist || "Unknown artist"}</div>
+        <div className="truncate text-muted-foreground">{song.artist || 'Unknown artist'}</div>
       </div>
     );
   }
 
   if (loading) {
-    return "Loading…";
+    return 'Loading…';
   }
 
   return `Unknown song (${songHash.slice(0, 8)})`;
@@ -90,8 +91,8 @@ export const LeaderboardsDialog = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const displayedMode = useRetainedLeaderboardMode(mode);
   const open = isLeaderboardMode(mode);
-  const globalOpen = displayedMode === "leaderboards";
-  const songMode = typeof displayedMode === "object" ? displayedMode : null;
+  const globalOpen = displayedMode === 'leaderboards';
+  const songMode = typeof displayedMode === 'object' ? displayedMode : null;
   const scores = profiles?.scores ?? EMPTY_SCORES;
 
   const globalBoard = useMemo(() => topScoreRecords(scores), [scores]);
@@ -104,7 +105,7 @@ export const LeaderboardsDialog = () => {
     [globalBoard],
   );
   const { data: leaderboardSongs, isLoading: songsLoading } = useQuery({
-    queryKey: ["leaderboard-songs", targetSongHashes],
+    queryKey: ['leaderboard-songs', targetSongHashes],
     queryFn: async () => {
       const songs = await loadSongsByHashes(targetSongHashes);
       return new Map(songs.map((song) => [song.file_hash, song]));
@@ -119,13 +120,13 @@ export const LeaderboardsDialog = () => {
     onBack: close,
     onAction: (_segment, _slot, action) => {
       if (!action.up && !action.down) return false;
-      scrollRef.current?.scrollBy({ top: action.down ? 48 : -48, behavior: "smooth" });
+      scrollRef.current?.scrollBy({ top: action.down ? 48 : -48, behavior: 'smooth' });
       return true;
     },
   });
 
   const songTitle = songMode?.song.title;
-  const songArtist = songMode?.song.artist || "Unknown artist";
+  const songArtist = songMode?.song.artist || 'Unknown artist';
   const boardEmpty = globalOpen ? globalBoard.length === 0 : songBoard.length === 0;
 
   return (
@@ -133,8 +134,8 @@ export const LeaderboardsDialog = () => {
       <DialogContent
         showCloseButton={false}
         className={cn(
-          "flex max-h-[calc(100svh-2rem)] min-h-0 flex-col gap-0 overflow-hidden p-0",
-          globalOpen ? "sm:max-w-2xl" : "sm:max-w-lg",
+          'flex max-h-[calc(100svh-2rem)] min-h-0 flex-col gap-0 overflow-hidden p-0',
+          globalOpen ? 'sm:max-w-2xl' : 'sm:max-w-lg',
         )}
       >
         <div ref={containerRef} className="contents">
@@ -142,7 +143,7 @@ export const LeaderboardsDialog = () => {
             <DialogTitle className="flex min-w-0 items-start gap-2 text-base">
               <TrophyIcon className="size-4 shrink-0 self-center text-primary" />
               <span className="min-w-0">
-                <span className="block truncate">{globalOpen ? "Leaderboards" : songTitle}</span>
+                <span className="block truncate">{globalOpen ? 'Leaderboards' : songTitle}</span>
                 {!globalOpen && (
                   <span className="block truncate text-xs font-normal text-muted-foreground">
                     {songArtist}
@@ -152,8 +153,8 @@ export const LeaderboardsDialog = () => {
             </DialogTitle>
             <DialogDescription>
               {globalOpen
-                ? "Top score records across every profile and song."
-                : "Best score for each profile."}
+                ? 'Top score records across every profile and song.'
+                : 'Best score for each profile.'}
             </DialogDescription>
           </DialogHeader>
 

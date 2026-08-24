@@ -1,7 +1,7 @@
-import { SidebarHeader } from "@/components/ui/sidebar";
+import logoUrl from '@/assets/images/logo.png';
+import { SidebarHeader } from '@/components/ui/sidebar';
 
-import logoUrl from "@/assets/images/logo.png";
-import { ThemeToggle } from "./theme-toggle";
+import { ThemeToggle } from './theme-toggle';
 
 interface HeaderProps {
   focusedSidebarIndex: number;

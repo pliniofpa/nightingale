@@ -1,4 +1,5 @@
-import { Button } from "@/components/ui/button";
+import { Stars } from '@/components/shared/stars';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -6,7 +7,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -14,18 +15,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { useDialogNav } from "@/hooks/navigation/use-dialog-nav";
-import type { ScoreRecord } from "@/types/ScoreRecord";
-import type { Song } from "@/types/Song";
-import { cn } from "@/lib/utils";
-import { topScoresForSong } from "@/utils/playback/result";
-import { Stars } from "@/components/shared/stars";
+} from '@/components/ui/table';
+import { useDialogNav } from '@/hooks/navigation/use-dialog-nav';
+import { cn } from '@/lib/utils';
+import type { ScoreRecord } from '@/types/ScoreRecord';
+import type { Song } from '@/types/Song';
+import { topScoresForSong } from '@/utils/playback/result';
 
 const TOP_LIMIT = 5;
 
-const RING = "ring-2 ring-primary";
-const NO_FOCUS_RING = "focus-visible:ring-0 focus-visible:border-transparent";
+const RING = 'ring-2 ring-primary';
+const NO_FOCUS_RING = 'focus-visible:ring-0 focus-visible:border-transparent';
 
 interface Props {
   open: boolean;
@@ -89,17 +89,17 @@ export const ResultDialog = ({ open, score, onFinish, song, scores, activeProfil
                     const isCurrent = profile === activeProfile && rowScore === score;
 
                     return (
-                      <TableRow key={profile} className={cn(isCurrent && "bg-primary/10")}>
+                      <TableRow key={profile} className={cn(isCurrent && 'bg-primary/10')}>
                         <TableCell className="py-2 text-xs tabular-nums">{i + 1}</TableCell>
                         <TableCell
-                          className={cn("py-2 text-xs", isCurrent && "font-medium text-primary")}
+                          className={cn('py-2 text-xs', isCurrent && 'font-medium text-primary')}
                         >
                           {profile}
                         </TableCell>
                         <TableCell
                           className={cn(
-                            "py-2 text-right text-xs tabular-nums",
-                            isCurrent && "font-medium text-primary",
+                            'py-2 text-right text-xs tabular-nums',
+                            isCurrent && 'font-medium text-primary',
                           )}
                         >
                           {rowScore}
@@ -115,7 +115,7 @@ export const ResultDialog = ({ open, score, onFinish, song, scores, activeProfil
           <DialogFooter className="mt-2 sm:justify-center">
             <Button
               type="button"
-              className={cn("w-full sm:w-auto", NO_FOCUS_RING, open && focusedIndex === 0 && RING)}
+              className={cn('w-full sm:w-auto', NO_FOCUS_RING, open && focusedIndex === 0 && RING)}
               onClick={onFinish}
             >
               Back to Menu

@@ -1,6 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { LucideIcon } from "lucide-react";
+import type { LucideIcon } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export interface ActionItemProps {
   icon: LucideIcon;
@@ -21,16 +22,16 @@ export const ActionItem = ({
 }: ActionItemProps) => (
   <Button
     type="button"
-    variant={destructive ? "destructive" : "ghost"}
+    variant={destructive ? 'destructive' : 'ghost'}
     size="lg"
     className={cn(
-      "h-auto min-h-10 w-full items-start justify-start gap-2 px-2 py-1.5 text-left whitespace-normal",
+      'h-auto min-h-10 w-full items-start justify-start gap-2 px-2 py-1.5 text-left whitespace-normal',
       // Match the keyboard-focus treatment (ring-2 ring-primary + z-10) on
       // hover so pointer and gamepad/keyboard highlighting look identical.
-      "hover:z-10 hover:ring-2 hover:ring-primary",
+      'hover:z-10 hover:ring-2 hover:ring-primary',
       destructive
-        ? "hover:bg-destructive/10 dark:hover:bg-destructive/20"
-        : "hover:bg-transparent dark:hover:bg-transparent",
+        ? 'hover:bg-destructive/10 dark:hover:bg-destructive/20'
+        : 'hover:bg-transparent dark:hover:bg-transparent',
     )}
     disabled={disabled}
     onClick={onClick}
@@ -41,8 +42,8 @@ export const ActionItem = ({
       <span
         className={
           destructive
-            ? "mt-0.5 block text-[0.625rem] leading-tight text-destructive/70"
-            : "mt-0.5 block text-[0.625rem] leading-tight text-muted-foreground"
+            ? 'mt-0.5 block text-[0.625rem] leading-tight text-destructive/70'
+            : 'mt-0.5 block text-[0.625rem] leading-tight text-muted-foreground'
         }
       >
         {description}

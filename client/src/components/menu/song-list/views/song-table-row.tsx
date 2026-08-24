@@ -1,7 +1,9 @@
-import { cn } from "@/lib/utils";
-import { memo, type KeyboardEvent } from "react";
-import { SONG_COLUMNS } from "../song-columns";
-import type { SongItemProps } from "../types";
+import { memo, type KeyboardEvent } from 'react';
+
+import { cn } from '@/lib/utils';
+
+import { SONG_COLUMNS } from '../song-columns';
+import type { SongItemProps } from '../types';
 
 interface SongTableRowProps extends SongItemProps {
   bestScore?: number;
@@ -10,7 +12,7 @@ interface SongTableRowProps extends SongItemProps {
 export const SongTableRow = memo(
   ({ song, queueStatus, index, isFocused, isSelected, onSelect, bestScore }: SongTableRowProps) => {
     const onKeyDown = (event: KeyboardEvent<HTMLTableRowElement>) => {
-      if (event.key !== "Enter" && event.key !== " ") return;
+      if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
       onSelect();
     };
@@ -23,8 +25,8 @@ export const SongTableRow = memo(
         onClick={onSelect}
         onKeyDown={onKeyDown}
         className={cn(
-          "cursor-pointer border-b border-border/70 outline-none [&>td]:bg-background [&>td]:transition-colors hover:[&>td]:bg-accent focus-visible:[&>td]:bg-primary/15",
-          (isFocused || isSelected) && "[&>td]:bg-primary/15 hover:[&>td]:bg-primary/20",
+          'cursor-pointer border-b border-border/70 outline-none [&>td]:bg-background [&>td]:transition-colors hover:[&>td]:bg-accent focus-visible:[&>td]:bg-primary/15',
+          (isFocused || isSelected) && '[&>td]:bg-primary/15 hover:[&>td]:bg-primary/20',
         )}
       >
         {SONG_COLUMNS.map((column) => (

@@ -1,4 +1,18 @@
 import {
+  ChevronDown,
+  Flame,
+  FileQuestionMark,
+  DiscIcon,
+  ListMusicIcon,
+  UserIcon,
+  type LucideIcon,
+} from 'lucide-react';
+import { Fragment, useCallback, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router';
+
+import { Badge } from '@/components/ui/badge';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import {
   SidebarContent,
   SidebarGroup,
   SidebarMenu,
@@ -8,40 +22,28 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import {
-  ChevronDown,
-  Flame,
-  FileQuestionMark,
-  DiscIcon,
-  ListMusicIcon,
-  UserIcon,
-  type LucideIcon,
-} from "lucide-react";
-import { useLibraryMenuItems } from "@/queries/use-library-menu-items";
-import type { LibraryMenuItem } from "@/types/LibraryMenuItem";
-import { Fragment, useCallback, useEffect, useMemo } from "react";
-import { Badge } from "@/components/ui/badge";
-import {
-  isLibraryMenuItemActive,
-  libraryFilterFromMenuSelection,
-  type LibraryMenuSection,
-} from "@/lib/library-menu-filter";
-import type { LibraryMenuFilters } from "@/types/LibraryMenuFilters";
-import { useLibraryFilter } from "@/hooks/use-library-filter";
-import { usePersistentScroll } from "@/hooks/use-persistent-scroll";
-import { useSidebarSectionsOpen } from "@/hooks/use-sidebar-sections-open";
-import { useMenuFocus } from "@/contexts/menu-focus-context";
+} from '@/components/ui/sidebar';
+import { useMenuFocus } from '@/contexts/menu-focus-context';
 import {
   SidebarNavProvider,
   useSidebarRowFocus,
   type SidebarNavRow,
-} from "@/contexts/sidebar-nav-context";
-import { FolderActions } from "./folder-actions";
-import { useNavigate } from "react-router";
-import { useIsMobile } from "@/hooks/use-is-mobile";
-import { ANALYSIS_STATUS_STYLES } from "@/lib/analysis-status-styles";
+} from '@/contexts/sidebar-nav-context';
+import { useIsMobile } from '@/hooks/use-is-mobile';
+import { useLibraryFilter } from '@/hooks/use-library-filter';
+import { usePersistentScroll } from '@/hooks/use-persistent-scroll';
+import { useSidebarSectionsOpen } from '@/hooks/use-sidebar-sections-open';
+import { ANALYSIS_STATUS_STYLES } from '@/lib/analysis-status-styles';
+import {
+  isLibraryMenuItemActive,
+  libraryFilterFromMenuSelection,
+  type LibraryMenuSection,
+} from '@/lib/library-menu-filter';
+import { useLibraryMenuItems } from '@/queries/use-library-menu-items';
+import type { LibraryMenuFilters } from '@/types/LibraryMenuFilters';
+import type { LibraryMenuItem } from '@/types/LibraryMenuItem';
+
+import { FolderActions } from './folder-actions';
 
 type NavSectionConfig = {
   section: LibraryMenuSection;
@@ -50,11 +52,11 @@ type NavSectionConfig = {
 };
 
 const NAV_SECTIONS: NavSectionConfig[] = [
-  { section: "hot", label: "Quick Filters", icon: Flame },
-  { section: "no_metadata", label: "No Metadata", icon: FileQuestionMark },
-  { section: "artists", label: "Artists", icon: UserIcon },
-  { section: "albums", label: "Albums", icon: DiscIcon },
-  { section: "playlists", label: "Playlists", icon: ListMusicIcon },
+  { section: 'hot', label: 'Quick Filters', icon: Flame },
+  { section: 'no_metadata', label: 'No Metadata', icon: FileQuestionMark },
+  { section: 'artists', label: 'Artists', icon: UserIcon },
+  { section: 'albums', label: 'Albums', icon: DiscIcon },
+  { section: 'playlists', label: 'Playlists', icon: ListMusicIcon },
 ];
 
 interface MenuItemCountsProps {
@@ -64,12 +66,12 @@ interface MenuItemCountsProps {
 function MenuItemCounts({ item }: MenuItemCountsProps) {
   const segments = [
     ...(item.count > 0n
-      ? [{ label: "total", value: item.count, className: "bg-muted text-muted-foreground" }]
+      ? [{ label: 'total', value: item.count, className: 'bg-muted text-muted-foreground' }]
       : []),
     ...(item.queuedCount > 0n
       ? [
           {
-            label: "queued",
+            label: 'queued',
             value: item.queuedCount,
             className: ANALYSIS_STATUS_STYLES.queued,
           },
@@ -78,7 +80,7 @@ function MenuItemCounts({ item }: MenuItemCountsProps) {
     ...(item.analysingCount > 0n
       ? [
           {
-            label: "analysing",
+            label: 'analysing',
             value: item.analysingCount,
             className: ANALYSIS_STATUS_STYLES.analysing,
           },
@@ -87,7 +89,7 @@ function MenuItemCounts({ item }: MenuItemCountsProps) {
     ...(item.analysedCount > 0n
       ? [
           {
-            label: "analysed",
+            label: 'analysed',
             value: item.analysedCount,
             className: ANALYSIS_STATUS_STYLES.analysed,
           },
@@ -102,7 +104,7 @@ function MenuItemCounts({ item }: MenuItemCountsProps) {
   return (
     <Badge
       className="h-[1.125rem] shrink-0 gap-0 overflow-hidden border border-foreground/15 bg-transparent p-0 text-[0.55rem] font-medium leading-none"
-      title={segments.map(({ label, value }) => `${value} ${label}`).join(", ")}
+      title={segments.map(({ label, value }) => `${value} ${label}`).join(', ')}
     >
       {segments.map(({ label, value, className }, index) => (
         <Fragment key={label}>
@@ -131,7 +133,7 @@ function LibraryNavSubItem({ section, item, filter, onSelectItem }: LibraryNavSu
         data-sidebar-nav-index={itemIndex}
         isActive={isLibraryMenuItemActive(section, item, filter)}
         className={`flex h-fit items-center justify-between gap-2 px-2 py-1.5 hover:ring-primary ${
-          isSidebarActive && isItemFocused ? "ring-2 ring-primary bg-sidebar-accent" : ""
+          isSidebarActive && isItemFocused ? 'ring-2 ring-primary bg-sidebar-accent' : ''
         }`}
         onClick={() => onSelectItem(section, item)}
       >
@@ -169,7 +171,7 @@ function LibraryNavSection({
           <SidebarMenuButton
             data-sidebar-nav-index={collapseIndex}
             className={`flex w-full justify-between hover:ring-primary ${
-              isSidebarActive && isCollapseFocused ? "ring-2 ring-primary bg-sidebar-accent" : ""
+              isSidebarActive && isCollapseFocused ? 'ring-2 ring-primary bg-sidebar-accent' : ''
             }`}
           >
             <span className="flex items-center gap-2">
@@ -216,7 +218,7 @@ export const MainNavigation = ({
   const { setLibraryFilter, ...filter } = useLibraryFilter();
   const { focus } = useMenuFocus();
   const navigate = useNavigate();
-  const { setScrollContainer } = usePersistentScroll("sidebar");
+  const { setScrollContainer } = usePersistentScroll('sidebar');
   const [openBySection, setOpenBySection] = useSidebarSectionsOpen();
 
   const selectMenuItem = useCallback(
@@ -229,7 +231,7 @@ export const MainNavigation = ({
       if (isMobile) {
         setOpen(false);
       }
-      navigate("/");
+      navigate('/');
     },
     [isMobile, navigate, setLibraryFilter, setOpen],
   );
@@ -247,10 +249,10 @@ export const MainNavigation = ({
 
   const rows = useMemo<SidebarNavRow[]>(() => {
     return visibleSections.flatMap(({ section, visibleItems }) => {
-      const sectionRows: SidebarNavRow[] = [{ kind: "collapse", section }];
+      const sectionRows: SidebarNavRow[] = [{ kind: 'collapse', section }];
       if (openBySection[section]) {
         sectionRows.push(
-          ...visibleItems.map(({ value }) => ({ kind: "item" as const, section, value })),
+          ...visibleItems.map(({ value }) => ({ kind: 'item' as const, section, value })),
         );
       }
       return sectionRows;
@@ -259,7 +261,7 @@ export const MainNavigation = ({
 
   useEffect(() => {
     const callbacks = rows.map((row) => {
-      if (row.kind === "collapse") {
+      if (row.kind === 'collapse') {
         return () => {
           setOpenBySection((prev) => ({ ...prev, [row.section]: !prev[row.section] }));
         };
@@ -281,10 +283,10 @@ export const MainNavigation = ({
     };
   }, [rows, menu, selectMenuItem, registerCallbacks]);
 
-  const isSidebarActive = focus.active && focus.panel === "sidebar";
+  const isSidebarActive = focus.active && focus.panel === 'sidebar';
 
   useEffect(() => {
-    if (!isSidebarActive || focus.source === "mouse") {
+    if (!isSidebarActive || focus.source === 'mouse') {
       return;
     }
 
@@ -292,7 +294,7 @@ export const MainNavigation = ({
       const focusedItem = document.querySelector<HTMLElement>(
         `[data-sidebar-nav-index="${focus.sidebarIndex}"]`,
       );
-      focusedItem?.scrollIntoView({ block: "nearest" });
+      focusedItem?.scrollIntoView({ block: 'nearest' });
     });
 
     return () => cancelAnimationFrame(rafId);

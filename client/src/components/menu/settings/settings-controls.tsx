@@ -1,6 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
-import { FieldDescription } from "@/components/ui/field";
+import type { ReactNode } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
+import { FieldDescription } from '@/components/ui/field';
 import {
   Select,
   SelectContent,
@@ -9,10 +11,10 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import type { ReactNode } from "react";
-import { cn } from "@/lib/utils";
-import { NUMBER_PICKER_SIZE, type SettingsOption } from "./constants";
+} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+
+import { NUMBER_PICKER_SIZE, type SettingsOption } from './constants';
 
 interface SettingsSelectProps {
   id?: string;
@@ -35,7 +37,7 @@ export function SettingsSelect({
 }: SettingsSelectProps) {
   return (
     <Select onValueChange={onValueChange} value={value}>
-      <SelectTrigger id={id} className={cn("w-full", triggerClassName)}>
+      <SelectTrigger id={id} className={cn('w-full', triggerClassName)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent position="popper" className="w-[var(--radix-select-trigger-width)]">
@@ -76,7 +78,7 @@ export function NumberButtonGroup({
           <Button
             key={`${name}-${option}`}
             onClick={() => onChange(option)}
-            variant={value === option ? "default" : "outline"}
+            variant={value === option ? 'default' : 'outline'}
             className={getFocusClassName(segment, index)}
           >
             {option}

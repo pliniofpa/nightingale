@@ -1,12 +1,14 @@
-import { Button } from "@/components/ui/button";
-import { Field } from "@/components/ui/field";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { measureMicLatencySec } from "@/lib/mic/latency-test";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Hint } from "./settings-controls";
+import { useState } from 'react';
+import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
+import { Field } from '@/components/ui/field';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { measureMicLatencySec } from '@/lib/mic/latency-test';
+
+import { Hint } from './settings-controls';
 
 interface MicLatencyFieldProps {
   selectedMicId: string | null;
@@ -63,7 +65,7 @@ export function MicLatencyField({
               disabled={measuring}
               className={buttonClassName}
             >
-              {measuring ? "Measuring..." : "Measure latency"}
+              {measuring ? 'Measuring...' : 'Measure latency'}
             </Button>
           </TooltipTrigger>
           <TooltipContent align="end">

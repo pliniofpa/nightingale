@@ -3,13 +3,15 @@
  * read from transport, and mic also needs theme indirectly via the song.
  */
 
-import type { AppConfig } from "@/types/AppConfig";
-import type { Song } from "@/types/Song";
-import type { ReactNode } from "react";
-import { PlaybackMicProvider } from "./playback-mic-context";
-import { PlaybackThemeProvider } from "./playback-theme-context";
-import { PlaybackTranscriptProvider } from "./playback-transcript-context";
-import { PlaybackTransportProvider } from "./playback-transport-context";
+import type { ReactNode } from 'react';
+
+import type { AppConfig } from '@/types/AppConfig';
+import type { Song } from '@/types/Song';
+
+import { PlaybackMicProvider } from './playback-mic-context';
+import { PlaybackThemeProvider } from './playback-theme-context';
+import { PlaybackTranscriptProvider } from './playback-transcript-context';
+import { PlaybackTransportProvider } from './playback-transport-context';
 
 interface PlaybackProvidersProps {
   song: Song;
@@ -40,7 +42,7 @@ export {
   usePlaybackTransportState,
   type PlaybackTransportActions,
   type PlaybackTransportState,
-} from "./playback-transport-context";
+} from './playback-transport-context';
 
 export {
   PlaybackThemeProvider,
@@ -48,7 +50,7 @@ export {
   usePlaybackThemeState,
   type PlaybackThemeActions,
   type PlaybackThemeState,
-} from "./playback-theme-context";
+} from './playback-theme-context';
 
 export {
   PlaybackMicProvider,
@@ -56,7 +58,7 @@ export {
   usePlaybackMicState,
   type PlaybackMicActions,
   type PlaybackMicState,
-} from "./playback-mic-context";
+} from './playback-mic-context';
 
 export {
   PlaybackTranscriptProvider,
@@ -64,4 +66,4 @@ export {
   usePlaybackTranscriptState,
   type PlaybackTranscriptActions,
   type PlaybackTranscriptState,
-} from "./playback-transcript-context";
+} from './playback-transcript-context';

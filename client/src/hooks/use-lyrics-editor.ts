@@ -1,8 +1,9 @@
-import { useSaveLyricsMutation } from "@/mutations/use-save-lyrics-mutation";
-import { useInitialLyrics } from "@/queries/use-lyrics";
-import type { Song } from "@/types/Song";
-import { normalizeLines } from "@/utils/edit-lyrics";
-import { useMemo, useState } from "react";
+import { useMemo, useState } from 'react';
+
+import { useSaveLyricsMutation } from '@/mutations/use-save-lyrics-mutation';
+import { useInitialLyrics } from '@/queries/use-lyrics';
+import type { Song } from '@/types/Song';
+import { normalizeLines } from '@/utils/edit-lyrics';
 
 export interface UseLyricsEditorArgs {
   song: Song | null;
@@ -37,7 +38,7 @@ export function useLyricsEditor({ song, onSaved }: UseLyricsEditorArgs): LyricsE
     setOverride(null);
   }
 
-  const loadedText = lyricsQuery.data ?? "";
+  const loadedText = lyricsQuery.data ?? '';
   const text = override ?? loadedText;
   const isDirty = override !== null && override !== loadedText;
 

@@ -1,7 +1,8 @@
-import { applyTimedLyrics, provideLrc } from "@/bridge/lyrics";
-import { ANALYSIS_QUEUE, LYRICS, MENU, SONGS, SONGS_META } from "@/queries/keys";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
+import { applyTimedLyrics, provideLrc } from '@/bridge/lyrics';
+import { ANALYSIS_QUEUE, LYRICS, MENU, SONGS, SONGS_META } from '@/queries/keys';
 
 const LYRICS_QUERY_KEYS = [LYRICS, MENU, SONGS, SONGS_META, ANALYSIS_QUEUE];
 

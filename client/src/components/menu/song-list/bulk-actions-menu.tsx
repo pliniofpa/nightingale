@@ -1,16 +1,3 @@
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useMenuFocus } from "@/contexts/menu-focus-context";
-import { useAnalysis } from "@/hooks/use-analysis";
-import { cn } from "@/lib/utils";
-import { useSongs } from "@/queries/use-songs";
 import {
   AlignLeftIcon,
   AudioLinesIcon,
@@ -19,8 +6,22 @@ import {
   RefreshCwIcon,
   Trash2Icon,
   EllipsisIcon,
-} from "lucide-react";
-import { useEffect, useState } from "react";
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useMenuFocus } from '@/contexts/menu-focus-context';
+import { useAnalysis } from '@/hooks/use-analysis';
+import { cn } from '@/lib/utils';
+import { useSongs } from '@/queries/use-songs';
 
 export const BulkActionsMenu = () => {
   const {
@@ -45,7 +46,7 @@ export const BulkActionsMenu = () => {
     };
   }, [actionsRef]);
 
-  const isActionsFocused = focus.active && focus.panel === "songList" && focus.actionsFocused;
+  const isActionsFocused = focus.active && focus.panel === 'songList' && focus.actionsFocused;
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -58,8 +59,8 @@ export const BulkActionsMenu = () => {
           aria-label="Actions on filtered songs"
           title="Actions"
           className={cn(
-            "border-input bg-input/20 focus-visible:border-transparent focus-visible:ring-0 dark:bg-input/30",
-            isActionsFocused && "ring-2 ring-primary",
+            'border-input bg-input/20 focus-visible:border-transparent focus-visible:ring-0 dark:bg-input/30',
+            isActionsFocused && 'ring-2 ring-primary',
           )}
         >
           <EllipsisIcon />

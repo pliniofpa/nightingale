@@ -1,10 +1,11 @@
-import { onShiftKeyDone, onShiftTempoDone, shiftKey, shiftTempo } from "@/bridge/analysis";
-import { SONGS } from "@/queries/keys";
-import type { ShiftDone } from "@/types/ShiftDone";
-import type { Song } from "@/types/Song";
-import { calculateKeyShift } from "@/utils/shift-key";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
+import { onShiftKeyDone, onShiftTempoDone, shiftKey, shiftTempo } from '@/bridge/analysis';
+import { SONGS } from '@/queries/keys';
+import type { ShiftDone } from '@/types/ShiftDone';
+import type { Song } from '@/types/Song';
+import { calculateKeyShift } from '@/utils/shift-key';
 
 type ShiftListener = (callback: (payload: ShiftDone) => void) => Promise<() => void>;
 

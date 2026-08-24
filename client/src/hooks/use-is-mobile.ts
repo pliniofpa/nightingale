@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-const MOBILE_QUERY = "(max-width: 767px)";
+const MOBILE_QUERY = '(max-width: 767px)';
 
 export function isMobileViewport(): boolean {
-  return typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches;
+  return typeof window !== 'undefined' && window.matchMedia(MOBILE_QUERY).matches;
 }
 
 export function useIsMobile(): boolean {
@@ -14,8 +14,8 @@ export function useIsMobile(): boolean {
     const sync = () => setIsMobile(media.matches);
 
     sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
+    media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
   }, []);
 
   return isMobile;

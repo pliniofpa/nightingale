@@ -1,6 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { MENU } from "./keys";
-import { loadLibraryMenuItems } from "@/bridge/library";
+import { useQuery } from '@tanstack/react-query';
+
+import { loadLibraryMenuItems } from '@/bridge/library';
+
+import { MENU } from './keys';
 
 export const useLibraryMenuItems = () => {
   return useQuery({

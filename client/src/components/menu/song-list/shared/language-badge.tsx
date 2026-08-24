@@ -1,6 +1,6 @@
-import { getLanguageName } from "@/lib/languages";
+import { getLanguageName } from '@/lib/languages';
 
-const UNKNOWN_LANGUAGE_CODES = new Set(["un", "und", "unk", "unknown"]);
+const UNKNOWN_LANGUAGE_CODES = new Set(['un', 'und', 'unk', 'unknown']);
 
 /** Whether a language is concrete enough to surface in the UI. Provided LRC
  * songs default to "unknown", which we hide rather than show as "UN". */

@@ -1,6 +1,8 @@
-import { getPreloadedConfig, loadConfig } from "@/bridge/config";
-import { useQuery } from "@tanstack/react-query";
-import { CONFIG } from "./keys";
+import { useQuery } from '@tanstack/react-query';
+
+import { getPreloadedConfig, loadConfig } from '@/bridge/config';
+
+import { CONFIG } from './keys';
 
 export const useConfig = () => {
   const preloaded = getPreloadedConfig();

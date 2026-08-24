@@ -1,12 +1,14 @@
-import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ANALYSIS_QUEUE, SONGS, SONGS_META, MENU } from "./keys";
-import { getPreloadedSongsMeta, loadAnalysisQueue, loadSongs, loadSongsMeta } from "@/bridge/songs";
-import { useLibraryFilter } from "@/hooks/use-library-filter";
-import { useSearch } from "@/hooks/use-search";
-import { useRef, useState } from "react";
-import type { AnalysisQueue } from "@/types/AnalysisQueue";
-import type { LoadSongsParams } from "@/types/LoadSongsParams";
-import { SongsMeta } from "@/types/SongsMeta";
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRef, useState } from 'react';
+
+import { getPreloadedSongsMeta, loadAnalysisQueue, loadSongs, loadSongsMeta } from '@/bridge/songs';
+import { useLibraryFilter } from '@/hooks/use-library-filter';
+import { useSearch } from '@/hooks/use-search';
+import type { AnalysisQueue } from '@/types/AnalysisQueue';
+import type { LoadSongsParams } from '@/types/LoadSongsParams';
+import { SongsMeta } from '@/types/SongsMeta';
+
+import { ANALYSIS_QUEUE, SONGS, SONGS_META, MENU } from './keys';
 
 const PAGE_SIZE = 25;
 const DEFAULT_REFETCH_INTERVAL = 2500;
@@ -79,7 +81,7 @@ export const useAnalysisQueue = () => {
       const entries = Object.entries(data.entries)
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([hash, status]) => `${hash}:${JSON.stringify(status)}`)
-        .join("|");
+        .join('|');
       const previous = prevEntriesRef.current;
 
       if (previous !== null && previous !== entries) {

@@ -1,27 +1,29 @@
+import { useCallback, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+
+import { openUrl } from '@/bridge/opener';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { useDialog } from "@/hooks/use-dialog";
-import { useDialogNav } from "@/hooks/navigation/use-dialog-nav";
-import { useUpdate, type UpdateState } from "@/queries/use-update";
-import { openUrl } from "@/bridge/opener";
-import { useCallback, useEffect, useRef } from "react";
-import { toast } from "sonner";
-import { useInstallFlow, type InstallFlow } from "@/hooks/update";
-import { RELEASES_URL, SELF_HOSTED_DOCS_URL, type FocusCtx, type ViewParts } from "./parts";
-import { availableView } from "./views/available";
-import { checkingView } from "./views/checking";
-import { downloadingView } from "./views/downloading";
-import { fetchErrorView } from "./views/fetch-error";
-import { installErrorView } from "./views/install-error";
-import { installedView } from "./views/installed";
-import { installingView } from "./views/installing";
-import { unsupportedView } from "./views/unsupported";
-import { upToDateView } from "./views/up-to-date";
+} from '@/components/ui/dialog';
+import { useDialogNav } from '@/hooks/navigation/use-dialog-nav';
+import { useInstallFlow, type InstallFlow } from '@/hooks/update';
+import { useDialog } from '@/hooks/use-dialog';
+import { useUpdate, type UpdateState } from '@/queries/use-update';
+
+import { RELEASES_URL, SELF_HOSTED_DOCS_URL, type FocusCtx, type ViewParts } from './parts';
+import { availableView } from './views/available';
+import { checkingView } from './views/checking';
+import { downloadingView } from './views/downloading';
+import { fetchErrorView } from './views/fetch-error';
+import { installErrorView } from './views/install-error';
+import { installedView } from './views/installed';
+import { installingView } from './views/installing';
+import { unsupportedView } from './views/unsupported';
+import { upToDateView } from './views/up-to-date';
 
 const NOOP = () => {};
 
@@ -33,25 +35,25 @@ interface Actions {
 }
 
 const versionLabel = (state: UpdateState, fallback: string): string =>
-  state.status === "available" ? state.update.version : fallback;
+  state.status === 'available' ? state.update.version : fallback;
 
 const focusableCount = (state: UpdateState, install: InstallFlow): number => {
   switch (install.state.stage) {
-    case "downloading":
-    case "installing":
+    case 'downloading':
+    case 'installing':
       return 0;
-    case "finished":
+    case 'finished':
       return 1;
-    case "error":
+    case 'error':
       return 2;
-    case "idle":
+    case 'idle':
       break;
   }
-  return state.status === "checking" ? 1 : 2;
+  return state.status === 'checking' ? 1 : 2;
 };
 
 const isLocked = (install: InstallFlow): boolean =>
-  install.state.stage === "downloading" || install.state.stage === "installing";
+  install.state.stage === 'downloading' || install.state.stage === 'installing';
 
 const pickView = (
   state: UpdateState,
@@ -60,33 +62,33 @@ const pickView = (
   actions: Actions,
 ): ViewParts => {
   switch (install.state.stage) {
-    case "downloading":
+    case 'downloading':
       return downloadingView({
         downloaded: install.state.downloaded,
         contentLength: install.state.contentLength,
-        version: versionLabel(state, "update"),
+        version: versionLabel(state, 'update'),
       });
-    case "installing":
+    case 'installing':
       return installingView();
-    case "finished":
+    case 'finished':
       return installedView({
         ctx,
-        version: versionLabel(state, "the new build"),
+        version: versionLabel(state, 'the new build'),
         onRestart: install.restart,
       });
-    case "error":
+    case 'error':
       return installErrorView({
         ctx,
         message: install.state.message,
         onClose: actions.close,
         onRetry: install.install,
       });
-    case "idle":
+    case 'idle':
       break;
   }
 
   switch (state.status) {
-    case "unsupported":
+    case 'unsupported':
       return unsupportedView({
         ctx,
         channel: state.channel,
@@ -94,9 +96,9 @@ const pickView = (
         onOpenReleases: actions.openReleases,
         onOpenSelfHostedDocs: actions.openSelfHostedDocs,
       });
-    case "checking":
+    case 'checking':
       return checkingView({ ctx, onClose: actions.close });
-    case "error":
+    case 'error':
       return fetchErrorView({
         ctx,
         error: state.error,
@@ -104,9 +106,9 @@ const pickView = (
         onClose: actions.close,
         onRetry: actions.refetch,
       });
-    case "up-to-date":
+    case 'up-to-date':
       return upToDateView({ ctx, onClose: actions.close, onRefetch: actions.refetch });
-    case "available":
+    case 'available':
       return availableView({
         ctx,
         update: state.update,
@@ -118,11 +120,11 @@ const pickView = (
 
 export const UpdateDialog = () => {
   const { mode, close } = useDialog();
-  const open = mode === "update";
+  const open = mode === 'update';
 
   const updateState = useUpdate();
   const installFlow = useInstallFlow(
-    updateState.status === "available" ? updateState.update : null,
+    updateState.status === 'available' ? updateState.update : null,
   );
 
   const locked = isLocked(installFlow);
@@ -137,11 +139,11 @@ export const UpdateDialog = () => {
       return;
     }
 
-    if (updateState.status === "unsupported") {
+    if (updateState.status === 'unsupported') {
       return;
     }
 
-    if (installFlow.state.stage !== "idle") {
+    if (installFlow.state.stage !== 'idle') {
       return;
     }
     updateState.refetch();
@@ -157,7 +159,7 @@ export const UpdateDialog = () => {
     try {
       await openUrl(RELEASES_URL);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
+      const message = err instanceof Error ? err.message : 'Unknown error';
       toast.error(`Couldn't open releases page: ${message}`);
     }
   }, []);
@@ -166,7 +168,7 @@ export const UpdateDialog = () => {
     try {
       await openUrl(SELF_HOSTED_DOCS_URL);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
+      const message = err instanceof Error ? err.message : 'Unknown error';
       toast.error(`Couldn't open docs: ${message}`);
     }
   }, []);

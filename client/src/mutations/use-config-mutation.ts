@@ -1,9 +1,10 @@
-import { CONFIG } from "@/queries/keys";
-import { useConfig } from "@/queries/use-config";
-import { loadConfig, saveConfig } from "@/bridge/config";
-import { AppConfig } from "@/types/AppConfig";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
+import { loadConfig, saveConfig } from '@/bridge/config';
+import { CONFIG } from '@/queries/keys';
+import { useConfig } from '@/queries/use-config';
+import { AppConfig } from '@/types/AppConfig';
 
 export const useConfigMutation = () => {
   const queryClient = useQueryClient();

@@ -1,7 +1,8 @@
-import { CACHE_STATS } from "@/queries/keys";
-import { clearAll, clearModels, clearVideos } from "@/bridge/cache";
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
+import { clearAll, clearModels, clearVideos } from '@/bridge/cache';
+import { CACHE_STATS } from '@/queries/keys';
 
 export const useClearCache = () => {
   const queryClient = useQueryClient();
@@ -16,7 +17,7 @@ export const useClearCache = () => {
         toast.info(`Cache was successfully cleared`);
       } catch (error: unknown) {
         toast.error(
-          `Error while deleting cache: ${error instanceof Error ? error.message : "unknown error"}`,
+          `Error while deleting cache: ${error instanceof Error ? error.message : 'unknown error'}`,
         );
       }
     };

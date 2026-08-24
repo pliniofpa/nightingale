@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
-import { useMenuFocus } from "@/contexts/menu-focus-context";
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 
-export type PersistentScrollSlot = "songList" | "sidebar";
+import { useMenuFocus } from '@/contexts/menu-focus-context';
+
+export type PersistentScrollSlot = 'songList' | 'sidebar';
 
 export function usePersistentScroll(slot: PersistentScrollSlot) {
   const ctx = useMenuFocus();
-  const scrollRef = slot === "sidebar" ? ctx.sidebarScrollRef : ctx.scrollRef;
-  const scrollTopRef = slot === "sidebar" ? ctx.sidebarScrollTopRef : ctx.scrollTopRef;
+  const scrollRef = slot === 'sidebar' ? ctx.sidebarScrollRef : ctx.scrollRef;
+  const scrollTopRef = slot === 'sidebar' ? ctx.sidebarScrollTopRef : ctx.scrollTopRef;
   const detachRef = useRef<(() => void) | null>(null);
 
   const setScrollContainer = useCallback(
@@ -23,8 +24,8 @@ export function usePersistentScroll(slot: PersistentScrollSlot) {
         scrollTopRef.current = el.scrollTop;
       };
 
-      el.addEventListener("scroll", onScroll, { passive: true });
-      detachRef.current = () => el.removeEventListener("scroll", onScroll);
+      el.addEventListener('scroll', onScroll, { passive: true });
+      detachRef.current = () => el.removeEventListener('scroll', onScroll);
     },
     [scrollRef, scrollTopRef],
   );

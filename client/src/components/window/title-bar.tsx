@@ -1,10 +1,11 @@
-import { minimizeWindow, triggerFrontendReady, windowImmersive } from "@/bridge/window";
-import { isFullScreen as tauriIsFullScreen, setFullScreen } from "@/bridge/fullScreen";
-import { loadConfig, saveConfig } from "@/bridge/config";
-import { isTauri } from "@/bridge/runtime";
-import { getCurrentWindow } from "@tauri-apps/api/window";
-import { MinusIcon, SquareIcon, XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { MinusIcon, SquareIcon, XIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+import { loadConfig, saveConfig } from '@/bridge/config';
+import { isFullScreen as tauriIsFullScreen, setFullScreen } from '@/bridge/fullScreen';
+import { isTauri } from '@/bridge/runtime';
+import { minimizeWindow, triggerFrontendReady, windowImmersive } from '@/bridge/window';
 
 export function TauriAppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -15,7 +16,7 @@ export function TauriAppShell({ children }: { children: React.ReactNode }) {
     if (!isTauri) return;
 
     const onKeyDown = async (e: KeyboardEvent) => {
-      if (e.key !== "F11") return;
+      if (e.key !== 'F11') return;
       e.preventDefault();
 
       const [current, config] = await Promise.all([tauriIsFullScreen(), loadConfig()]);
@@ -25,8 +26,8 @@ export function TauriAppShell({ children }: { children: React.ReactNode }) {
       await Promise.all([setFullScreen(next), saveConfig({ ...config, fullscreen: next })]);
     };
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
   if (!isTauri) {
@@ -79,10 +80,10 @@ function TitleBar() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.style.setProperty("--titlebar-offset", fullscreen ? "0px" : "2rem");
+    document.documentElement.style.setProperty('--titlebar-offset', fullscreen ? '0px' : '2rem');
 
     return () => {
-      document.documentElement.style.removeProperty("--titlebar-offset");
+      document.documentElement.style.removeProperty('--titlebar-offset');
     };
   }, [fullscreen]);
 

@@ -1,7 +1,8 @@
-import { convertFileSrc } from "@/bridge/media";
-import { cn } from "@/lib/utils";
-import type { Song } from "@/types/Song";
-import { MusicIcon, VideoIcon } from "lucide-react";
+import { MusicIcon, VideoIcon } from 'lucide-react';
+
+import { convertFileSrc } from '@/bridge/media';
+import { cn } from '@/lib/utils';
+import type { Song } from '@/types/Song';
 
 interface AlbumArtProps {
   song: Song;
@@ -20,19 +21,19 @@ export function AlbumArt({
 }: AlbumArtProps) {
   return (
     <div
-      className={cn("relative shrink-0 overflow-hidden bg-muted text-muted-foreground", className)}
+      className={cn('relative shrink-0 overflow-hidden bg-muted text-muted-foreground', className)}
     >
       {song.album_art_path ? (
         <img
           src={convertFileSrc(song.album_art_path)}
           alt=""
-          loading={lazy ? "lazy" : undefined}
-          decoding={lazy ? "async" : undefined}
+          loading={lazy ? 'lazy' : undefined}
+          decoding={lazy ? 'async' : undefined}
           className="size-full object-cover"
         />
       ) : (
         <MusicIcon
-          className={cn("absolute inset-0 m-auto", fallbackIconClassName)}
+          className={cn('absolute inset-0 m-auto', fallbackIconClassName)}
           aria-hidden="true"
         />
       )}

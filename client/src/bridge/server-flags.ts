@@ -14,7 +14,7 @@ export interface ServerFlags {
 const defaults: ServerFlags = { dataPathPinned: false, libraryPinned: false };
 
 export const getServerFlags = (): ServerFlags => {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return defaults;
   }
 

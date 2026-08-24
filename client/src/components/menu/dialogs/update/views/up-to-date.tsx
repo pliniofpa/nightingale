@@ -1,4 +1,5 @@
-import { CheckCircle2Icon } from "lucide-react";
+import { CheckCircle2Icon } from 'lucide-react';
+
 import {
   CURRENT_VERSION,
   GENERIC_DESCRIPTION,
@@ -6,7 +7,7 @@ import {
   PairFooter,
   type FocusCtx,
   type ViewParts,
-} from "../parts";
+} from '../parts';
 
 interface Args {
   ctx: FocusCtx;

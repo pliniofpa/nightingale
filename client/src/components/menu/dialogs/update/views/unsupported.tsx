@@ -1,6 +1,8 @@
-import { ExternalLinkIcon, InfoIcon, ServerIcon } from "lucide-react";
-import { CURRENT_VERSION, InfoLine, PairFooter, type FocusCtx, type ViewParts } from "../parts";
-import type { UnsupportedChannel } from "@/queries/use-update";
+import { ExternalLinkIcon, InfoIcon, ServerIcon } from 'lucide-react';
+
+import type { UnsupportedChannel } from '@/queries/use-update';
+
+import { CURRENT_VERSION, InfoLine, PairFooter, type FocusCtx, type ViewParts } from '../parts';
 
 interface Args {
   ctx: FocusCtx;
@@ -29,7 +31,7 @@ export const unsupportedView = ({
   onOpenReleases,
   onOpenSelfHostedDocs,
 }: Args): ViewParts => {
-  if (channel === "self-hosted-web") {
+  if (channel === 'self-hosted-web') {
     return selfHostedWebView({ ctx, onClose, onOpenSelfHostedDocs });
   }
   return linuxTauriView({ ctx, onClose, onOpenReleases });
@@ -42,7 +44,7 @@ interface LinuxArgs {
 }
 
 const linuxTauriView = ({ ctx, onClose, onOpenReleases }: LinuxArgs): ViewParts => ({
-  description: "Linux builds use manual updates from GitHub Releases.",
+  description: 'Linux builds use manual updates from GitHub Releases.',
   body: (
     <InfoLine icon={InfoIcon}>
       Auto-update isn't supported on Linux. Download the latest release from GitHub to update
@@ -67,7 +69,7 @@ interface SelfHostedArgs {
 }
 
 const selfHostedWebView = ({ ctx, onClose, onOpenSelfHostedDocs }: SelfHostedArgs): ViewParts => ({
-  description: "Self-hosted instance — update by re-running the install script on the host.",
+  description: 'Self-hosted instance — update by re-running the install script on the host.',
   body: (
     <div className="flex flex-col gap-3">
       <InfoLine icon={ServerIcon}>

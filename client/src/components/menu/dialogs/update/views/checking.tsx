@@ -1,5 +1,6 @@
-import { Spinner } from "@/components/ui/spinner";
-import { GENERIC_DESCRIPTION, SoloFooter, type FocusCtx, type ViewParts } from "../parts";
+import { Spinner } from '@/components/ui/spinner';
+
+import { GENERIC_DESCRIPTION, SoloFooter, type FocusCtx, type ViewParts } from '../parts';
 
 interface Args {
   ctx: FocusCtx;

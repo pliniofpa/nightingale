@@ -1,7 +1,8 @@
-import type { MicCaptureOptions } from "@/types/MicCaptureOptions";
-import type { MicrophoneInfo } from "@/types/MicrophoneInfo";
-import type { MicSampleFrame } from "@/types/MicSampleFrame";
-import { dispatchMicFrame, type MicrophoneAdapter, subscribeMicSamples } from "./microphone";
+import type { MicCaptureOptions } from '@/types/MicCaptureOptions';
+import type { MicrophoneInfo } from '@/types/MicrophoneInfo';
+import type { MicSampleFrame } from '@/types/MicSampleFrame';
+
+import { dispatchMicFrame, type MicrophoneAdapter, subscribeMicSamples } from './microphone';
 
 /**
  * Matches `SAMPLE_CHUNK` in `client/src-tauri/src/microphones.rs` (=512) so JS
@@ -56,13 +57,13 @@ let liveMonitorGain = DEFAULT_MONITOR_GAIN;
 
 const ensureWorkletUrl = (): string => {
   if (workletUrl !== null) return workletUrl;
-  const blob = new Blob([WORKLET_SRC], { type: "application/javascript" });
+  const blob = new Blob([WORKLET_SRC], { type: 'application/javascript' });
   workletUrl = URL.createObjectURL(blob);
   return workletUrl;
 };
 
 const initialMonitorGain = (): number => {
-  if (typeof window === "undefined") return DEFAULT_MONITOR_GAIN;
+  if (typeof window === 'undefined') return DEFAULT_MONITOR_GAIN;
   const cfg = window.__NIGHTINGALE_APP_CONFIG__;
   const raw = cfg?.mic_monitor_gain;
   if (raw == null) return DEFAULT_MONITOR_GAIN;
@@ -113,7 +114,7 @@ const teardown = (): void => {
 };
 
 const listDevices = async (): Promise<MicrophoneInfo[]> => {
-  if (typeof navigator === "undefined" || !navigator.mediaDevices?.enumerateDevices) {
+  if (typeof navigator === 'undefined' || !navigator.mediaDevices?.enumerateDevices) {
     return [];
   }
   /**
@@ -123,16 +124,16 @@ const listDevices = async (): Promise<MicrophoneInfo[]> => {
    */
   const devices = await navigator.mediaDevices.enumerateDevices();
   return devices
-    .filter((d) => d.kind === "audioinput")
+    .filter((d) => d.kind === 'audioinput')
     .map((d, idx) => ({ name: d.label?.trim() || d.deviceId || `Microphone ${idx + 1}` }));
 };
 
 const findDeviceId = async (preferred: string | null): Promise<string | undefined> => {
-  if (!preferred || typeof navigator === "undefined") return undefined;
+  if (!preferred || typeof navigator === 'undefined') return undefined;
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
     const match = devices.find(
-      (d) => d.kind === "audioinput" && (d.label === preferred || d.deviceId === preferred),
+      (d) => d.kind === 'audioinput' && (d.label === preferred || d.deviceId === preferred),
     );
     return match?.deviceId;
   } catch {
@@ -160,7 +161,7 @@ const startCapture = async (
   await context.audioWorklet.addModule(ensureWorkletUrl());
 
   const source = context.createMediaStreamSource(stream);
-  const node = new AudioWorkletNode(context, "nightingale-mic-processor", {
+  const node = new AudioWorkletNode(context, 'nightingale-mic-processor', {
     numberOfInputs: 1,
     numberOfOutputs: 0,
     processorOptions: { chunkSize: SAMPLE_CHUNK },
@@ -198,7 +199,7 @@ const startCapture = async (
   };
 
   const track = stream.getAudioTracks()[0];
-  return track?.label || preferred || "default";
+  return track?.label || preferred || 'default';
 };
 
 const stopCapture = async (): Promise<void> => {

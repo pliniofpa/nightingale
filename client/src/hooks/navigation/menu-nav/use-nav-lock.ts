@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
-import type { MenuNavLock } from "./types";
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+
+import type { MenuNavLock } from './types';
 
 const NAV_LOCK_MS = 120;
 

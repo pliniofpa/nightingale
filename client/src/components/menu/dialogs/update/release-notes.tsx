@@ -1,25 +1,26 @@
-import { cn } from "@/lib/utils";
-import { openUrl } from "@/bridge/opener";
-import Markdown, { type Components } from "react-markdown";
+import Markdown, { type Components } from 'react-markdown';
+
+import { openUrl } from '@/bridge/opener';
+import { cn } from '@/lib/utils';
 
 const COMPONENTS: Components = {
   h3: ({ node: _node, className, ...props }) => (
     <h3
       className={cn(
-        "text-[0.7rem] font-medium uppercase tracking-wide text-foreground first:mt-0 mt-3",
+        'text-[0.7rem] font-medium uppercase tracking-wide text-foreground first:mt-0 mt-3',
         className,
       )}
       {...props}
     />
   ),
   p: ({ node: _node, className, ...props }) => (
-    <p className={cn("text-xs first:mt-0 mt-2", className)} {...props} />
+    <p className={cn('text-xs first:mt-0 mt-2', className)} {...props} />
   ),
   ul: ({ node: _node, className, ...props }) => (
-    <ul className={cn("list-disc pl-4 space-y-1 first:mt-0 mt-2", className)} {...props} />
+    <ul className={cn('list-disc pl-4 space-y-1 first:mt-0 mt-2', className)} {...props} />
   ),
   li: ({ node: _node, className, ...props }) => (
-    <li className={cn("text-xs", className)} {...props} />
+    <li className={cn('text-xs', className)} {...props} />
   ),
   a: ({ node: _node, href, children, ...props }) =>
     href ? (
@@ -40,7 +41,7 @@ const COMPONENTS: Components = {
     ),
   code: ({ node: _node, className, ...props }) => (
     <code
-      className={cn("rounded bg-muted px-1 py-0.5 font-mono text-[0.7rem]", className)}
+      className={cn('rounded bg-muted px-1 py-0.5 font-mono text-[0.7rem]', className)}
       {...props}
     />
   ),
@@ -54,7 +55,7 @@ interface Props {
 export const ReleaseNotes = ({ body, className }: Props) => (
   <div
     className={cn(
-      "max-h-48 overflow-y-auto scrollbar-hide text-xs text-muted-foreground leading-relaxed break-words",
+      'max-h-48 overflow-y-auto scrollbar-hide text-xs text-muted-foreground leading-relaxed break-words',
       className,
     )}
   >

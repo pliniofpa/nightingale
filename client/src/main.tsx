@@ -1,9 +1,11 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import { isTauri } from "@/bridge/runtime";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 
-document.addEventListener("contextmenu", (e) => e.preventDefault());
+import { isTauri } from '@/bridge/runtime';
+
+import App from './App';
+
+document.addEventListener('contextmenu', (e) => e.preventDefault());
 
 interface WebBootstrap {
   config: typeof window.__NIGHTINGALE_APP_CONFIG__;
@@ -22,9 +24,9 @@ async function loadWebBootstrap(): Promise<void> {
   if (isTauri) return;
 
   try {
-    const res = await fetch("/api/bootstrap");
+    const res = await fetch('/api/bootstrap');
     if (!res.ok) {
-      console.warn("bootstrap fetch failed", res.status);
+      console.warn('bootstrap fetch failed', res.status);
       return;
     }
     const data = (await res.json()) as WebBootstrap;
@@ -35,12 +37,12 @@ async function loadWebBootstrap(): Promise<void> {
       libraryPinned: Boolean(data.libraryPinned),
     };
   } catch (e) {
-    console.warn("bootstrap fetch failed", e);
+    console.warn('bootstrap fetch failed', e);
   }
 }
 
 void loadWebBootstrap().then(() => {
-  ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
       <App />
     </React.StrictMode>,

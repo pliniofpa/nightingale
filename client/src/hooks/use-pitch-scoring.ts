@@ -1,11 +1,13 @@
-import type { TimeSubscriber } from "@/hooks/use-audio-player";
+import { useEffect, useRef, useState } from 'react';
+
+import type { TimeSubscriber } from '@/hooks/use-audio-player';
 import {
   DEFAULT_MIC_LATENCY_COMPENSATION_SEC,
   MAX_MIC_LATENCY_COMPENSATION_SEC,
   MIN_MIC_LATENCY_COMPENSATION_SEC,
   PITCH_WINDOW_SAMPLES,
-} from "@/lib/pitch/constants";
-import { createPitchDetector, detectPitchFromSamplesRef } from "@/lib/pitch/detect";
+} from '@/lib/pitch/constants';
+import { createPitchDetector, detectPitchFromSamplesRef } from '@/lib/pitch/detect';
 import {
   computeSingableTime,
   PitchScoring,
@@ -13,8 +15,7 @@ import {
   PitchStateBuffer,
   pitchSimilarity,
   sampleVocalsWindow,
-} from "@/lib/pitch/state";
-import { useEffect, useRef, useState } from "react";
+} from '@/lib/pitch/state';
 
 export interface PitchScoringSource {
   isReady: boolean;

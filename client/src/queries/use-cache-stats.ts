@@ -1,6 +1,8 @@
-import { calculateCacheStats } from "@/bridge/cache";
-import { useQuery } from "@tanstack/react-query";
-import { CACHE_STATS } from "./keys";
+import { useQuery } from '@tanstack/react-query';
+
+import { calculateCacheStats } from '@/bridge/cache';
+
+import { CACHE_STATS } from './keys';
 
 export const useCacheStats = () =>
   useQuery({

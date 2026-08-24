@@ -1,4 +1,4 @@
-import { GENERIC_DESCRIPTION, PairFooter, type FocusCtx, type ViewParts } from "../parts";
+import { GENERIC_DESCRIPTION, PairFooter, type FocusCtx, type ViewParts } from '../parts';
 
 interface Args {
   ctx: FocusCtx;

@@ -1,7 +1,9 @@
-import { microphoneAdapter, type MicrophoneAdapter } from "@/bridge/microphone";
-import type { MicrophoneInfo } from "@/types/MicrophoneInfo";
-import { useQuery } from "@tanstack/react-query";
-import { MIC_DEVICES } from "./keys";
+import { useQuery } from '@tanstack/react-query';
+
+import { microphoneAdapter, type MicrophoneAdapter } from '@/bridge/microphone';
+import type { MicrophoneInfo } from '@/types/MicrophoneInfo';
+
+import { MIC_DEVICES } from './keys';
 
 export interface MicDevice {
   deviceId: string;

@@ -1,5 +1,6 @@
-import { useProfiles } from "@/queries/use-profiles";
-import { useMemo } from "react";
+import { useMemo } from 'react';
+
+import { useProfiles } from '@/queries/use-profiles';
 
 export function useBestScoresBySongForActiveProfile(): Map<string, number> {
   const { data } = useProfiles();

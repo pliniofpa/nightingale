@@ -6,22 +6,22 @@
  * presentational tree that consumes the playback contexts via hooks.
  */
 
-import { Background } from "@/components/playback/background";
-import { ResultDialog } from "@/components/playback/dialogs/result";
-import { LyricsDisplay } from "@/components/playback/lyrics-display";
-import { PauseOverlay } from "@/components/playback/pause-overlay";
-import { PitchGraph } from "@/components/playback/pitch-graph";
-import { PlaybackHud } from "@/components/playback/playback-hud";
+import { Background } from '@/components/playback/background';
+import { ResultDialog } from '@/components/playback/dialogs/result';
+import { LyricsDisplay } from '@/components/playback/lyrics-display';
+import { PauseOverlay } from '@/components/playback/pause-overlay';
+import { PitchGraph } from '@/components/playback/pitch-graph';
+import { PlaybackHud } from '@/components/playback/playback-hud';
 import {
   PlaybackProviders,
   usePlaybackMicState,
   usePlaybackTranscriptState,
   usePlaybackTransportActions,
   usePlaybackTransportState,
-} from "@/contexts/playback";
-import { usePlaybackInput, usePlaybackResult } from "@/hooks/playback";
-import type { AppConfig } from "@/types/AppConfig";
-import type { Song } from "@/types/Song";
+} from '@/contexts/playback';
+import { usePlaybackInput, usePlaybackResult } from '@/hooks/playback';
+import type { AppConfig } from '@/types/AppConfig';
+import type { Song } from '@/types/Song';
 
 export interface PlaybackInnerProps {
   song: Song;
@@ -38,15 +38,15 @@ function PlaybackLayout({ song, config }: PlaybackLayoutProps) {
   const { handleContinue, handleExit } = usePlaybackTransportActions();
   const { segments } = usePlaybackTranscriptState();
   const { series } = usePlaybackMicState();
-  const lyricsVerticalPosition = config?.lyrics_vertical_position ?? "bottom";
-  const lyricsHorizontalPosition = config?.lyrics_horizontal_position ?? "center";
-  const hudPosition = lyricsVerticalPosition === "top" ? "bottom" : "top";
+  const lyricsVerticalPosition = config?.lyrics_vertical_position ?? 'bottom';
+  const lyricsHorizontalPosition = config?.lyrics_horizontal_position ?? 'center';
+  const hudPosition = lyricsVerticalPosition === 'top' ? 'bottom' : 'top';
 
   usePlaybackInput(config);
   const result = usePlaybackResult(song);
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-black" style={{ contain: "strict" }}>
+    <div className="fixed inset-0 overflow-hidden bg-black" style={{ contain: 'strict' }}>
       <Background />
 
       {isReady && (

@@ -7,10 +7,10 @@ import {
   useState,
   type RefObject,
   type ReactNode,
-} from "react";
+} from 'react';
 
-export type FocusPanel = "songList" | "sidebar" | "songDetails";
-export type FocusSource = "mouse" | "nav";
+export type FocusPanel = 'songList' | 'sidebar' | 'songDetails';
+export type FocusSource = 'mouse' | 'nav';
 
 export interface MenuFocus {
   active: boolean;
@@ -51,12 +51,12 @@ const MenuFocusContext = createContext<MenuFocusContextValue | null>(null);
 
 const INITIAL_FOCUS: MenuFocus = {
   active: false,
-  panel: "songList",
+  panel: 'songList',
   songIndex: 0,
   sidebarIndex: 0,
   sidebarSubIndex: 0,
   actionsFocused: false,
-  source: "nav",
+  source: 'nav',
 };
 
 const INITIAL_ACTIONS: MenuFocusActions = {
@@ -114,7 +114,7 @@ export function MenuFocusProvider({ children }: { children: ReactNode }) {
 export function useMenuFocus(): MenuFocusContextValue {
   const ctx = useContext(MenuFocusContext);
   if (!ctx) {
-    throw new Error("useMenuFocus must be used within MenuFocusProvider");
+    throw new Error('useMenuFocus must be used within MenuFocusProvider');
   }
   return ctx;
 }

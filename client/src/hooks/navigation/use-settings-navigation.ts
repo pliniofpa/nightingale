@@ -1,7 +1,6 @@
-import { DIALOG_FOCUSABLE_SELECTOR, useDialogNav } from "@/hooks/navigation/use-dialog-nav";
-import { cn } from "@/lib/utils";
-import type { RefObject } from "react";
-import { useMemo } from "react";
+import type { RefObject } from 'react';
+import { useMemo } from 'react';
+
 import {
   MIC_LATENCY_MAX,
   MIC_LATENCY_STEP,
@@ -14,10 +13,12 @@ import {
   getAnalysisNav,
   getSettingsStops,
   type SettingsTab,
-} from "@/components/menu/settings/constants";
+} from '@/components/menu/settings/constants';
+import { DIALOG_FOCUSABLE_SELECTOR, useDialogNav } from '@/hooks/navigation/use-dialog-nav';
+import { cn } from '@/lib/utils';
 
-const FOCUS_RING = "relative z-10 ring-2 ring-primary";
-const NO_FOCUS_RING = "focus-visible:ring-0 focus-visible:border-transparent";
+const FOCUS_RING = 'relative z-10 ring-2 ring-primary';
+const NO_FOCUS_RING = 'focus-visible:ring-0 focus-visible:border-transparent';
 
 function getVisibleFocusables(container: HTMLElement) {
   return Array.from(container.querySelectorAll<HTMLElement>(DIALOG_FOCUSABLE_SELECTOR)).filter(
@@ -78,27 +79,27 @@ export function useSettingsNavigation({
     containerRef,
     onAction: (segment, slot, action) => {
       if (segment === NAV.tabSegment && action.confirm) {
-        onTabChange(slot === 0 ? "general" : "analysis");
+        onTabChange(slot === 0 ? 'general' : 'analysis');
         return true;
       }
 
       if (!action.left && !action.right) return false;
 
-      if (tab === "general" && segment === NAV.general.micMonitorGain) {
+      if (tab === 'general' && segment === NAV.general.micMonitorGain) {
         const delta = action.right ? MIC_MONITOR_GAIN_STEP : -MIC_MONITOR_GAIN_STEP;
         const next = Math.min(MIC_MONITOR_GAIN_MAX, Math.max(0, micMonitorGain + delta));
         onMicMonitorGainChange(next);
         return true;
       }
 
-      if (tab === "general" && segment === NAV.general.micLatency) {
+      if (tab === 'general' && segment === NAV.general.micLatency) {
         const delta = action.right ? MIC_LATENCY_STEP : -MIC_LATENCY_STEP;
         const next = Math.min(MIC_LATENCY_MAX, Math.max(0, micLatencySec + delta));
         onMicLatencyChange(next);
         return true;
       }
 
-      if (tab === "analysis" && segment === getAnalysisNav(isParakeet).vocalThreshold) {
+      if (tab === 'analysis' && segment === getAnalysisNav(isParakeet).vocalThreshold) {
         const delta = action.right ? VOCAL_THRESHOLD_STEP : -VOCAL_THRESHOLD_STEP;
         const next = Math.min(
           VOCAL_THRESHOLD_MAX,

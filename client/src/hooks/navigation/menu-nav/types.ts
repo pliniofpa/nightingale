@@ -1,5 +1,6 @@
-import type { MenuFocusContextValue } from "@/contexts/menu-focus-context";
-import type { RefObject } from "react";
+import type { RefObject } from 'react';
+
+import type { MenuFocusContextValue } from '@/contexts/menu-focus-context';
 
 export interface UseMenuNavOptions {
   overlayOpen: boolean;

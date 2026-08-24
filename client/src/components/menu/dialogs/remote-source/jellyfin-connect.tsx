@@ -1,5 +1,5 @@
-import { RemoteSourceConnectDialog } from "@/components/menu/dialogs/remote-source/connect";
-import { useConnectJellyfin, useJellyfinLogin } from "@/mutations/use-source-mutations";
+import { RemoteSourceConnectDialog } from '@/components/menu/dialogs/remote-source/connect';
+import { useConnectJellyfin, useJellyfinLogin } from '@/mutations/use-source-mutations';
 
 export const JellyfinConnectDialog = () => (
   <RemoteSourceConnectDialog
@@ -18,7 +18,7 @@ export const JellyfinConnectDialog = () => (
     useLogin={useJellyfinLogin}
     useConnect={useConnectJellyfin}
     selection={{
-      label: "Libraries to import",
+      label: 'Libraries to import',
       emptyMessage:
         "This server didn't report any libraries, so everything the account can see will be imported.",
       getItems: (login) =>

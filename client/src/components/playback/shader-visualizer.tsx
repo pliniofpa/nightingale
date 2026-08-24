@@ -1,7 +1,9 @@
-import type { MicReactiveRef } from "@/hooks/use-mic-reactive";
-import { useReactiveShaderUniforms } from "@/hooks/use-reactive-shader-uniforms";
-import { Canvas } from "@react-three/fiber";
-import { shaders, vertexShader } from "./shaders";
+import { Canvas } from '@react-three/fiber';
+
+import type { MicReactiveRef } from '@/hooks/use-mic-reactive';
+import { useReactiveShaderUniforms } from '@/hooks/use-reactive-shader-uniforms';
+
+import { shaders, vertexShader } from './shaders';
 
 interface ShaderVisualizerProps {
   shaderIndex: number;
@@ -23,7 +25,7 @@ const ShaderQuad = ({
     <mesh>
       <planeGeometry args={[2, 2]} />
       <shaderMaterial
-        key={customFragment ? "custom" : shaderIndex}
+        key={customFragment ? 'custom' : shaderIndex}
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
         uniforms={uniforms}

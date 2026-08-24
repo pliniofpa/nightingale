@@ -1,11 +1,11 @@
-import { useMemo, type ComponentType, type SVGProps } from "react";
-import { Disc3Icon, FolderIcon, RefreshCwIcon } from "lucide-react";
+import { Disc3Icon, FolderIcon, RefreshCwIcon } from 'lucide-react';
+import { useMemo, type ComponentType, type SVGProps } from 'react';
 
-import { JellyfinIcon } from "@/components/icons/jellyfin";
-import { PlexIcon } from "@/components/icons/plex";
-import type { BadgeTone } from "@/components/menu/sidebar/source-action-button";
-import { useDialog } from "@/hooks/use-dialog";
-import { useLibrarySourceActions } from "@/hooks/use-library-source-actions";
+import { JellyfinIcon } from '@/components/icons/jellyfin';
+import { PlexIcon } from '@/components/icons/plex';
+import type { BadgeTone } from '@/components/menu/sidebar/source-action-button';
+import { useDialog } from '@/hooks/use-dialog';
+import { useLibrarySourceActions } from '@/hooks/use-library-source-actions';
 
 export interface SourceButton {
   key: string;
@@ -37,16 +37,16 @@ const remoteBadge = ({
   if (!baseUrl) {
     return { tooltip: `Connect ${label}` };
   }
-  const hostname = health?.server_name ?? baseUrl.replace(/^https?:\/\//, "");
+  const hostname = health?.server_name ?? baseUrl.replace(/^https?:\/\//, '');
   if (!health) {
-    return { tooltip: `Checking ${hostname}…`, badge: "muted" };
+    return { tooltip: `Checking ${hostname}…`, badge: 'muted' };
   }
   if (health.reachable) {
-    return { tooltip: `Connected to: ${hostname}`, badge: "ok" };
+    return { tooltip: `Connected to: ${hostname}`, badge: 'ok' };
   }
   return {
     tooltip: health.error ? `Offline: ${hostname} — ${health.error}` : `Offline: ${hostname}`,
-    badge: "warn",
+    badge: 'warn',
   };
 };
 
@@ -77,7 +77,7 @@ export const useSourceButtons = (): SourceButton[] => {
   const jellyfin = useMemo(
     () =>
       remoteBadge({
-        label: "Jellyfin",
+        label: 'Jellyfin',
         baseUrl: jellyfinSource?.base_url,
         health: jellyfinHealth,
       }),
@@ -87,7 +87,7 @@ export const useSourceButtons = (): SourceButton[] => {
   const navidrome = useMemo(
     () =>
       remoteBadge({
-        label: "Navidrome",
+        label: 'Navidrome',
         baseUrl: navidromeSource?.base_url,
         health: navidromeHealth,
       }),
@@ -97,7 +97,7 @@ export const useSourceButtons = (): SourceButton[] => {
   const plex = useMemo(
     () =>
       remoteBadge({
-        label: "Plex",
+        label: 'Plex',
         baseUrl: plexSource?.base_url,
         health: plexHealth,
       }),
@@ -111,37 +111,37 @@ export const useSourceButtons = (): SourceButton[] => {
       ? []
       : [
           {
-            key: "plex",
+            key: 'plex',
             icon: PlexIcon,
-            label: "Connect Plex",
+            label: 'Connect Plex',
             tooltip: plex.tooltip,
-            handler: () => setMode("plex-connect"),
+            handler: () => setMode('plex-connect'),
             disabled: isPending,
             badge: plex.badge,
           },
           {
-            key: "navidrome",
+            key: 'navidrome',
             icon: Disc3Icon,
-            label: "Connect Navidrome",
+            label: 'Connect Navidrome',
             tooltip: navidrome.tooltip,
-            handler: () => setMode("navidrome-connect"),
+            handler: () => setMode('navidrome-connect'),
             disabled: isPending,
             badge: navidrome.badge,
           },
           {
-            key: "jellyfin",
+            key: 'jellyfin',
             icon: JellyfinIcon,
-            label: "Connect Jellyfin",
+            label: 'Connect Jellyfin',
             tooltip: jellyfin.tooltip,
-            handler: () => setMode("jellyfin-connect"),
+            handler: () => setMode('jellyfin-connect'),
             disabled: isPending,
             badge: jellyfin.badge,
           },
           {
-            key: "folder",
+            key: 'folder',
             icon: FolderIcon,
-            label: "Select folder",
-            tooltip: "Select folder",
+            label: 'Select folder',
+            tooltip: 'Select folder',
             handler: selectFolder,
             disabled: isPending,
           },
@@ -149,10 +149,10 @@ export const useSourceButtons = (): SourceButton[] => {
 
     if (hasSource) {
       buttons.push({
-        key: "rescan",
+        key: 'rescan',
         icon: RefreshCwIcon,
-        label: "Rescan library",
-        tooltip: "Rescan library",
+        label: 'Rescan library',
+        tooltip: 'Rescan library',
         handler: rescan,
         disabled: rescanDisabled,
       });

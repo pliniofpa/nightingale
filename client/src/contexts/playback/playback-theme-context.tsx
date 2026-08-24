@@ -7,15 +7,6 @@
  */
 
 import {
-  SOURCE_VIDEO_INDEX,
-  nextFlavorIndex,
-  nextThemeIndex,
-} from "@/components/playback/background";
-import { FLAVORS, type VideoFlavor } from "@/lib/playback/video-flavor";
-import { ensurePlayableSourceVideo } from "@/bridge/playback";
-import type { AppConfig } from "@/types/AppConfig";
-import type { Song } from "@/types/Song";
-import {
   createContext,
   useCallback,
   useContext,
@@ -25,8 +16,18 @@ import {
   type Dispatch,
   type ReactNode,
   type SetStateAction,
-} from "react";
-import { usePlaybackConfigPersist } from "@/hooks/playback/use-playback-config-persist";
+} from 'react';
+
+import { ensurePlayableSourceVideo } from '@/bridge/playback';
+import {
+  SOURCE_VIDEO_INDEX,
+  nextFlavorIndex,
+  nextThemeIndex,
+} from '@/components/playback/background';
+import { usePlaybackConfigPersist } from '@/hooks/playback/use-playback-config-persist';
+import { FLAVORS, type VideoFlavor } from '@/lib/playback/video-flavor';
+import type { AppConfig } from '@/types/AppConfig';
+import type { Song } from '@/types/Song';
 
 export interface PlaybackThemeState {
   themeIndex: number;
@@ -140,7 +141,7 @@ export function PlaybackThemeProvider({ song, config, children }: PlaybackThemeP
 export function usePlaybackThemeState(): PlaybackThemeState {
   const ctx = useContext(ThemeStateContext);
   if (!ctx) {
-    throw new Error("usePlaybackThemeState must be used within a PlaybackThemeProvider");
+    throw new Error('usePlaybackThemeState must be used within a PlaybackThemeProvider');
   }
   return ctx;
 }
@@ -148,7 +149,7 @@ export function usePlaybackThemeState(): PlaybackThemeState {
 export function usePlaybackThemeActions(): PlaybackThemeActions {
   const ctx = useContext(ThemeActionsContext);
   if (!ctx) {
-    throw new Error("usePlaybackThemeActions must be used within a PlaybackThemeProvider");
+    throw new Error('usePlaybackThemeActions must be used within a PlaybackThemeProvider');
   }
   return ctx;
 }

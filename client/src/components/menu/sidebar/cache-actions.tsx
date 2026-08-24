@@ -1,10 +1,11 @@
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useMenuFocus } from "@/contexts/menu-focus-context";
-import { useDialog, type ClearCacheTarget } from "@/hooks/use-dialog";
-import { cn } from "@/lib/utils";
-import { BoxIcon, Trash2Icon, VideoIcon, type LucideIcon } from "lucide-react";
-import { useEffect, useMemo, useRef } from "react";
+import { BoxIcon, Trash2Icon, VideoIcon, type LucideIcon } from 'lucide-react';
+import { useEffect, useMemo, useRef } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useMenuFocus } from '@/contexts/menu-focus-context';
+import { useDialog, type ClearCacheTarget } from '@/hooks/use-dialog';
+import { cn } from '@/lib/utils';
 
 interface CacheButton {
   icon: LucideIcon;
@@ -23,9 +24,9 @@ export const CacheActions = ({ focusedSidebarIndex, registerCallback }: CacheAct
 
   const buttons = useMemo<CacheButton[]>(
     () => [
-      { icon: Trash2Icon, label: "Clear all cache", target: "all" },
-      { icon: VideoIcon, label: "Clear videos cache", target: "videos" },
-      { icon: BoxIcon, label: "Clear models cache", target: "models" },
+      { icon: Trash2Icon, label: 'Clear all cache', target: 'all' },
+      { icon: VideoIcon, label: 'Clear videos cache', target: 'videos' },
+      { icon: BoxIcon, label: 'Clear models cache', target: 'models' },
     ],
     [],
   );
@@ -42,7 +43,7 @@ export const CacheActions = ({ focusedSidebarIndex, registerCallback }: CacheAct
     registerCallback((subIndex: number) => {
       const button = buttonsRef.current[subIndex];
       if (!button) return;
-      setModeRef.current({ mode: "clear-cache", target: button.target });
+      setModeRef.current({ mode: 'clear-cache', target: button.target });
     });
 
     return () => {
@@ -51,7 +52,7 @@ export const CacheActions = ({ focusedSidebarIndex, registerCallback }: CacheAct
     };
   }, [actionsRef, focusedSidebarIndex, registerCallback, buttons.length]);
 
-  const isSidebarActive = focus.active && focus.panel === "sidebar";
+  const isSidebarActive = focus.active && focus.panel === 'sidebar';
   const isClusterFocused = isSidebarActive && focus.sidebarIndex === focusedSidebarIndex;
 
   return (
@@ -68,11 +69,11 @@ export const CacheActions = ({ focusedSidebarIndex, registerCallback }: CacheAct
                 variant="ghost"
                 size="icon-xs"
                 aria-label={button.label}
-                onClick={() => setMode({ mode: "clear-cache", target: button.target })}
+                onClick={() => setMode({ mode: 'clear-cache', target: button.target })}
                 data-sidebar-sub-index={index}
                 className={cn(
-                  "text-sidebar-foreground/70 hover:bg-transparent hover:text-sidebar-foreground/70 focus-visible:ring-0 focus-visible:border-transparent dark:hover:bg-transparent",
-                  isButtonFocused && "ring-2 ring-primary bg-sidebar-accent",
+                  'text-sidebar-foreground/70 hover:bg-transparent hover:text-sidebar-foreground/70 focus-visible:ring-0 focus-visible:border-transparent dark:hover:bg-transparent',
+                  isButtonFocused && 'ring-2 ring-primary bg-sidebar-accent',
                 )}
               >
                 <Icon />

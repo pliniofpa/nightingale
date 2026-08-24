@@ -1,5 +1,5 @@
-import type { QueuedStatus } from "@/types/QueuedStatus";
-import type { Song } from "@/types/Song";
+import type { QueuedStatus } from '@/types/QueuedStatus';
+import type { Song } from '@/types/Song';
 
 export interface SongItemProps {
   song: Song;

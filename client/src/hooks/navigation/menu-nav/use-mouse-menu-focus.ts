@@ -1,12 +1,13 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
+
 import {
   blurActiveTextInput,
   getHoveredSidebarIndex,
   getHoveredSidebarSubTarget,
   getHoveredSongIndex,
   isActionsTarget,
-} from "./dom";
-import type { MenuNavHookOptions } from "./types";
+} from './dom';
+import type { MenuNavHookOptions } from './types';
 
 export function useMouseMenuFocus({ menuFocus, refs, lock }: MenuNavHookOptions) {
   const { deactivate, setFocus } = menuFocus;
@@ -25,7 +26,7 @@ export function useMouseMenuFocus({ menuFocus, refs, lock }: MenuNavHookOptions)
         setFocus((prev) => {
           if (
             prev.active &&
-            prev.panel === "sidebar" &&
+            prev.panel === 'sidebar' &&
             prev.sidebarIndex === subTarget.sidebarIndex &&
             prev.sidebarSubIndex === subTarget.sidebarSubIndex
           ) {
@@ -35,11 +36,11 @@ export function useMouseMenuFocus({ menuFocus, refs, lock }: MenuNavHookOptions)
           return {
             ...prev,
             active: true,
-            panel: "sidebar",
+            panel: 'sidebar',
             sidebarIndex: subTarget.sidebarIndex,
             sidebarSubIndex: subTarget.sidebarSubIndex,
             actionsFocused: false,
-            source: "mouse",
+            source: 'mouse',
           };
         });
         return;
@@ -49,7 +50,7 @@ export function useMouseMenuFocus({ menuFocus, refs, lock }: MenuNavHookOptions)
       if (sidebarIndex !== null) {
         blurActiveTextInput();
         setFocus((prev) => {
-          if (prev.active && prev.panel === "sidebar" && prev.sidebarIndex === sidebarIndex) {
+          if (prev.active && prev.panel === 'sidebar' && prev.sidebarIndex === sidebarIndex) {
             return prev;
           }
 
@@ -58,10 +59,10 @@ export function useMouseMenuFocus({ menuFocus, refs, lock }: MenuNavHookOptions)
             ...prev,
             ...subReset,
             active: true,
-            panel: "sidebar",
+            panel: 'sidebar',
             sidebarIndex,
             actionsFocused: false,
-            source: "mouse",
+            source: 'mouse',
           };
         });
         return;
@@ -70,16 +71,16 @@ export function useMouseMenuFocus({ menuFocus, refs, lock }: MenuNavHookOptions)
       if (isActionsTarget(target)) {
         blurActiveTextInput();
         setFocus((prev) => {
-          if (prev.active && prev.panel === "songList" && prev.actionsFocused) {
+          if (prev.active && prev.panel === 'songList' && prev.actionsFocused) {
             return prev;
           }
 
           return {
             ...prev,
             active: true,
-            panel: "songList",
+            panel: 'songList',
             actionsFocused: true,
-            source: "mouse",
+            source: 'mouse',
           };
         });
         return;
@@ -91,7 +92,7 @@ export function useMouseMenuFocus({ menuFocus, refs, lock }: MenuNavHookOptions)
         setFocus((prev) => {
           if (
             prev.active &&
-            prev.panel === "songList" &&
+            prev.panel === 'songList' &&
             !prev.actionsFocused &&
             prev.songIndex === songIndex
           ) {
@@ -101,10 +102,10 @@ export function useMouseMenuFocus({ menuFocus, refs, lock }: MenuNavHookOptions)
           return {
             ...prev,
             active: true,
-            panel: "songList",
+            panel: 'songList',
             songIndex,
             actionsFocused: false,
-            source: "mouse",
+            source: 'mouse',
           };
         });
         return;
@@ -113,7 +114,7 @@ export function useMouseMenuFocus({ menuFocus, refs, lock }: MenuNavHookOptions)
       deactivate();
     };
 
-    window.addEventListener("mousemove", onMouseMove);
-    return () => window.removeEventListener("mousemove", onMouseMove);
+    window.addEventListener('mousemove', onMouseMove);
+    return () => window.removeEventListener('mousemove', onMouseMove);
   }, [deactivate, lock, refs, setFocus]);
 }

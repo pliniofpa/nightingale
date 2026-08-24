@@ -1,7 +1,9 @@
-import { usePlaybackTransportActions, usePlaybackTransportState } from "@/contexts/playback";
-import { cn } from "@/lib/utils";
-import type { AppConfig } from "@/types/AppConfig";
-import type { Segment, Word } from "@/types/Transcript";
+import { memo, useLayoutEffect, useRef, useState } from 'react';
+
+import { usePlaybackTransportActions, usePlaybackTransportState } from '@/contexts/playback';
+import { cn } from '@/lib/utils';
+import type { AppConfig } from '@/types/AppConfig';
+import type { Segment, Word } from '@/types/Transcript';
 import {
   BUBBLE_COUNTDOWN_SEC,
   findCurrentSegment,
@@ -9,8 +11,7 @@ import {
   LYRICS_LEAD,
   SEGMENT_LINGER,
   WORD_HIGHLIGHT_LEAD,
-} from "@/utils/playback/lyrics-gap";
-import { memo, useLayoutEffect, useRef, useState } from "react";
+} from '@/utils/playback/lyrics-gap';
 
 interface WordStyle {
   rgb: string;
@@ -18,11 +19,11 @@ interface WordStyle {
 }
 
 const STYLES = {
-  unsung: { rgb: "rgb(255,255,255)", opacity: 0.5 },
-  unsungEstimated: { rgb: "rgb(255,200,100)", opacity: 0.4 },
-  sung: { rgb: "rgb(255,255,255)", opacity: 1.0 },
-  nextLine: { rgb: "rgb(255,255,255)", opacity: 0.35 },
-  nextLineEstimated: { rgb: "rgb(255,200,100)", opacity: 0.25 },
+  unsung: { rgb: 'rgb(255,255,255)', opacity: 0.5 },
+  unsungEstimated: { rgb: 'rgb(255,200,100)', opacity: 0.4 },
+  sung: { rgb: 'rgb(255,255,255)', opacity: 1.0 },
+  nextLine: { rgb: 'rgb(255,255,255)', opacity: 0.35 },
+  nextLineEstimated: { rgb: 'rgb(255,200,100)', opacity: 0.25 },
 } as const;
 
 const unsungStyle = (word: Word): WordStyle =>
@@ -88,10 +89,10 @@ function updateCountdown(el: HTMLSpanElement | null, showCountdown: boolean, tim
   }
 
   if (showCountdown) {
-    el.style.display = "";
+    el.style.display = '';
     el.textContent = String(Math.ceil(timeUntil));
   } else {
-    el.style.display = "none";
+    el.style.display = 'none';
   }
 }
 
@@ -110,44 +111,44 @@ function WordToken({ word, hasReading, isLast, readingClass, refSetter, style }:
   return (
     <span
       ref={refSetter}
-      className={hasReading ? "inline-flex flex-col items-center leading-tight" : undefined}
+      className={hasReading ? 'inline-flex flex-col items-center leading-tight' : undefined}
       style={{ color: style.rgb, opacity: style.opacity }}
     >
       {hasReading && (
         <span className={`block leading-tight font-medium opacity-80 ${readingClass}`}>
-          {word.reading ?? "\u00A0"}
+          {word.reading ?? '\u00A0'}
         </span>
       )}
       <span>{word.word}</span>
-      {!hasReading && !isLast ? " " : ""}
+      {!hasReading && !isLast ? ' ' : ''}
     </span>
   );
 }
 
-type LyricsVerticalPosition = NonNullable<AppConfig["lyrics_vertical_position"]>;
+type LyricsVerticalPosition = NonNullable<AppConfig['lyrics_vertical_position']>;
 
-type LyricsHorizontalPosition = NonNullable<AppConfig["lyrics_horizontal_position"]>;
+type LyricsHorizontalPosition = NonNullable<AppConfig['lyrics_horizontal_position']>;
 
 const verticalClass: Record<LyricsVerticalPosition, string> = {
-  bottom: "top-[8rem] bottom-[calc(2rem+env(safe-area-inset-bottom))] justify-end sm:bottom-[60px]",
-  center: "inset-y-[6rem] justify-center",
-  top: "top-[calc(2rem+env(safe-area-inset-top))] bottom-[8rem] justify-start overflow-visible sm:top-[60px]",
+  bottom: 'top-[8rem] bottom-[calc(2rem+env(safe-area-inset-bottom))] justify-end sm:bottom-[60px]',
+  center: 'inset-y-[6rem] justify-center',
+  top: 'top-[calc(2rem+env(safe-area-inset-top))] bottom-[8rem] justify-start overflow-visible sm:top-[60px]',
 };
 
 const horizontalItemsClass: Record<LyricsHorizontalPosition, string> = {
-  left: "items-start",
-  center: "items-center",
-  right: "items-end",
+  left: 'items-start',
+  center: 'items-center',
+  right: 'items-end',
 };
 
 const horizontalTextClass: Record<LyricsHorizontalPosition, string> = {
-  left: "text-left justify-start",
-  center: "text-center justify-center",
-  right: "text-right justify-end",
+  left: 'text-left justify-start',
+  center: 'text-center justify-center',
+  right: 'text-right justify-end',
 };
 
 const COUNTDOWN_CLASS =
-  "absolute -top-12 left-2 z-10 flex size-10 items-center justify-center rounded-full bg-black/40 text-[1rem] font-bold text-white sm:-left-9 sm:-top-9";
+  'absolute -top-12 left-2 z-10 flex size-10 items-center justify-center rounded-full bg-black/40 text-[1rem] font-bold text-white sm:-left-9 sm:-top-9';
 
 const lineClass = (
   hasReading: boolean,
@@ -169,8 +170,8 @@ interface LyricsDisplayProps {
 
 function LyricsDisplayImpl({
   segments,
-  verticalPosition = "bottom",
-  horizontalPosition = "center",
+  verticalPosition = 'bottom',
+  horizontalPosition = 'center',
 }: LyricsDisplayProps) {
   const { isPlaying, paused } = usePlaybackTransportState();
   const { subscribe, getCurrentTime } = usePlaybackTransportActions();
@@ -230,8 +231,8 @@ function LyricsDisplayImpl({
       const showNext =
         showCurrent && hasNext && gapAfter < GAP_THRESHOLD_SEC && (!inLongGap || showCountdown);
 
-      if (containerRef.current) containerRef.current.style.display = showCurrent ? "" : "none";
-      if (nextContainerRef.current) nextContainerRef.current.style.display = showNext ? "" : "none";
+      if (containerRef.current) containerRef.current.style.display = showCurrent ? '' : 'none';
+      if (nextContainerRef.current) nextContainerRef.current.style.display = showNext ? '' : 'none';
 
       updateCountdown(countdownRef.current, showCountdown, timeUntil);
       // Bridged finished lines are past every word's end, so treating them as
@@ -290,13 +291,13 @@ function LyricsDisplayImpl({
   const segHasReading = seg.words.some((w) => w.reading);
   const nextHasReading = nextSeg?.words.some((w) => w.reading) ?? false;
 
-  const vertical = verticalPosition ?? "bottom";
-  const horizontal = horizontalPosition ?? "center";
+  const vertical = verticalPosition ?? 'bottom';
+  const horizontal = horizontalPosition ?? 'center';
 
   return (
     <div
       className={cn(
-        "pointer-events-none absolute inset-x-0 z-10 flex flex-col gap-2 overflow-hidden px-3 sm:px-10",
+        'pointer-events-none absolute inset-x-0 z-10 flex flex-col gap-2 overflow-hidden px-3 sm:px-10',
         verticalClass[vertical],
         horizontalItemsClass[horizontal],
       )}
@@ -304,15 +305,15 @@ function LyricsDisplayImpl({
       <div
         ref={containerRef}
         className="relative max-w-full rounded-lg bg-black/40 px-3 py-2 sm:px-5 sm:py-2.5"
-        style={{ display: "none" }}
+        style={{ display: 'none' }}
       >
-        <span ref={countdownRef} className={COUNTDOWN_CLASS} style={{ display: "none" }} />
+        <span ref={countdownRef} className={COUNTDOWN_CLASS} style={{ display: 'none' }} />
         {seg.words.length > 0 && (
           <p
             className={lineClass(
               segHasReading,
-              "text-[clamp(1.35rem,7svh,2.5rem)] leading-tight font-bold",
-              "gap-x-3 gap-y-1",
+              'text-[clamp(1.35rem,7svh,2.5rem)] leading-tight font-bold',
+              'gap-x-3 gap-y-1',
               horizontal,
             )}
           >
@@ -337,13 +338,13 @@ function LyricsDisplayImpl({
         <div
           ref={nextContainerRef}
           className="max-w-full rounded-md bg-black/25 px-3 py-1.5 sm:px-4"
-          style={{ display: "none" }}
+          style={{ display: 'none' }}
         >
           <p
             className={lineClass(
               nextHasReading,
-              "text-[clamp(0.9rem,4.5svh,1.5rem)] leading-tight",
-              "gap-x-2 gap-y-0.5",
+              'text-[clamp(0.9rem,4.5svh,1.5rem)] leading-tight',
+              'gap-x-2 gap-y-0.5',
               horizontal,
             )}
           >

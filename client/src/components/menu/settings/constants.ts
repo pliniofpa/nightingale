@@ -1,106 +1,106 @@
 import {
   DEFAULT_MIC_LATENCY_COMPENSATION_SEC,
   MAX_MIC_LATENCY_COMPENSATION_SEC,
-} from "@/lib/pitch/constants";
-import type { AppConfig } from "@/types/AppConfig";
+} from '@/lib/pitch/constants';
+import type { AppConfig } from '@/types/AppConfig';
 
-export type SettingsTab = "general" | "analysis";
+export type SettingsTab = 'general' | 'analysis';
 export type SettingsOption = { value: string; label: string; description?: string };
 
 export const SETTINGS_TABS: { value: SettingsTab; label: string }[] = [
-  { value: "general", label: "General" },
-  { value: "analysis", label: "Analysis" },
+  { value: 'general', label: 'General' },
+  { value: 'analysis', label: 'Analysis' },
 ];
 
 export const SEPARATORS: SettingsOption[] = [
   {
-    value: "karaoke",
-    label: "UVR Karaoke",
-    description: "Usually separates more cleanly, but can occasionally slip on tricky parts.",
+    value: 'karaoke',
+    label: 'UVR Karaoke',
+    description: 'Usually separates more cleanly, but can occasionally slip on tricky parts.',
   },
   {
-    value: "demucs",
-    label: "Demucs",
+    value: 'demucs',
+    label: 'Demucs',
     description:
-      "Smoother and more consistent with fewer abrupt artifacts, though slightly less crisp overall.",
+      'Smoother and more consistent with fewer abrupt artifacts, though slightly less crisp overall.',
   },
 ];
 
 export const ASR_ENGINES: SettingsOption[] = [
   {
-    value: "whisper",
-    label: "Whisper",
-    description: "Works in any language and lets you pick a model size below.",
+    value: 'whisper',
+    label: 'Whisper',
+    description: 'Works in any language and lets you pick a model size below.',
   },
   {
-    value: "parakeet",
-    label: "Parakeet v3 (Experimental)",
+    value: 'parakeet',
+    label: 'Parakeet v3 (Experimental)',
     description:
-      "Much faster and produces its own word timings (skipping alignment), but only covers 25 European languages. Whisper takes over for anything else.",
+      'Much faster and produces its own word timings (skipping alignment), but only covers 25 European languages. Whisper takes over for anything else.',
   },
 ];
 
 export const ALIGN_BACKENDS: SettingsOption[] = [
   {
-    value: "whisperx",
-    label: "WhisperX",
-    description: "The reliable default, timing words with a proven decoder.",
+    value: 'whisperx',
+    label: 'WhisperX',
+    description: 'The reliable default, timing words with a proven decoder.',
   },
   {
-    value: "ctc",
-    label: "CTC Forced Alignment (Experimental)",
+    value: 'ctc',
+    label: 'CTC Forced Alignment (Experimental)',
     description:
-      "Calculates word start/end points with a different algorithm, and runs much faster on GPU and Apple Silicon. Falls back to WhisperX if a line trips it up.",
+      'Calculates word start/end points with a different algorithm, and runs much faster on GPU and Apple Silicon. Falls back to WhisperX if a line trips it up.',
   },
   {
-    value: "qwen",
-    label: "Qwen Forced Alignment (Experimental)",
+    value: 'qwen',
+    label: 'Qwen Forced Alignment (Experimental)',
     description:
-      "A fast AI model covering 11 languages. Timing quality varies song to song, but it can do better on Chinese, Japanese, and Korean. Falls back to WhisperX otherwise.",
+      'A fast AI model covering 11 languages. Timing quality varies song to song, but it can do better on Chinese, Japanese, and Korean. Falls back to WhisperX otherwise.',
   },
 ];
 
-export const MODELS = ["large-v3", "large-v3-turbo", "medium", "small", "base", "tiny"];
+export const MODELS = ['large-v3', 'large-v3-turbo', 'medium', 'small', 'base', 'tiny'];
 
 export const LYRICS_VERTICAL_POSITIONS: SettingsOption[] = [
-  { value: "bottom", label: "Bottom" },
-  { value: "center", label: "Center" },
-  { value: "top", label: "Top" },
+  { value: 'bottom', label: 'Bottom' },
+  { value: 'center', label: 'Center' },
+  { value: 'top', label: 'Top' },
 ];
 
 export const LYRICS_HORIZONTAL_POSITIONS: SettingsOption[] = [
-  { value: "left", label: "Left" },
-  { value: "center", label: "Center" },
-  { value: "right", label: "Right" },
+  { value: 'left', label: 'Left' },
+  { value: 'center', label: 'Center' },
+  { value: 'right', label: 'Right' },
 ];
 
 export const DEFAULTS = {
-  separator: "karaoke",
-  asr_engine: "whisper",
-  align_backend: "whisperx",
+  separator: 'karaoke',
+  asr_engine: 'whisper',
+  align_backend: 'whisperx',
   vocal_detection_threshold_pct: 0.15,
-  whisper_model: "large-v3",
+  whisper_model: 'large-v3',
   beam_size: 8,
   batch_size: 8,
   mic_monitor_gain: 0.65,
   mic_latency_compensation_sec: DEFAULT_MIC_LATENCY_COMPENSATION_SEC,
   auto_analyze: false,
-  lyrics_vertical_position: "bottom",
-  lyrics_horizontal_position: "center",
+  lyrics_vertical_position: 'bottom',
+  lyrics_horizontal_position: 'center',
 } satisfies Pick<
   AppConfig,
-  | "separator"
-  | "asr_engine"
-  | "align_backend"
-  | "vocal_detection_threshold_pct"
-  | "whisper_model"
-  | "beam_size"
-  | "batch_size"
-  | "mic_monitor_gain"
-  | "mic_latency_compensation_sec"
-  | "auto_analyze"
-  | "lyrics_vertical_position"
-  | "lyrics_horizontal_position"
+  | 'separator'
+  | 'asr_engine'
+  | 'align_backend'
+  | 'vocal_detection_threshold_pct'
+  | 'whisper_model'
+  | 'beam_size'
+  | 'batch_size'
+  | 'mic_monitor_gain'
+  | 'mic_latency_compensation_sec'
+  | 'auto_analyze'
+  | 'lyrics_vertical_position'
+  | 'lyrics_horizontal_position'
 >;
 
 export const MIC_MONITOR_GAIN_STEP = 0.01;
@@ -155,7 +155,7 @@ export function getAnalysisNav(isParakeet: boolean) {
 }
 
 export function getSettingsStops(tab: SettingsTab, isParakeet: boolean) {
-  if (tab === "general") {
+  if (tab === 'general') {
     return [2, 2, 1, 1, 2, 1, 1, 2];
   }
 

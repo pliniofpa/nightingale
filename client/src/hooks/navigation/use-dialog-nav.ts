@@ -1,20 +1,22 @@
-import { useNavInput } from "./use-nav-input";
-import type { NavAction } from "@/contexts/nav-input-context";
-import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+
+import type { NavAction } from '@/contexts/nav-input-context';
+
+import { useNavInput } from './use-nav-input';
 
 /**
  * Focusables that confirm/back can target. Must stay in sync with how dialogs
  * lay out controls; scope `containerRef` so order matches your `stops` / counts.
  */
 export const DIALOG_FOCUSABLE_SELECTOR = [
-  "button:not([disabled])",
-  "input:not([disabled])",
-  "select:not([disabled])",
-  "textarea:not([disabled])",
-  "a[href]",
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  'a[href]',
   '[role="combobox"]:not([disabled])',
   '[role="slider"]:not([data-disabled])',
-].join(", ");
+].join(', ');
 
 /** Ignore confirm on the first frames after open (avoids acting on the same press that opened the dialog). */
 const CONFIRM_DEBOUNCE_MS = 150;
@@ -51,12 +53,12 @@ function isInsideMenuOrListbox(el: Element | null): boolean {
  */
 function dispatchMenuKeyFromNav(focused: HTMLElement, action: NavAction): void {
   let key: string | null = null;
-  if (action.up) key = "ArrowUp";
-  else if (action.down) key = "ArrowDown";
-  else if (action.confirm) key = "Enter";
-  else if (action.back) key = "Escape";
+  if (action.up) key = 'ArrowUp';
+  else if (action.down) key = 'ArrowDown';
+  else if (action.confirm) key = 'Enter';
+  else if (action.back) key = 'Escape';
   if (key) {
-    focused.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+    focused.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
   }
 }
 
@@ -171,7 +173,7 @@ export function useDialogNav({
   useEffect(() => {
     if (!open || !containerRef?.current) return;
     const focusables = getVisibleFocusables(containerRef.current);
-    focusables[flatFocusedIndex]?.scrollIntoView({ block: "nearest" });
+    focusables[flatFocusedIndex]?.scrollIntoView({ block: 'nearest' });
   }, [open, flatFocusedIndex, containerRef]);
 
   const handleNav = useCallback(

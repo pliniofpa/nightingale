@@ -1,7 +1,8 @@
-import type { Song } from "@/types/Song";
-import type { SongItemProps } from "../types";
-import { SongGridCard } from "./song-grid-card";
-import { useBestScoresBySongForActiveProfile } from "@/hooks/use-best-scores-by-song";
+import { useBestScoresBySongForActiveProfile } from '@/hooks/use-best-scores-by-song';
+import type { Song } from '@/types/Song';
+
+import type { SongItemProps } from '../types';
+import { SongGridCard } from './song-grid-card';
 
 interface SongGridProps {
   songs: Song[];

@@ -1,7 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { ARIA_DISABLED_CLASS, ringFor } from "./parts";
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+import { ARIA_DISABLED_CLASS, ringFor } from './parts';
 
 interface CarouselNavProps {
   index: number;

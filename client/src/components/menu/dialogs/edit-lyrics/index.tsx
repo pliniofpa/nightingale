@@ -1,37 +1,39 @@
+import { Loader2Icon } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
+
+import { openUrl } from '@/bridge/opener';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { openUrl } from "@/bridge/opener";
-import { useDialogNav } from "@/hooks/navigation/use-dialog-nav";
-import { useDialog } from "@/hooks/use-dialog";
-import { useLyricsEditor } from "@/hooks/use-lyrics-editor";
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useDialogNav } from '@/hooks/navigation/use-dialog-nav';
+import { useDialog } from '@/hooks/use-dialog';
+import { useLyricsEditor } from '@/hooks/use-lyrics-editor';
+import { useSaveLyricsMutation } from '@/mutations/use-save-lyrics-mutation';
 import {
   useApplyTimedLyricsMutation,
   useProvideLrcMutation,
-} from "@/mutations/use-timed-lyrics-mutation";
-import { useSaveLyricsMutation } from "@/mutations/use-save-lyrics-mutation";
-import { useLrclibCandidates } from "@/queries/use-lyrics";
-import type { LrclibCandidate } from "@/types/LrclibCandidate";
-import { detectLrcLevel, isEditLyricsDialogMode, stripLrcToPlainLines } from "@/utils/edit-lyrics";
-import { Loader2Icon } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
-import { CarouselNav } from "./carousel-nav";
-import { EditLyricsFooter } from "./edit-lyrics-footer";
-import { LrcOptions, type TimingChoice } from "./lrc-options";
-import { LrclibMatches } from "./lrclib-matches";
-import { LyricsEditor } from "./lyrics-editor";
-import { ringFor } from "./parts";
+} from '@/mutations/use-timed-lyrics-mutation';
+import { useLrclibCandidates } from '@/queries/use-lyrics';
+import type { LrclibCandidate } from '@/types/LrclibCandidate';
+import { detectLrcLevel, isEditLyricsDialogMode, stripLrcToPlainLines } from '@/utils/edit-lyrics';
 
-export { isEditLyricsDialogMode } from "@/utils/edit-lyrics";
+import { CarouselNav } from './carousel-nav';
+import { EditLyricsFooter } from './edit-lyrics-footer';
+import { LrcOptions, type TimingChoice } from './lrc-options';
+import { LrclibMatches } from './lrclib-matches';
+import { LyricsEditor } from './lyrics-editor';
+import { ringFor } from './parts';
 
-const LRC_SPEC_URL = "https://en.wikipedia.org/wiki/LRC_(file_format)";
+export { isEditLyricsDialogMode } from '@/utils/edit-lyrics';
 
-type EditLyricsTab = "edit" | "lrclib";
+const LRC_SPEC_URL = 'https://en.wikipedia.org/wiki/LRC_(file_format)';
+
+type EditLyricsTab = 'edit' | 'lrclib';
 
 interface NavLayout {
   stops: number[];
@@ -70,28 +72,28 @@ function navLayout({
   timingNav,
   audioNav,
 }: NavLayoutInput): NavLayout {
-  const onLrclib = showMatchesTab && activeTab === "lrclib";
+  const onLrclib = showMatchesTab && activeTab === 'lrclib';
   const segments: { key: string; width: number }[] = [];
   let arrowSlotStart: number | null = null;
 
   if (showMatchesTab) {
     if (onLrclib && hasCandidates) {
-      segments.push({ key: "header", width: 4 });
+      segments.push({ key: 'header', width: 4 });
       arrowSlotStart = 2;
     } else {
-      segments.push({ key: "header", width: 2 });
+      segments.push({ key: 'header', width: 2 });
     }
   }
 
   if (onLrclib) {
-    if (hasCandidates) segments.push({ key: "use", width: Math.max(1, useSlots) });
+    if (hasCandidates) segments.push({ key: 'use', width: Math.max(1, useSlots) });
   } else {
-    segments.push({ key: "editor", width: 1 });
-    if (timingNav) segments.push({ key: "timing", width: 2 });
-    if (audioNav) segments.push({ key: "audio", width: 2 });
+    segments.push({ key: 'editor', width: 1 });
+    if (timingNav) segments.push({ key: 'timing', width: 2 });
+    if (audioNav) segments.push({ key: 'audio', width: 2 });
   }
 
-  segments.push({ key: "footer", width: 2 });
+  segments.push({ key: 'footer', width: 2 });
 
   const indexOf = (key: string): number | null => {
     const i = segments.findIndex((s) => s.key === key);
@@ -100,13 +102,13 @@ function navLayout({
 
   return {
     stops: segments.map((s) => s.width),
-    headerSegment: indexOf("header"),
+    headerSegment: indexOf('header'),
     arrowSlotStart,
-    editorSegment: indexOf("editor"),
-    timingSegment: indexOf("timing"),
-    audioSegment: indexOf("audio"),
-    useThisSegment: indexOf("use"),
-    footerSegment: indexOf("footer") ?? segments.length - 1,
+    editorSegment: indexOf('editor'),
+    timingSegment: indexOf('timing'),
+    audioSegment: indexOf('audio'),
+    useThisSegment: indexOf('use'),
+    footerSegment: indexOf('footer') ?? segments.length - 1,
   };
 }
 
@@ -136,22 +138,22 @@ export const EditLyricsDialog = () => {
   const applyTimedMutation = useApplyTimedLyricsMutation();
   const saveLyricsMutation = useSaveLyricsMutation();
 
-  const [activeTab, setActiveTab] = useState<EditLyricsTab>("edit");
+  const [activeTab, setActiveTab] = useState<EditLyricsTab>('edit');
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const [timingChoice, setTimingChoice] = useState<TimingChoice>("provided");
+  const [timingChoice, setTimingChoice] = useState<TimingChoice>('provided');
   const [separateStems, setSeparateStems] = useState(false);
   const [lastHash, setLastHash] = useState<string | null>(fileHash);
   if (lastHash !== fileHash) {
     setLastHash(fileHash);
-    setActiveTab("edit");
+    setActiveTab('edit');
     setCarouselIndex(0);
-    setTimingChoice("provided");
+    setTimingChoice('provided');
     setSeparateStems(false);
   }
 
   const lrcLevel = useMemo(() => detectLrcLevel(editor.text), [editor.text]);
-  const hasLrc = lrcLevel !== "none";
-  const useProvidedTiming = hasLrc && timingChoice === "provided";
+  const hasLrc = lrcLevel !== 'none';
+  const useProvidedTiming = hasLrc && timingChoice === 'provided';
   // Stems already exist only for analyzed tracks that weren't kept on the
   // original mix. Those can't change their audio mode by re-editing lyrics.
   const stemsSeparated = isAnalyzed && !(song?.no_stems ?? false);
@@ -166,26 +168,26 @@ export const EditLyricsDialog = () => {
 
   const saveLabel = useProvidedTiming
     ? willSeparate
-      ? "Save & separate stems"
+      ? 'Save & separate stems'
       : isAnalyzed
-        ? "Use timed lyrics"
-        : "Save timed lyrics"
+        ? 'Use timed lyrics'
+        : 'Save timed lyrics'
     : isAnalyzed
-      ? "Save & realign"
-      : "Save & analyze";
+      ? 'Save & realign'
+      : 'Save & analyze';
 
   const footerHints: string[] = [];
   if (!hasLrc) {
-    footerHints.push("Paste LRC / Enhanced LRC to set timing directly.");
+    footerHints.push('Paste LRC / Enhanced LRC to set timing directly.');
   } else {
-    if (useProvidedTiming && lrcLevel === "line") {
-      footerHints.push("Line-level LRC highlights whole lines — no per-word timing.");
+    if (useProvidedTiming && lrcLevel === 'line') {
+      footerHints.push('Line-level LRC highlights whole lines — no per-word timing.');
     }
     if (useProvidedTiming && !willSeparate && !stemsSeparated) {
-      footerHints.push("Original mix is used, so pitch scoring will likely be inaccurate.");
+      footerHints.push('Original mix is used, so pitch scoring will likely be inaccurate.');
     }
   }
-  const footerHint = footerHints.length > 0 ? footerHints.join(" ") : undefined;
+  const footerHint = footerHints.length > 0 ? footerHints.join(' ') : undefined;
 
   const handleSave = () => {
     if (!canSave || !song) return;
@@ -215,16 +217,16 @@ export const EditLyricsDialog = () => {
   };
 
   const applyCandidate = (candidate: LrclibCandidate) => {
-    editor.setText(candidate.lines.join("\n"));
-    setTimingChoice("provided");
-    setActiveTab("edit");
+    editor.setText(candidate.lines.join('\n'));
+    setTimingChoice('provided');
+    setActiveTab('edit');
   };
 
   const applyCandidateLrc = (candidate: LrclibCandidate) => {
     if (candidate.synced_lyrics == null) return;
     editor.setText(candidate.synced_lyrics);
-    setTimingChoice("provided");
-    setActiveTab("edit");
+    setTimingChoice('provided');
+    setActiveTab('edit');
   };
 
   const timingNav = hasLrc && !saving;
@@ -272,7 +274,7 @@ export const EditLyricsDialog = () => {
       // click, so drive them from state; arrows adjust the carousel directly.
       if (layout.headerSegment !== null && segment === layout.headerSegment) {
         if (slot < 2) {
-          setActiveTab(slot === 0 ? "edit" : "lrclib");
+          setActiveTab(slot === 0 ? 'edit' : 'lrclib');
           return true;
         }
         if (layout.arrowSlotStart !== null && slot >= layout.arrowSlotStart) {
@@ -285,7 +287,7 @@ export const EditLyricsDialog = () => {
       }
 
       if (layout.timingSegment !== null && segment === layout.timingSegment) {
-        setTimingChoice(slot === 0 ? "provided" : "align");
+        setTimingChoice(slot === 0 ? 'provided' : 'align');
         return true;
       }
 
@@ -358,7 +360,7 @@ export const EditLyricsDialog = () => {
         timingFocusedSlot={focusedSlotIn(layout.timingSegment)}
         audioFocusedSlot={focusedSlotIn(layout.audioSegment)}
         onFocusOption={(row, slot) => {
-          const segment = row === "timing" ? layout.timingSegment : layout.audioSegment;
+          const segment = row === 'timing' ? layout.timingSegment : layout.audioSegment;
           if (segment !== null) focusSegment(segment, slot);
         }}
       />
@@ -377,7 +379,7 @@ export const EditLyricsDialog = () => {
           <DialogHeader>
             <DialogTitle>Edit lyrics</DialogTitle>
             <DialogDescription>
-              Type plain lyrics to run alignment, or paste{" "}
+              Type plain lyrics to run alignment, or paste{' '}
               <a
                 href={LRC_SPEC_URL}
                 rel="noreferrer"
@@ -388,7 +390,7 @@ export const EditLyricsDialog = () => {
                 className="text-primary underline underline-offset-2 hover:text-primary/80"
               >
                 LRC / Enhanced LRC
-              </a>{" "}
+              </a>{' '}
               to set timing directly.
             </DialogDescription>
           </DialogHeader>
@@ -429,7 +431,7 @@ export const EditLyricsDialog = () => {
                     )}
                   </TabsTrigger>
                 </TabsList>
-                {activeTab === "lrclib" &&
+                {activeTab === 'lrclib' &&
                   layout.headerSegment !== null &&
                   layout.arrowSlotStart !== null && (
                     <CarouselNav

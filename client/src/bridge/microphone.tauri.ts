@@ -1,8 +1,9 @@
-import type { MicCaptureOptions } from "@/types/MicCaptureOptions";
-import type { MicrophoneInfo } from "@/types/MicrophoneInfo";
-import type { MicSampleFrame } from "@/types/MicSampleFrame";
-import { Channel, invoke } from "./runtime";
-import { dispatchMicFrame, type MicrophoneAdapter, subscribeMicSamples } from "./microphone";
+import type { MicCaptureOptions } from '@/types/MicCaptureOptions';
+import type { MicrophoneInfo } from '@/types/MicrophoneInfo';
+import type { MicSampleFrame } from '@/types/MicSampleFrame';
+
+import { dispatchMicFrame, type MicrophoneAdapter, subscribeMicSamples } from './microphone';
+import { Channel, invoke } from './runtime';
 
 /**
  * Serializes start/stop so React's stop-then-start on song change can't race
@@ -17,7 +18,7 @@ const enqueue = <T>(op: () => Promise<T>): Promise<T> => {
   return next;
 };
 
-const listDevices = (): Promise<MicrophoneInfo[]> => invoke<MicrophoneInfo[]>("list_microphones");
+const listDevices = (): Promise<MicrophoneInfo[]> => invoke<MicrophoneInfo[]>('list_microphones');
 
 const startCapture = (preferred: string | null, options: MicCaptureOptions): Promise<string> =>
   enqueue(async () => {
@@ -29,7 +30,7 @@ const startCapture = (preferred: string | null, options: MicCaptureOptions): Pro
      */
     const channel = new Channel<MicSampleFrame>();
     channel.onmessage = dispatchMicFrame;
-    return await invoke<string>("start_mic_capture", {
+    return await invoke<string>('start_mic_capture', {
       preferred,
       options,
       onSamples: channel,
@@ -38,7 +39,7 @@ const startCapture = (preferred: string | null, options: MicCaptureOptions): Pro
 
 const stopCapture = (): Promise<void> =>
   enqueue(async () => {
-    await invoke("stop_mic_capture");
+    await invoke('stop_mic_capture');
   });
 
 export const tauriMicrophoneAdapter: MicrophoneAdapter = {

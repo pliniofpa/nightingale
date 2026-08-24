@@ -1,12 +1,13 @@
-import { playbackAdapter } from "@/bridge/playback";
+import { useEffect, useRef, useState } from 'react';
+
+import { playbackAdapter } from '@/bridge/playback';
 import {
   usePlaybackThemeState,
   usePlaybackTransportActions,
   usePlaybackTransportState,
-} from "@/contexts/playback";
-import { useSourceVideoSync } from "@/hooks/use-source-video-sync";
-import { useEffect, useRef, useState } from "react";
-import { VIDEO_CLASS_NAME } from "@/lib/playback/video-styles";
+} from '@/contexts/playback';
+import { useSourceVideoSync } from '@/hooks/use-source-video-sync';
+import { VIDEO_CLASS_NAME } from '@/lib/playback/video-styles';
 
 interface SourceVideoProps {
   isActive: boolean;
@@ -38,7 +39,7 @@ export const SourceVideo = ({ isActive }: SourceVideoProps) => {
   const { subscribe, getCurrentTime } = usePlaybackTransportActions();
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  const src = useMediaUrl(sourceVideoPath ?? "");
+  const src = useMediaUrl(sourceVideoPath ?? '');
 
   const playWhenActive = isReady && isPlaying && isActive;
 
@@ -57,7 +58,7 @@ export const SourceVideo = ({ isActive }: SourceVideoProps) => {
     <video
       ref={videoRef}
       className={VIDEO_CLASS_NAME}
-      style={{ visibility: ready && isActive ? "visible" : "hidden" }}
+      style={{ visibility: ready && isActive ? 'visible' : 'hidden' }}
       src={src}
       muted
       playsInline

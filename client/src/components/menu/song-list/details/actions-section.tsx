@@ -1,14 +1,16 @@
-import { Separator } from "@/components/ui/separator";
-import { useAnalysis } from "@/hooks/use-analysis";
-import { useDialog } from "@/hooks/use-dialog";
-import type { Song } from "@/types/Song";
-import { useProfiles } from "@/queries/use-profiles";
-import { TrophyIcon } from "lucide-react";
-import { Fragment } from "react";
-import { toast } from "sonner";
-import type { SongStatusInfo } from "../shared/song-status";
-import { ActionItem } from "./action-item";
-import { buildActionGroups } from "./song-actions";
+import { TrophyIcon } from 'lucide-react';
+import { Fragment } from 'react';
+import { toast } from 'sonner';
+
+import { Separator } from '@/components/ui/separator';
+import { useAnalysis } from '@/hooks/use-analysis';
+import { useDialog } from '@/hooks/use-dialog';
+import { useProfiles } from '@/queries/use-profiles';
+import type { Song } from '@/types/Song';
+
+import type { SongStatusInfo } from '../shared/song-status';
+import { ActionItem } from './action-item';
+import { buildActionGroups } from './song-actions';
 
 interface ActionsSectionProps {
   song: Song;
@@ -45,8 +47,8 @@ export const ActionsSection = ({
     analysisBusy,
     supportsAnalysisActions,
     analysis,
-    onEditLyrics: () => setMode({ mode: "edit-lyrics", song }),
-    onChangeLanguage: () => setMode({ mode: "language", song }),
+    onEditLyrics: () => setMode({ mode: 'edit-lyrics', song }),
+    onChangeLanguage: () => setMode({ mode: 'language', song }),
     run,
   });
 
@@ -54,9 +56,9 @@ export const ActionsSection = ({
     groups.unshift([
       {
         icon: TrophyIcon,
-        title: "Leaderboard",
-        description: "View the best score from each profile.",
-        onClick: () => setMode({ mode: "song-leaderboard", song }),
+        title: 'Leaderboard',
+        description: 'View the best score from each profile.',
+        onClick: () => setMode({ mode: 'song-leaderboard', song }),
       },
     ]);
   }

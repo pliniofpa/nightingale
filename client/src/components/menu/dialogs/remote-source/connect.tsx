@@ -1,10 +1,10 @@
-import type { UseMutationResult } from "@tanstack/react-query";
-import { CheckCircle2Icon, Loader2Icon, XCircleIcon } from "lucide-react";
-import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react";
-import { toast } from "sonner";
+import type { UseMutationResult } from '@tanstack/react-query';
+import { CheckCircle2Icon, Loader2Icon, XCircleIcon } from 'lucide-react';
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
+import { toast } from 'sonner';
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogClose,
@@ -13,16 +13,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Field, FieldGroup } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useDialog } from "@/hooks/use-dialog";
-import { useDialogNav } from "@/hooks/navigation/use-dialog-nav";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/dialog';
+import { Field, FieldGroup } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useDialogNav } from '@/hooks/navigation/use-dialog-nav';
+import { useDialog } from '@/hooks/use-dialog';
+import { cn } from '@/lib/utils';
 
-const normaliseUrl = (raw: string) => raw.trim().replace(/\/+$/, "");
+const normaliseUrl = (raw: string) => raw.trim().replace(/\/+$/, '');
 
 type RemoteSourceForm = {
   baseUrl: string;
@@ -30,7 +30,7 @@ type RemoteSourceForm = {
   password: string;
 };
 
-const EMPTY_FORM: RemoteSourceForm = { baseUrl: "", username: "", password: "" };
+const EMPTY_FORM: RemoteSourceForm = { baseUrl: '', username: '', password: '' };
 
 type RemoteLoginResult = {
   server_name?: string | null;
@@ -42,7 +42,7 @@ type SelectableItem = { id: string; label: string };
 type ConnectVariables = RemoteSourceForm & { selectedIds: string[] };
 
 type RemoteSourceConnectDialogProps<TLogin extends RemoteLoginResult> = {
-  mode: "jellyfin-connect" | "navidrome-connect";
+  mode: 'jellyfin-connect' | 'navidrome-connect';
   title: string;
   description: ReactNode;
   urlInputId: string;
@@ -92,7 +92,7 @@ export const RemoteSourceConnectDialog = <TLogin extends RemoteLoginResult>({
     <K extends keyof RemoteSourceForm>(key: K) =>
     (e: ChangeEvent<HTMLInputElement>) => {
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
-      if (testMutation.status !== "idle") {
+      if (testMutation.status !== 'idle') {
         testMutation.reset();
         setSelectedIds([]);
       }
@@ -175,7 +175,7 @@ export const RemoteSourceConnectDialog = <TLogin extends RemoteLoginResult>({
     if (testMutation.isPending) {
       return {
         icon: <Loader2Icon className="size-4 animate-spin" />,
-        tooltip: "Testing connection…",
+        tooltip: 'Testing connection…',
       };
     }
     if (testMutation.isError) {
@@ -190,7 +190,7 @@ export const RemoteSourceConnectDialog = <TLogin extends RemoteLoginResult>({
         tooltip: `Reached: ${reachedHost}`,
       };
     }
-    return { icon: null, tooltip: "Test connection" };
+    return { icon: null, tooltip: 'Test connection' };
   })();
 
   return (
@@ -208,7 +208,7 @@ export const RemoteSourceConnectDialog = <TLogin extends RemoteLoginResult>({
                 id={urlInputId}
                 placeholder={urlPlaceholder}
                 value={form.baseUrl}
-                onChange={updateField("baseUrl")}
+                onChange={updateField('baseUrl')}
                 disabled={isBusy}
               />
             </Field>
@@ -218,7 +218,7 @@ export const RemoteSourceConnectDialog = <TLogin extends RemoteLoginResult>({
                 id={usernameInputId}
                 autoComplete="username"
                 value={form.username}
-                onChange={updateField("username")}
+                onChange={updateField('username')}
                 disabled={isBusy}
               />
             </Field>
@@ -229,7 +229,7 @@ export const RemoteSourceConnectDialog = <TLogin extends RemoteLoginResult>({
                 type="password"
                 autoComplete="current-password"
                 value={form.password}
-                onChange={updateField("password")}
+                onChange={updateField('password')}
                 disabled={isBusy}
               />
             </Field>
@@ -267,8 +267,8 @@ export const RemoteSourceConnectDialog = <TLogin extends RemoteLoginResult>({
                   onClick={close}
                   disabled={isBusy}
                   className={cn(
-                    "focus-visible:ring-0 focus-visible:border-transparent",
-                    focusedIndex === 0 && "ring-2 ring-primary",
+                    'focus-visible:ring-0 focus-visible:border-transparent',
+                    focusedIndex === 0 && 'ring-2 ring-primary',
                   )}
                 >
                   Cancel
@@ -282,8 +282,8 @@ export const RemoteSourceConnectDialog = <TLogin extends RemoteLoginResult>({
                     onClick={handleTest}
                     aria-label={testState.tooltip}
                     className={cn(
-                      "focus-visible:ring-0 focus-visible:border-transparent",
-                      focusedIndex === 1 && "ring-2 ring-primary",
+                      'focus-visible:ring-0 focus-visible:border-transparent',
+                      focusedIndex === 1 && 'ring-2 ring-primary',
                     )}
                   >
                     {testState.icon}
@@ -296,8 +296,8 @@ export const RemoteSourceConnectDialog = <TLogin extends RemoteLoginResult>({
                 disabled={!canConnect}
                 onClick={handleConnect}
                 className={cn(
-                  "focus-visible:ring-0 focus-visible:border-transparent",
-                  focusedIndex === 2 && "ring-2 ring-primary",
+                  'focus-visible:ring-0 focus-visible:border-transparent',
+                  focusedIndex === 2 && 'ring-2 ring-primary',
                 )}
               >
                 Connect

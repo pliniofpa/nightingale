@@ -1,12 +1,13 @@
-import { useMicSamples } from "@/hooks/use-mic-samples";
+import { useEffect, useRef, type MutableRefObject } from 'react';
+
+import { useMicSamples } from '@/hooks/use-mic-samples';
 import {
   type MicReactiveEvent,
   REACTIVE_EMIT_PERIOD_MS,
   REACTIVE_FFT_SIZE,
   ReactiveAnalyzer,
-} from "@/lib/mic/reactive-analyzer";
-import { SampleRing } from "@/lib/mic/sample-ring";
-import { useEffect, useRef, type MutableRefObject } from "react";
+} from '@/lib/mic/reactive-analyzer';
+import { SampleRing } from '@/lib/mic/sample-ring';
 
 const MIN_PITCH_HZ = 80;
 const MAX_PITCH_HZ = 1000;
@@ -14,7 +15,7 @@ const RMS_GATE = 0.012;
 
 const RING_CAPACITY = REACTIVE_FFT_SIZE * 2;
 
-export type { MicReactiveEvent } from "@/lib/mic/reactive-analyzer";
+export type { MicReactiveEvent } from '@/lib/mic/reactive-analyzer';
 export type MicReactiveRef = MutableRefObject<MicReactiveEvent | null>;
 
 export function useMicReactive(enabled: boolean): MicReactiveRef {

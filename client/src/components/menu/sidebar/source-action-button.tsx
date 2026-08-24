@@ -1,15 +1,15 @@
-import { type ComponentType, type SVGProps } from "react";
+import { type ComponentType, type SVGProps } from 'react';
 
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
-export type BadgeTone = "ok" | "warn" | "muted";
+export type BadgeTone = 'ok' | 'warn' | 'muted';
 
 const BADGE_CLASSES: Record<BadgeTone, string> = {
-  ok: "bg-chart-3",
-  warn: "bg-destructive",
-  muted: "bg-muted-foreground",
+  ok: 'bg-chart-3',
+  warn: 'bg-destructive',
+  muted: 'bg-muted-foreground',
 };
 
 export interface SourceActionButtonProps {
@@ -51,8 +51,8 @@ export const SourceActionButton = ({
           onClick={onClick}
           data-sidebar-sub-index={subIndex}
           className={cn(
-            "text-sidebar-foreground/70 hover:bg-transparent hover:text-sidebar-foreground/70 focus-visible:ring-0 focus-visible:border-transparent dark:hover:bg-transparent",
-            focused && "ring-2 ring-primary bg-sidebar-accent",
+            'text-sidebar-foreground/70 hover:bg-transparent hover:text-sidebar-foreground/70 focus-visible:ring-0 focus-visible:border-transparent dark:hover:bg-transparent',
+            focused && 'ring-2 ring-primary bg-sidebar-accent',
           )}
         >
           <Icon />
@@ -61,7 +61,7 @@ export const SourceActionButton = ({
           <span
             aria-hidden
             className={cn(
-              "pointer-events-none absolute -right-0.5 -top-0.5 size-1.5 rounded-full ring-1 ring-sidebar",
+              'pointer-events-none absolute -right-0.5 -top-0.5 size-1.5 rounded-full ring-1 ring-sidebar',
               BADGE_CLASSES[badge],
             )}
           />

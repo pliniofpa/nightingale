@@ -1,8 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import { type Update } from "@tauri-apps/plugin-updater";
-import { UPDATER } from "./keys";
-import { checkForUpdate } from "@/bridge/updater";
-import { UPDATE_CHANNEL, UPDATES_SUPPORTED, type UpdateChannel } from "@/bridge/platform";
+import { useQuery } from '@tanstack/react-query';
+import { type Update } from '@tauri-apps/plugin-updater';
+
+import { UPDATE_CHANNEL, UPDATES_SUPPORTED, type UpdateChannel } from '@/bridge/platform';
+import { checkForUpdate } from '@/bridge/updater';
+
+import { UPDATER } from './keys';
 
 /**
  * The `"unsupported"` variant carries the reason so the dialog can render
@@ -11,30 +13,30 @@ import { UPDATE_CHANNEL, UPDATES_SUPPORTED, type UpdateChannel } from "@/bridge/
  * non-Linux behaviour so the `availableView` / `checkingView` / `errorView`
  * branches keep narrowing the way they do today.
  */
-export type UnsupportedChannel = Exclude<UpdateChannel, "auto">;
+export type UnsupportedChannel = Exclude<UpdateChannel, 'auto'>;
 
 export type UpdateState =
-  | { status: "unsupported"; channel: UnsupportedChannel }
-  | { status: "checking" }
-  | { status: "error"; error: Error; isOffline: boolean }
-  | { status: "up-to-date" }
-  | { status: "available"; update: Update };
+  | { status: 'unsupported'; channel: UnsupportedChannel }
+  | { status: 'checking' }
+  | { status: 'error'; error: Error; isOffline: boolean }
+  | { status: 'up-to-date' }
+  | { status: 'available'; update: Update };
 
-export type UpdateStatus = UpdateState["status"];
+export type UpdateStatus = UpdateState['status'];
 
 const isOfflineError = (error: Error): boolean => {
-  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
     return true;
   }
 
   const msg = error.message.toLowerCase();
   return (
-    msg.includes("network") ||
-    msg.includes("failed to fetch") ||
-    msg.includes("dns") ||
-    msg.includes("getaddrinfo") ||
-    msg.includes("connect") ||
-    msg.includes("timed out")
+    msg.includes('network') ||
+    msg.includes('failed to fetch') ||
+    msg.includes('dns') ||
+    msg.includes('getaddrinfo') ||
+    msg.includes('connect') ||
+    msg.includes('timed out')
   );
 };
 
@@ -50,25 +52,25 @@ const buildState = (query: {
     // so anything left over here is necessarily one of the unsupported
     // channels. Narrow explicitly so the dialog can switch on it.
     const channel: UnsupportedChannel =
-      UPDATE_CHANNEL === "self-hosted-web" ? "self-hosted-web" : "linux-tauri";
-    return { status: "unsupported", channel };
+      UPDATE_CHANNEL === 'self-hosted-web' ? 'self-hosted-web' : 'linux-tauri';
+    return { status: 'unsupported', channel };
   }
 
   if (query.isLoading || query.isFetching) {
-    return { status: "checking" };
+    return { status: 'checking' };
   }
 
   if (query.isError) {
-    const error = query.error instanceof Error ? query.error : new Error("Unknown error");
+    const error = query.error instanceof Error ? query.error : new Error('Unknown error');
 
-    return { status: "error", error, isOffline: isOfflineError(error) };
+    return { status: 'error', error, isOffline: isOfflineError(error) };
   }
 
   if (query.data) {
-    return { status: "available", update: query.data };
+    return { status: 'available', update: query.data };
   }
 
-  return { status: "up-to-date" };
+  return { status: 'up-to-date' };
 };
 
 export const useUpdate = () => {

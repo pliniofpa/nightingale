@@ -1,7 +1,8 @@
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
-import { windowImmersive } from "@/bridge/window";
-import { isTauri } from "./runtime";
+import { windowImmersive } from '@/bridge/window';
+
+import { isTauri } from './runtime';
 
 let cachedTauriWindow: ReturnType<typeof getCurrentWindow> | null = null;
 
@@ -12,14 +13,14 @@ const tauriWindow = () => {
 
 export const isFullScreen = (): Promise<boolean> => {
   if (!isTauri) {
-    return Promise.resolve(typeof document !== "undefined" && document.fullscreenElement != null);
+    return Promise.resolve(typeof document !== 'undefined' && document.fullscreenElement != null);
   }
   return windowImmersive();
 };
 
 export const setFullScreen = async (next: boolean): Promise<void> => {
   if (!isTauri) {
-    if (typeof document === "undefined") return;
+    if (typeof document === 'undefined') return;
     if (next) {
       try {
         await document.documentElement.requestFullscreen();

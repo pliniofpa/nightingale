@@ -1,16 +1,18 @@
+import { memo } from 'react';
+
 import {
   usePlaybackMicActions,
   usePlaybackThemeState,
   usePlaybackTransportState,
-} from "@/contexts/playback";
-import { FLAVORS, type VideoFlavor } from "@/lib/playback/video-flavor";
-import { memo } from "react";
-import { PixabayVideo } from "./pixabay-video";
-import { ShaderVisualizer } from "./shader-visualizer";
-import { loadingFragment, shaders } from "./shaders";
-import { SourceVideo } from "./source-video";
+} from '@/contexts/playback';
+import { FLAVORS, type VideoFlavor } from '@/lib/playback/video-flavor';
 
-export type ThemeMode = "shader" | "pixabay" | "source";
+import { PixabayVideo } from './pixabay-video';
+import { ShaderVisualizer } from './shader-visualizer';
+import { loadingFragment, shaders } from './shaders';
+import { SourceVideo } from './source-video';
+
+export type ThemeMode = 'shader' | 'pixabay' | 'source';
 
 const SHADER_COUNT = shaders.length;
 const PIXABAY_INDEX = SHADER_COUNT;
@@ -18,24 +20,24 @@ export const SOURCE_VIDEO_INDEX = SHADER_COUNT + 1;
 
 export function themeMode(index: number): ThemeMode {
   if (index === PIXABAY_INDEX) {
-    return "pixabay";
+    return 'pixabay';
   }
 
   if (index === SOURCE_VIDEO_INDEX) {
-    return "source";
+    return 'source';
   }
 
-  return "shader";
+  return 'shader';
 }
 
 export function themeName(index: number, videoFlavor: VideoFlavor): string {
   const mode = themeMode(index);
 
-  if (mode === "source") {
-    return "Source Video";
+  if (mode === 'source') {
+    return 'Source Video';
   }
 
-  if (mode === "pixabay") {
+  if (mode === 'pixabay') {
     const name = videoFlavor.charAt(0).toUpperCase() + videoFlavor.slice(1);
 
     return `Video — ${name}`;
@@ -84,14 +86,14 @@ function BackgroundImpl() {
   }
 
   const mode = themeMode(themeIndex);
-  const showSourceVideo = mode === "source";
+  const showSourceVideo = mode === 'source';
   const playing = isReady && isPlaying;
 
   return (
     <div className="fixed inset-0">
       {sourceVideoPath && <SourceVideo isActive={showSourceVideo} />}
-      {mode === "shader" && <ShaderBranch themeIndex={themeIndex} isPlaying={playing} />}
-      {mode === "pixabay" && <PixabayVideo flavor={videoFlavor} isPlaying={playing} />}
+      {mode === 'shader' && <ShaderBranch themeIndex={themeIndex} isPlaying={playing} />}
+      {mode === 'pixabay' && <PixabayVideo flavor={videoFlavor} isPlaying={playing} />}
     </div>
   );
 }
