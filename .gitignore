@@ -17,3 +17,27 @@ RELEASING.md
 **/.DS_Store
 
 **/__pycache__
+
+# JavaScript build output
+client/node_modules/
+client/dist/
+*.tsbuildinfo
+
+# Generated per-agent configuration and local agent state
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.agents/
+.claude/
+.cline/
+.continue/
+.cursor/
+.junie/
+.kiro/
+.pi/
+.pi-subagents/
+.roo/
+.trae/
+.windsurf/
+.github/copilot-instructions.md
+.github/instructions/
