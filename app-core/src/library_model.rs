@@ -19,6 +19,14 @@ pub struct LibraryMenuFilters {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+#[ts(export)]
+pub enum SongTarget {
+    Hashes { hashes: Vec<String> },
+    Filter { filters: LibraryMenuFilters },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export)]
 pub struct LoadSongsParams {
     pub search: Option<String>,
@@ -35,6 +43,12 @@ pub struct SongsStore {
     pub processed: Vec<Song>,
     #[serde(default)]
     pub processed_count: usize,
+    /// Count of songs matching the current filter that are already analyzed
+    /// -- lets the frontend gate analyzed-only bulk actions (e.g. full
+    /// reanalysis, refetch lyrics & align) without paging in every song in
+    /// the filtered set.
+    #[serde(default)]
+    pub analyzed_count: usize,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, TS)]

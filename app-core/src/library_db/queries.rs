@@ -291,20 +291,27 @@ pub fn load_songs_page(params: &LoadSongsParams) -> rusqlite::Result<SongsStore>
         })?
     };
 
-    let processed_count = if let Some(ref where_sql) = where_sql {
-        let sql = format!("SELECT COUNT(*) FROM songs s WHERE {where_sql}");
+    let (processed_count, analyzed_count) = if let Some(ref where_sql) = where_sql {
+        let sql = format!(
+            "SELECT COUNT(*), COALESCE(SUM(CASE WHEN s.is_analyzed = 1 THEN 1 ELSE 0 END), 0)
+             FROM songs s WHERE {where_sql}"
+        );
         with_conn(|c| {
-            let n: i64 = c.query_row(
+            let (count, analyzed): (i64, i64) = c.query_row(
                 &sql,
                 rusqlite::params_from_iter(bind_strings.iter().map(|s| s.as_str())),
-                |r| r.get(0),
+                |r| Ok((r.get(0)?, r.get(1)?)),
             )?;
-            Ok(n as usize)
+            Ok((count as usize, analyzed as usize))
         })?
     } else {
         with_conn(|c| {
-            let n: i64 = c.query_row("SELECT COUNT(*) FROM songs", [], |r| r.get(0))?;
-            Ok(n as usize)
+            let (count, analyzed): (i64, i64) = c.query_row(
+                "SELECT COUNT(*), COALESCE(SUM(CASE WHEN is_analyzed = 1 THEN 1 ELSE 0 END), 0) FROM songs",
+                [],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )?;
+            Ok((count as usize, analyzed as usize))
         })?
     };
 
@@ -313,13 +320,15 @@ pub fn load_songs_page(params: &LoadSongsParams) -> rusqlite::Result<SongsStore>
         folder,
         processed,
         processed_count,
+        analyzed_count,
     })
 }
 
-pub fn iter_file_hashes_filtered_not_analyzed(
+fn iter_file_hashes_filtered(
     filters: &LibraryMenuFilters,
+    extra_where_parts: &[&str],
 ) -> rusqlite::Result<Vec<String>> {
-    let (where_sql, bind_strings) = build_song_where_clause(None, filters, &["s.is_analyzed = 0"]);
+    let (where_sql, bind_strings) = build_song_where_clause(None, filters, extra_where_parts);
 
     if let Some(where_sql) = where_sql {
         let playlist_order = if filters.playlist.as_deref().is_some_and(|p| !p.is_empty()) {
@@ -342,15 +351,45 @@ pub fn iter_file_hashes_filtered_not_analyzed(
         })
     } else {
         with_conn(|c| {
-            let mut stmt = c.prepare(
-                "SELECT file_hash FROM songs
-                 WHERE is_analyzed = 0
-                 ORDER BY artist COLLATE NOCASE, title COLLATE NOCASE",
-            )?;
+            let mut stmt = c.prepare("SELECT file_hash FROM songs ORDER BY artist COLLATE NOCASE, title COLLATE NOCASE")?;
             let rows = stmt.query_map([], |r| r.get(0))?;
             rows.collect()
         })
     }
+}
+
+pub fn iter_file_hashes_filtered_not_analyzed(
+    filters: &LibraryMenuFilters,
+) -> rusqlite::Result<Vec<String>> {
+    iter_file_hashes_filtered(filters, &["s.is_analyzed = 0"])
+}
+
+pub fn iter_file_hashes_filtered_realignable(
+    filters: &LibraryMenuFilters,
+) -> rusqlite::Result<Vec<String>> {
+    iter_file_hashes_filtered(
+        filters,
+        &[
+            "s.is_analyzed = 1",
+            "s.transcript_source NOT IN ('usdx', 'lrc')",
+        ],
+    )
+}
+
+/// Unlike `iter_file_hashes_filtered_realignable`, includes LRC-provided songs.
+pub fn iter_file_hashes_filtered_full_reanalyzable(
+    filters: &LibraryMenuFilters,
+) -> rusqlite::Result<Vec<String>> {
+    iter_file_hashes_filtered(
+        filters,
+        &["s.is_analyzed = 1", "s.transcript_source != 'usdx'"],
+    )
+}
+
+pub fn iter_file_hashes_filtered_refreshable(
+    filters: &LibraryMenuFilters,
+) -> rusqlite::Result<Vec<String>> {
+    iter_file_hashes_filtered(filters, &["json_extract(s.payload, '$.usdx') IS NULL"])
 }
 
 pub fn query_library_menu_items() -> rusqlite::Result<LibraryMenuItems> {

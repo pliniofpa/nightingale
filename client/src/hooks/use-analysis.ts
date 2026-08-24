@@ -3,18 +3,26 @@ import { useLibraryFilter } from "@/hooks/use-library-filter";
 import { useSearch } from "@/hooks/use-search";
 import {
   deleteSongCache,
-  enqueueAll,
-  enqueueOne,
+  enqueue,
   realign,
   reanalyzeForceTranscribe,
   reanalyzeFull,
   reanalyzeTranscript,
+  refreshMetadata,
+  songsByFilter,
+  songsByHashes,
 } from "@/bridge/analysis";
+import type { LibraryMenuFilters } from "@/types/LibraryMenuFilters";
 import type { Song } from "@/types/Song";
 import type { SongsStore } from "@/types/SongsStore";
 import { type InfiniteData, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { toast } from "sonner";
+
+enum BulkActionKind {
+  Queued,
+  Immediate,
+}
 
 const withoutAnalysisCache = (song: Song): Song => ({
   ...song,
@@ -34,6 +42,16 @@ export const useAnalysis = () => {
   const { search } = useSearch();
 
   return useMemo(() => {
+    const currentFilters = (): LibraryMenuFilters => ({
+      artist,
+      album,
+      playlist,
+      query,
+      status,
+      transcript_source,
+      search: search || null,
+    });
+
     const invalidateQueue = () => {
       queryClient.invalidateQueries({ queryKey: ANALYSIS_QUEUE });
     };
@@ -61,42 +79,109 @@ export const useAnalysis = () => {
       );
     };
 
+    const run = async <R>(handler: () => Promise<R>, invalidate: () => void) => {
+      try {
+        return await handler();
+      } catch (error: unknown) {
+        toast.error(
+          `Error while running an analysis action: ${error instanceof Error ? error.message : "unknown error"}`,
+        );
+      } finally {
+        invalidate();
+      }
+    };
+
     const wrap =
-      <A extends unknown[]>(handler: (...args: A) => Promise<void>, invalidate: () => void) =>
+      <A extends unknown[], R>(handler: (...args: A) => Promise<R>, invalidate: () => void) =>
       async (...args: A) => {
-        try {
-          await handler(...args);
-          invalidate();
-        } catch (error: unknown) {
-          toast.error(
-            `Error while running an analysis action: ${error instanceof Error ? error.message : "unknown error"}`,
+        await run(() => handler(...args), invalidate);
+      };
+
+    const wrapBulk =
+      <A extends unknown[]>(
+        kind: BulkActionKind,
+        label: string,
+        handler: (...args: A) => Promise<number>,
+        invalidate: () => void,
+      ) =>
+      async (...args: A) => {
+        const count = await run(() => handler(...args), invalidate);
+        if (count === undefined) return;
+
+        if (count > 0) {
+          toast.success(
+            kind === BulkActionKind.Queued
+              ? `Queued ${count} song${count === 1 ? "" : "s"} for ${label}`
+              : `${label} for ${count} song${count === 1 ? "" : "s"}`,
+          );
+        } else {
+          toast.info(
+            `No eligible songs for ${kind === BulkActionKind.Queued ? label : label.toLowerCase()} in the current filter`,
           );
         }
       };
 
+    const one = (fileHash: string) => songsByHashes([fileHash]);
+    const filtered = () => songsByFilter(currentFilters());
+
     return {
-      enqueueOne: wrap(enqueueOne, invalidateQueue),
-      enqueueAll: wrap(
-        () =>
-          enqueueAll({
-            artist,
-            album,
-            playlist,
-            query,
-            status,
-            transcript_source,
-            search: search || null,
-          }),
-        invalidateQueue,
-      ),
+      enqueueOne: wrap((fileHash: string) => enqueue(one(fileHash)), invalidateQueue),
+      enqueueAll: wrap(() => enqueue(filtered()), invalidateQueue),
       deleteSongCache: wrap(async (fileHash: string) => {
-        await deleteSongCache(fileHash);
+        await deleteSongCache(one(fileHash));
         markSongCacheDeleted(fileHash);
       }, invalidateSongs),
-      reanalyzeTranscript: wrap(reanalyzeTranscript, invalidateSongs),
-      reanalyzeFull: wrap(reanalyzeFull, invalidateSongs),
-      realign: wrap(realign, invalidateSongs),
-      reanalyzeForceTranscribe: wrap(reanalyzeForceTranscribe, invalidateSongs),
+      deleteSongCacheAll: wrapBulk(
+        BulkActionKind.Immediate,
+        "Cache deleted",
+        () => deleteSongCache(filtered()),
+        invalidateSongs,
+      ),
+      reanalyzeTranscript: wrap(
+        (fileHash: string, language?: string) => reanalyzeTranscript(one(fileHash), language),
+        invalidateSongs,
+      ),
+      reanalyzeFull: wrap((fileHash: string) => reanalyzeFull(one(fileHash)), invalidateSongs),
+      realign: wrap(
+        (fileHash: string, language?: string) => realign(one(fileHash), language),
+        invalidateSongs,
+      ),
+      realignAll: wrapBulk(
+        BulkActionKind.Queued,
+        "realigning",
+        () => realign(filtered()),
+        invalidateSongs,
+      ),
+      reanalyzeForceTranscribe: wrap(
+        (fileHash: string) => reanalyzeForceTranscribe(one(fileHash)),
+        invalidateSongs,
+      ),
+      refreshMetadata: (fileHash: string) =>
+        run(async () => (await refreshMetadata(one(fileHash))) > 0, invalidateSongs),
+      refreshMetadataAll: wrapBulk(
+        BulkActionKind.Immediate,
+        "Metadata refreshed",
+        () => refreshMetadata(filtered()),
+        invalidateSongs,
+      ),
+      reanalyzeAllFull: wrapBulk(
+        BulkActionKind.Queued,
+        "full reanalysis",
+        () => reanalyzeFull(filtered()),
+        invalidateSongs,
+      ),
+      reanalyzeAllTranscript: wrapBulk(
+        BulkActionKind.Queued,
+        "refetching lyrics & aligning",
+        (language?: string) => reanalyzeTranscript(filtered(), language),
+        invalidateSongs,
+      ),
+      reanalyzeAllForceTranscribe: wrapBulk(
+        BulkActionKind.Queued,
+        "force transcribing",
+        () => reanalyzeForceTranscribe(filtered()),
+        invalidateSongs,
+      ),
     };
   }, [queryClient, artist, album, playlist, query, status, transcript_source, search]);
 };

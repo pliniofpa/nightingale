@@ -19,8 +19,8 @@ mod vendor;
 mod vendor_scripts;
 
 pub use analyzer::{
-    AnalysisQueue, delete_cache, enqueue_all, enqueue_one, realign, reanalyze_force_transcribe,
-    reanalyze_full, reanalyze_transcript, shutdown_server,
+    AnalysisQueue, delete_cache, enqueue, realign, reanalyze_force_transcribe, reanalyze_full,
+    reanalyze_transcript, refresh_metadata, shutdown_server,
 };
 pub use cache::{
     CacheDir, CachePaths, CacheStats, cache_roots, change_app_data_path, clear_models,
@@ -29,7 +29,7 @@ pub use cache::{
 pub use config::{AppConfig, LibrarySource};
 pub use library_db::{init_library, library_db_path};
 pub use library_menu::{LibraryMenuItem, LibraryMenuItems, load_library_menu_items};
-pub use library_model::{LibraryMenuFilters, LoadSongsParams, SongsMeta, SongsStore};
+pub use library_model::{LibraryMenuFilters, LoadSongsParams, SongTarget, SongsMeta, SongsStore};
 pub use lyrics::{
     LrclibCandidate, LyricsFile, apply_timed_lyrics, load_lyrics_file, provide_lrc,
     save_lyrics_and_realign, search_lrclib_for_hash,
@@ -85,7 +85,9 @@ pub fn startup() -> Result<(), String> {
     }
 
     if AppConfig::load().auto_analyze() {
-        analyzer::enqueue_all(&LibraryMenuFilters::default());
+        let _ = analyzer::enqueue(SongTarget::Filter {
+            filters: LibraryMenuFilters::default(),
+        });
     }
 
     Ok(())

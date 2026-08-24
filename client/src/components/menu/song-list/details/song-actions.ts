@@ -2,6 +2,7 @@ import type { Song } from "@/types/Song";
 import {
   AlignLeftIcon,
   AudioLinesIcon,
+  ImageIcon,
   LanguagesIcon,
   MicIcon,
   PencilLineIcon,
@@ -20,6 +21,7 @@ interface AnalysisHandlers {
   reanalyzeTranscript: AnalysisHandler;
   realign: AnalysisHandler;
   reanalyzeForceTranscribe: AnalysisHandler;
+  refreshMetadata: (fileHash: string) => Promise<boolean | undefined>;
 }
 
 interface BuildActionGroupsParams {
@@ -30,7 +32,11 @@ interface BuildActionGroupsParams {
   analysis: AnalysisHandlers;
   onEditLyrics: () => void;
   onChangeLanguage: () => void;
-  run: (message: string, action: () => void | Promise<void>) => () => Promise<void>;
+  run: (
+    message: string,
+    action: () => void | boolean | undefined | Promise<void | boolean | undefined>,
+    onFalse?: string,
+  ) => () => Promise<void>;
 }
 
 export function buildActionGroups({
@@ -138,6 +144,22 @@ export function buildActionGroups({
           title: "Change language",
           description: "Set the language and choose how to reprocess.",
           onClick: onChangeLanguage,
+        },
+      ]);
+    }
+
+    if (!song.usdx) {
+      groups.push([
+        {
+          icon: ImageIcon,
+          title: "Refresh metadata",
+          description:
+            "Reload title, artist, album, duration, and cover art from the library source.",
+          onClick: run(
+            `Refreshed metadata for "${song.title}"`,
+            () => analysis.refreshMetadata(song.file_hash),
+            `Nothing to refresh for "${song.title}"`,
+          ),
         },
       ]);
     }
