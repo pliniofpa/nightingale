@@ -14,7 +14,9 @@
 
 :root {
   color-scheme: light;
+
   --titlebar-offset: 0px;
+
   /* Theme::light() — sRGB matches Rust Color::srgb */
   --background: color(srgb 0.955 0.955 0.97);
   --foreground: color(srgb 0.12 0.12 0.15);
@@ -52,6 +54,7 @@
 
 .dark {
   color-scheme: dark;
+
   /* Theme::dark() */
   --background: color(srgb 0.05 0.05 0.085);
   --foreground: color(srgb 0.96 0.96 0.98);
@@ -139,6 +142,7 @@
 
   body {
     @apply bg-background text-foreground;
+
     overflow: hidden;
     height: 100svh;
   }
@@ -149,10 +153,11 @@
 
   html {
     @apply font-sans;
+
     font-size: clamp(20px, 1vw, 64px);
   }
 
-  @media (max-width: 767px) {
+  @media (width <= 767px) {
     html {
       font-size: 16px;
     }
@@ -178,36 +183,36 @@
     container-type: inline-size;
   }
 
-  .song-table__thumbnail {
+  .song-table-thumbnail {
     width: 3.5rem;
   }
 
-  .song-table__song {
+  .song-table-song {
     width: 16rem;
   }
 
-  .song-table__band {
+  .song-table-band {
     width: 12rem;
   }
 
   /* Flexible column: absorbs all leftover width so fixed columns never grow. */
-  .song-table__album {
+  .song-table-album {
     width: auto;
   }
 
-  .song-table__duration {
+  .song-table-duration {
     width: 5rem;
   }
 
-  .song-table__status {
+  .song-table-status {
     width: 9rem;
   }
 
-  .song-table__header {
+  .song-table-header {
     background-color: var(--background);
   }
 
-  .song-table__header th {
+  .song-table-header th {
     position: sticky;
     top: 0;
     z-index: 20;
@@ -216,34 +221,34 @@
   }
 
   @container (max-width: 1100px) {
-    .song-table__album {
+    .song-table-album {
       display: none;
     }
 
     /* Hand the absorber role to Song so the thumbnail stays fixed. */
-    .song-table__song {
+    .song-table-song {
       width: auto;
     }
   }
 
   @container (max-width: 920px) {
-    .song-table__band {
+    .song-table-band {
       display: none;
     }
   }
 
   @container (max-width: 700px) {
-    .song-table__duration {
+    .song-table-duration {
       display: none;
     }
   }
 
   @container (max-width: 520px) {
-    .song-table__thumbnail {
+    .song-table-thumbnail {
       display: none;
     }
 
-    .song-table__status {
+    .song-table-status {
       width: 7.5rem;
     }
   }

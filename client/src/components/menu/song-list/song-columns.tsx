@@ -21,8 +21,8 @@ export const SONG_COLUMNS: SongColumn[] = [
   {
     id: 'thumbnail',
     header: <span className="sr-only">Cover</span>,
-    thClassName: 'song-table__thumbnail px-2 py-2 font-medium',
-    tdClassName: 'song-table__thumbnail py-1.5 pr-2 pl-2',
+    thClassName: 'song-table-thumbnail px-2 py-2 font-medium',
+    tdClassName: 'song-table-thumbnail py-1.5 pr-2 pl-2',
     cell: (song) => (
       <AlbumArt
         song={song}
@@ -35,8 +35,8 @@ export const SONG_COLUMNS: SongColumn[] = [
   {
     id: 'song',
     header: 'Song',
-    thClassName: 'song-table__song px-2 py-2 font-medium',
-    tdClassName: 'song-table__song px-2 py-2 align-middle font-medium',
+    thClassName: 'song-table-song px-2 py-2 font-medium',
+    tdClassName: 'song-table-song px-2 py-2 align-middle font-medium',
     cell: (song, _queueStatus, bestScore) => (
       <div className="min-w-0">
         <div className="flex h-5 min-w-0 items-center gap-2">
@@ -50,30 +50,30 @@ export const SONG_COLUMNS: SongColumn[] = [
   {
     id: 'band',
     header: 'Artist',
-    thClassName: 'song-table__band px-2 py-2 font-medium',
-    tdClassName: 'song-table__band px-2 py-2 text-muted-foreground',
+    thClassName: 'song-table-band px-2 py-2 font-medium',
+    tdClassName: 'song-table-band px-2 py-2 text-muted-foreground',
     cell: (song) => <span className="block truncate">{song.artist || '—'}</span>,
   },
   {
     id: 'album',
     header: 'Album',
-    thClassName: 'song-table__album px-2 py-2 font-medium',
-    tdClassName: 'song-table__album px-2 py-2 text-muted-foreground',
+    thClassName: 'song-table-album px-2 py-2 font-medium',
+    tdClassName: 'song-table-album px-2 py-2 text-muted-foreground',
     cell: (song) => <span className="block truncate">{song.album || '—'}</span>,
   },
   {
     id: 'duration',
     header: 'Duration',
-    thClassName: 'song-table__duration px-2 py-2 font-medium',
+    thClassName: 'song-table-duration px-2 py-2 font-medium',
     tdClassName:
-      'song-table__duration px-2 py-2 font-variant-numeric tabular-nums text-muted-foreground',
+      'song-table-duration px-2 py-2 font-variant-numeric tabular-nums text-muted-foreground',
     cell: (song) => formatSeconds(song.duration_secs),
   },
   {
     id: 'status',
     header: 'Analysis status',
-    thClassName: 'song-table__status px-2 py-2 text-right font-medium',
-    tdClassName: 'song-table__status px-2 py-2 text-right',
+    thClassName: 'song-table-status px-2 py-2 text-right font-medium',
+    tdClassName: 'song-table-status px-2 py-2 text-right',
     cell: (song, queueStatus) => <StatusBadge song={song} queueStatus={queueStatus} />,
   },
 ];

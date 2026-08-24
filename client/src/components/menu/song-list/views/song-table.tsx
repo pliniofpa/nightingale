@@ -15,7 +15,7 @@ export const SongTable = ({ songs, getItemProps }: SongTableProps) => {
 
   return (
     <table className="w-full table-fixed border-separate border-spacing-0 text-xs">
-      <thead className="song-table__header">
+      <thead className="song-table-header">
         <tr className="text-left text-muted-foreground">
           {SONG_COLUMNS.map((column) => (
             <th key={column.id} className={column.thClassName}>
