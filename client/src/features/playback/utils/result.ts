@@ -8,22 +8,19 @@ export function topScoresForSong(
   records: ScoreRecord[],
   songHash: string,
   limit: number,
-): Array<{ profile: string; score: number }> {
-  const best = new Map<string, number>();
+): ScoreRecord[] {
+  const best = new Map<string, ScoreRecord>();
 
-  for (const r of records) {
-    if (r.song_hash !== songHash) {
+  for (const record of records) {
+    if (record.song_hash !== songHash) {
       continue;
     }
 
-    const prev = best.get(r.profile);
-    if (prev === undefined || r.score > prev) {
-      best.set(r.profile, r.score);
+    const previous = best.get(record.profile);
+    if (previous === undefined || record.score > previous.score) {
+      best.set(record.profile, record);
     }
   }
 
-  return [...best.entries()]
-    .toSorted((a, b) => b[1] - a[1])
-    .slice(0, limit)
-    .map(([profile, score]) => ({ profile, score }));
+  return [...best.values()].toSorted((a, b) => b.score - a.score).slice(0, limit);
 }

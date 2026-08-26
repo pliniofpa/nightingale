@@ -15,6 +15,7 @@ below.
 
 ### Improvements
 
+- Leaderboard entries now show when each score was achieved beneath the profile name.
 - Long gaps between lyric lines now show a compact countdown beneath the song details, while the circular three-second countdown bubble stays beside the lyric line as the next line approaches. The next lyric block is no longer previewed across an instrumental break.
 - Change "AI generated" to "AI transcribed" in song list.
 - Add bulk song actions and a Refresh Metadata action for reloading metadata from the library source.

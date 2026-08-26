@@ -33,6 +33,21 @@ const RING = 'ring-2 ring-primary';
 const NO_FOCUS_RING = 'focus-visible:ring-0 focus-visible:border-transparent';
 const EMPTY_SCORES: ScoreRecord[] = [];
 
+function AchievedAt({ playedAt }: { playedAt: bigint }) {
+  const date = new Date(Number(playedAt) * 1000);
+
+  return Number.isNaN(date.getTime()) ? (
+    '—'
+  ) : (
+    <time
+      className="block truncate text-[10px] text-muted-foreground"
+      dateTime={date.toISOString()}
+    >
+      {date.toLocaleString()}
+    </time>
+  );
+}
+
 function topScoreRecords(records: ScoreRecord[]): ScoreRecord[] {
   return records
     .map((record, index) => ({ record, index }))
@@ -96,7 +111,7 @@ type LeaderboardBoardProps = {
   empty: boolean;
   global: boolean;
   globalBoard: ScoreRecord[];
-  songBoard: Array<{ profile: string; score: number }>;
+  songBoard: ScoreRecord[];
   songs: Map<string, Song> | undefined;
   loading: boolean;
 };
@@ -123,11 +138,12 @@ const LeaderboardBoard = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {songBoard.map(({ profile, score }, index) => (
+          {songBoard.map(({ profile, score, played_at: playedAt }, index) => (
             <TableRow key={profile} className="hover:bg-transparent">
               <TableCell className="px-1 py-2 text-xs tabular-nums">{index + 1}</TableCell>
-              <TableCell className="max-w-0 truncate py-2 text-xs" title={profile}>
-                {profile}
+              <TableCell className="max-w-0 py-2 text-xs" title={profile}>
+                <div className="truncate">{profile}</div>
+                <AchievedAt playedAt={playedAt} />
               </TableCell>
               <TableCell className="py-2 text-right text-xs font-medium tabular-nums">
                 {score}
@@ -151,7 +167,10 @@ const LeaderboardBoard = ({
       </TableHeader>
       <TableBody>
         {globalBoard.map((record, index) => (
-          <TableRow key={`${record.song_hash}-${record.profile}`} className="hover:bg-transparent">
+          <TableRow
+            key={`${record.song_hash}-${record.profile}-${record.score}-${record.played_at}`}
+            className="hover:bg-transparent"
+          >
             <TableCell className="px-1 py-2 text-xs tabular-nums">{index + 1}</TableCell>
             <TableCell className="max-w-0 py-2 text-xs">
               <LeaderboardSongName
@@ -160,8 +179,9 @@ const LeaderboardBoard = ({
                 songHash={record.song_hash}
               />
             </TableCell>
-            <TableCell className="max-w-0 truncate py-2 text-xs" title={record.profile}>
-              {record.profile}
+            <TableCell className="max-w-0 py-2 text-xs" title={record.profile}>
+              <div className="truncate">{record.profile}</div>
+              <AchievedAt playedAt={record.played_at} />
             </TableCell>
             <TableCell className="py-2 text-right text-xs font-medium tabular-nums">
               {record.score}
@@ -192,8 +212,8 @@ const LeaderboardHeading = ({
         )}
       </span>
     </DialogTitle>
-    <DialogDescription>
-      {global ? 'Top score records across every profile and song.' : 'Best score for each profile.'}
+    <DialogDescription className={cn(!global && 'sr-only')}>
+      {global ? 'Top score records across every profile and song.' : 'Song leaderboard.'}
     </DialogDescription>
   </DialogHeader>
 );
