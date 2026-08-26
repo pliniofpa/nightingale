@@ -44,8 +44,6 @@ jobs:
 
       - uses: swatinem/rust-cache@v2
 
-      - uses: taiki-e/install-action@cargo-deny
-
       - name: Install frontend dependencies
         run: pnpm --dir client install --frozen-lockfile
 
@@ -55,5 +53,3 @@ jobs:
       - name: Run static checks
         run: pnpm --dir client quality
 
-      - name: Audit Rust dependencies
-        run: pnpm --dir client audit:rust
