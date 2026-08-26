@@ -4,7 +4,7 @@ use std::net::{Shutdown, SocketAddr, TcpStream};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicU32, Ordering};
-use std::sync::{LazyLock, Mutex};
+use std::sync::{LazyLock, Mutex, MutexGuard, PoisonError};
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
@@ -104,6 +104,10 @@ impl Drop for ServerProcess {
 
 static ANALYZER_SERVER: LazyLock<Mutex<Option<ServerProcess>>> = LazyLock::new(|| Mutex::new(None));
 
+fn lock_unpoisoned<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
+    mutex.lock().unwrap_or_else(PoisonError::into_inner)
+}
+
 #[derive(Debug, Deserialize)]
 struct ReadyHandshake {
     port: u16,
@@ -176,7 +180,7 @@ fn connect_and_authenticate(
     let mut writer = BufWriter::new(writer_stream);
 
     let hello = serde_json::json!({"type": "hello", "token": token});
-    writer.write_all(serde_json::to_string(&hello).unwrap().as_bytes())?;
+    serde_json::to_writer(&mut writer, &hello)?;
     writer.write_all(b"\n")?;
     writer.flush()?;
 
@@ -206,7 +210,7 @@ fn spawn_server() -> Result<ServerProcess, NightingaleError> {
     let script = analyzer_dir().join("server.py");
     let models = models_dir();
     let ffmpeg = ffmpeg_path();
-    let ffmpeg_dir = ffmpeg.parent().unwrap_or(std::path::Path::new("."));
+    let ffmpeg_dir = ffmpeg.parent().unwrap_or(Path::new("."));
     let path_env = if let Some(existing) = std::env::var_os("PATH") {
         let mut paths = std::env::split_paths(&existing).collect::<Vec<_>>();
         paths.insert(0, ffmpeg_dir.to_path_buf());
@@ -294,7 +298,7 @@ fn spawn_server() -> Result<ServerProcess, NightingaleError> {
 }
 
 fn ensure_server(
-    guard: &mut std::sync::MutexGuard<Option<ServerProcess>>,
+    guard: &mut MutexGuard<'_, Option<ServerProcess>>,
 ) -> Result<(), NightingaleError> {
     if guard.is_some() {
         return Ok(());
@@ -329,8 +333,8 @@ static STEMS_ONLY: LazyLock<Mutex<HashSet<String>>> = LazyLock::new(|| Mutex::ne
 
 /// Mark a hash so its next analysis pass separates stems without transcribing,
 /// preserving the transcript built from provided LRC.
-pub fn mark_stems_only(file_hash: &str) {
-    STEMS_ONLY.lock().unwrap().insert(file_hash.to_string());
+pub(crate) fn mark_stems_only(file_hash: &str) {
+    lock_unpoisoned(&STEMS_ONLY).insert(file_hash.to_string());
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────
@@ -434,7 +438,7 @@ where
 fn enqueue_hashes(mut hashes: Vec<String>, skip_persisted: bool) -> usize {
     hashes.retain(|hash| !is_usdx_song(hash));
     let persisted = skip_persisted.then(AnalysisQueue::load);
-    let mut state = ANALYZER.lock().unwrap();
+    let mut state = lock_unpoisoned(&ANALYZER);
     let mut newly_queued = Vec::new();
 
     for file_hash in hashes {
@@ -489,15 +493,15 @@ pub fn shutdown_server() {
     let pid = SERVER_PID.swap(0, Ordering::SeqCst);
     if pid != 0 {
         info!("[analyzer] Graceful shutdown of server (pid={pid})");
-        if let Ok(mut guard) = ANALYZER_SERVER.try_lock() {
-            if let Some(server) = guard.as_mut() {
-                let _ = server.writer.write_all(b"{\"type\":\"quit\"}\n");
-                let _ = server.writer.flush();
-            }
+        if let Ok(mut guard) = ANALYZER_SERVER.try_lock()
+            && let Some(server) = guard.as_mut()
+        {
+            let _ = server.writer.write_all(b"{\"type\":\"quit\"}\n");
+            let _ = server.writer.flush();
         }
         std::thread::spawn(move || {
             let _ = Command::new("kill").args([&pid.to_string()]).status();
-            std::thread::sleep(std::time::Duration::from_secs(3));
+            std::thread::sleep(Duration::from_secs(3));
             let _ = Command::new("kill").args(["-9", &pid.to_string()]).status();
         });
     }
@@ -526,12 +530,12 @@ fn reanalyze_transcript_one(file_hash: &str, language: Option<String>) -> bool {
         return false;
     }
 
-    if let Some(lang) = language {
-        if !lang.is_empty() {
-            let mut config = AppConfig::load();
-            config.set_language_override(file_hash.to_string(), lang);
-            config.save();
-        }
+    if let Some(lang) = language
+        && !lang.is_empty()
+    {
+        let mut config = AppConfig::load();
+        config.set_language_override(file_hash.to_string(), lang);
+        config.save();
     }
     reanalyze(file_hash, false);
     true
@@ -606,10 +610,7 @@ fn reanalyze_force_transcribe_one(file_hash: &str) -> bool {
         return false;
     }
 
-    FORCE_TRANSCRIBE
-        .lock()
-        .unwrap()
-        .insert(file_hash.to_string());
+    lock_unpoisoned(&FORCE_TRANSCRIBE).insert(file_hash.to_string());
 
     reanalyze(file_hash, false);
     true
@@ -718,7 +719,7 @@ fn spawn_worker() {
 
         loop {
             let file_hash = {
-                let mut state = ANALYZER.lock().unwrap();
+                let mut state = lock_unpoisoned(&ANALYZER);
                 match state.queue.pop_front() {
                     Some(hash) => {
                         state.active_hash = Some(hash.clone());
@@ -734,7 +735,7 @@ fn spawn_worker() {
 
             process_song(&file_hash, &cache);
 
-            let mut state = ANALYZER.lock().unwrap();
+            let mut state = lock_unpoisoned(&ANALYZER);
             state.active_hash = None;
         }
     });
@@ -770,7 +771,7 @@ fn process_song(initial_hash: &str, cache: &CacheDir) {
     // Stems-only: keep the LRC-provided transcript and just separate stems.
     // The intent may have been keyed by the pre-rekey hash for remote songs.
     let stems_only = {
-        let mut set = STEMS_ONLY.lock().unwrap();
+        let mut set = lock_unpoisoned(&STEMS_ONLY);
         set.remove(file_hash) || set.remove(initial_hash)
     };
     if stems_only && file_hash != initial_hash {
@@ -783,7 +784,7 @@ fn process_song(initial_hash: &str, cache: &CacheDir) {
     }
 
     let config = AppConfig::load();
-    let skip_lrclib = stems_only || FORCE_TRANSCRIBE.lock().unwrap().remove(file_hash);
+    let skip_lrclib = stems_only || lock_unpoisoned(&FORCE_TRANSCRIBE).remove(file_hash);
     let lyrics_path = if skip_lrclib {
         None
     } else {
@@ -825,11 +826,17 @@ fn process_song(initial_hash: &str, cache: &CacheDir) {
         cmd_json["language"] = serde_json::json!(lang);
     }
 
-    let json_str = serde_json::to_string(&cmd_json).unwrap();
+    let json_str = match serde_json::to_string(&cmd_json) {
+        Ok(json) => json,
+        Err(error) => {
+            update_queue_status(file_hash, QueuedStatus::Failed(error.to_string()));
+            return;
+        }
+    };
     let mut retried = false;
 
     loop {
-        let mut guard = ANALYZER_SERVER.lock().unwrap();
+        let mut guard = lock_unpoisoned(&ANALYZER_SERVER);
 
         if let Err(e) = ensure_server(&mut guard) {
             warn!("[analyzer] Failed to start server: {e}");
@@ -837,7 +844,13 @@ fn process_song(initial_hash: &str, cache: &CacheDir) {
             return;
         }
 
-        let server = guard.as_mut().unwrap();
+        let Some(server) = guard.as_mut() else {
+            update_queue_status(
+                file_hash,
+                QueuedStatus::Failed("analyzer server unavailable".into()),
+            );
+            return;
+        };
         match send_and_monitor(server, &json_str, Some(file_hash)) {
             Ok(SongResult::Done) => {
                 finalize_song(file_hash, cache);
@@ -917,7 +930,7 @@ fn finalize_song(file_hash: &str, cache: &CacheDir) {
 /// The musical key is then detected on a background thread (which contends on
 /// the analyzer server) and patched in once it lands, so the key/tempo controls
 /// unlock later without blocking playback.
-pub fn prepare_lrc_no_stems(file_hash: &str) -> Result<(), NightingaleError> {
+pub(crate) fn prepare_lrc_no_stems(file_hash: &str) -> Result<(), NightingaleError> {
     let cache = CacheDir::new();
     let Some(song) = library_db::load_song_by_hash(file_hash).ok().flatten() else {
         return Err(NightingaleError::Other("Song not found".into()));
@@ -993,13 +1006,15 @@ fn run_key_pass(
         "skip_transcription": true,
         "skip_separation": true,
     });
-    let json_str = serde_json::to_string(&cmd_json).unwrap();
+    let json_str = serde_json::to_string(&cmd_json)?;
 
     let mut retried = false;
     loop {
-        let mut guard = ANALYZER_SERVER.lock().unwrap();
+        let mut guard = lock_unpoisoned(&ANALYZER_SERVER);
         ensure_server(&mut guard)?;
-        let server = guard.as_mut().unwrap();
+        let server = guard
+            .as_mut()
+            .ok_or_else(|| NightingaleError::Other("analyzer server unavailable".into()))?;
         // `None` progress hash keeps this off the status pipe (no queue rows).
         match send_and_monitor(server, &json_str, None) {
             Ok(SongResult::Done) => return Ok(()),
@@ -1144,7 +1159,7 @@ fn send_and_monitor(
                     update_queue_status(hash, QueuedStatus::Analyzing(pct as usize));
                 }
             }
-            ServerEvent::Done { .. } => return Ok(SongResult::Done),
+            ServerEvent::Done => return Ok(SongResult::Done),
             ServerEvent::Error { kind, msg } => {
                 let kind_s = kind.as_deref().unwrap_or("generic");
                 if kind_s == "oom" {

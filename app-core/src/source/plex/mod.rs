@@ -28,9 +28,9 @@ use super::{
     apply_refreshed_metadata, flush_batch, retained_cover,
 };
 
-pub mod client;
+pub(crate) mod client;
 
-pub use client::PlexClient;
+pub(crate) use client::PlexClient;
 
 const ACCOUNT_BASE_URL: &str = "https://plex.tv";
 const PRODUCT: &str = "Nightingale";

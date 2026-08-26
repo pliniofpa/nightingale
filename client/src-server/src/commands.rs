@@ -17,7 +17,7 @@ use crate::events::EventBus;
 use crate::state::AppState;
 
 /// HTTP error wrapper. JSON body matches what `webInvoke` reads on non-2xx.
-pub struct ApiError(pub StatusCode, pub String);
+pub(crate) struct ApiError(pub StatusCode, pub String);
 
 impl ApiError {
     fn bad_request(msg: impl Into<String>) -> Self {
@@ -35,10 +35,10 @@ impl IntoResponse for ApiError {
     }
 }
 
-pub type CmdResult = Result<Value, ApiError>;
+pub(crate) type CmdResult = Result<Value, ApiError>;
 
 /// Generic dispatcher that mirrors Tauri's `generate_handler!` table.
-pub async fn handle_cmd(
+pub(crate) async fn handle_cmd(
     State(state): State<AppState>,
     AxumPath(name): AxumPath<String>,
     body: Option<Json<Value>>,
@@ -372,7 +372,7 @@ async fn dispatch(events: std::sync::Arc<EventBus>, name: &str, payload: Value) 
 
         // ── Vendor ───────────────────────────────────────────────────────
         "is_ready" => Ok(Value::Bool(app_core::is_ready())),
-        "trigger_setup" => crate::commands::vendor::trigger_setup(events, payload),
+        "trigger_setup" => vendor::trigger_setup(events, payload),
 
         // ── Mic (browser-side; no server-side state) ────────────────────
         "list_microphones" => Ok(Value::Array(vec![])),
@@ -507,4 +507,4 @@ fn fetch_pixabay_videos_cmd(events: std::sync::Arc<EventBus>, payload: Value) ->
     Ok(json!(cached))
 }
 
-pub mod vendor;
+pub(crate) mod vendor;

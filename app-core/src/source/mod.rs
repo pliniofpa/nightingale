@@ -16,12 +16,12 @@ use crate::error::NightingaleError;
 use crate::library_db;
 use crate::song::Song;
 
-pub mod folder;
-pub mod jellyfin;
-pub mod navidrome;
-pub mod plex;
+pub(crate) mod folder;
+pub(crate) mod jellyfin;
+pub(crate) mod navidrome;
+pub(crate) mod plex;
 
-pub use folder::FolderSource;
+pub(crate) use folder::FolderSource;
 pub use jellyfin::{JellyfinAuth, JellyfinSource};
 pub use navidrome::{NavidromeAuth, NavidromeSource};
 pub use plex::{PlexAuth, PlexSource};
@@ -29,7 +29,7 @@ pub use plex::{PlexAuth, PlexSource};
 /// How many songs we buffer in memory before flushing them to the library DB
 /// during a scan. Small enough to keep memory bounded, large enough to avoid
 /// the per-transaction overhead of writing rows one-by-one.
-pub const SCAN_BATCH_SIZE: usize = 25;
+pub(crate) const SCAN_BATCH_SIZE: usize = 25;
 
 /// Coarse-grained discriminator surfaced to the UI / commands layer.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -143,7 +143,7 @@ pub fn active_source() -> Result<Option<Box<dyn MediaSource>>, NightingaleError>
     active_source_from_config(&AppConfig::load())
 }
 
-pub fn active_source_from_config(
+pub(crate) fn active_source_from_config(
     config: &AppConfig,
 ) -> Result<Option<Box<dyn MediaSource>>, NightingaleError> {
     let Some(src) = config.library_source.as_ref() else {

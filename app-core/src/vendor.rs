@@ -56,7 +56,7 @@ pub fn clear_vendor_dir() -> Result<(), String> {
     Ok(())
 }
 
-pub fn ffmpeg_path() -> PathBuf {
+pub(crate) fn ffmpeg_path() -> PathBuf {
     let name = if cfg!(windows) {
         "ffmpeg.exe"
     } else {
@@ -66,7 +66,7 @@ pub fn ffmpeg_path() -> PathBuf {
     vendor_dir().join(name)
 }
 
-pub fn python_path() -> PathBuf {
+pub(crate) fn python_path() -> PathBuf {
     if cfg!(windows) {
         vendor_dir().join("venv").join("Scripts").join("python.exe")
     } else {
@@ -74,7 +74,7 @@ pub fn python_path() -> PathBuf {
     }
 }
 
-pub fn analyzer_dir() -> PathBuf {
+pub(crate) fn analyzer_dir() -> PathBuf {
     vendor_dir().join("analyzer")
 }
 
@@ -265,7 +265,7 @@ pub fn run_vendor_setup(
 
 // ─── Download helpers ───────────────────────────────────────────────
 
-fn download_to_file(url: &str, dest: &std::path::Path) -> Result<(), String> {
+fn download_to_file(url: &str, dest: &Path) -> Result<(), String> {
     let resp = ureq::get(url).call().map_err(|e| e.to_string())?;
     let mut body = resp.into_body();
     let mut reader = body.as_reader();
@@ -274,7 +274,7 @@ fn download_to_file(url: &str, dest: &std::path::Path) -> Result<(), String> {
     Ok(())
 }
 
-fn extract_archive(archive: &std::path::Path, dest_dir: &std::path::Path) -> Result<(), String> {
+fn extract_archive(archive: &Path, dest_dir: &Path) -> Result<(), String> {
     let name = archive.to_string_lossy();
 
     let output = if name.ends_with(".tar.xz") {
@@ -322,7 +322,7 @@ fn extract_archive(archive: &std::path::Path, dest_dir: &std::path::Path) -> Res
     Ok(())
 }
 
-fn find_file_in(dir: &std::path::Path, name: &str) -> Option<PathBuf> {
+fn find_file_in(dir: &Path, name: &str) -> Option<PathBuf> {
     walkdir::WalkDir::new(dir)
         .into_iter()
         .flatten()
@@ -330,7 +330,7 @@ fn find_file_in(dir: &std::path::Path, name: &str) -> Option<PathBuf> {
         .map(|e| e.into_path())
 }
 
-fn mark_executable(_path: &std::path::Path) -> Result<(), String> {
+fn mark_executable(_path: &Path) -> Result<(), String> {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -342,7 +342,7 @@ fn mark_executable(_path: &std::path::Path) -> Result<(), String> {
 
 // ─── Other Helpers ───────────────────────────────────────────────────
 
-pub fn silent_command(program: impl AsRef<std::ffi::OsStr>) -> Command {
+pub(crate) fn silent_command(program: impl AsRef<std::ffi::OsStr>) -> Command {
     #[allow(unused_mut)]
     let mut cmd = Command::new(program);
     #[cfg(windows)]
@@ -594,7 +594,7 @@ fn detect_gpu() -> GpuInfo {
     {
         match nvidia_smi_path() {
             Some(smi) => {
-                let cuda_index = query_cuda_index(&smi);
+                let cuda_index = query_cuda_index(smi);
                 info!("[vendor] GPU detection: CUDA (index {cuda_index})");
                 GpuInfo {
                     device: "cuda",

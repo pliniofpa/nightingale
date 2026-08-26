@@ -69,7 +69,7 @@ pub(crate) fn load_song_from_payload_column(r: &rusqlite::Row<'_>) -> rusqlite::
     })
 }
 
-pub fn read_library_meta() -> rusqlite::Result<(String, usize)> {
+pub(crate) fn read_library_meta() -> rusqlite::Result<(String, usize)> {
     with_conn(|c| {
         c.query_row(
             "SELECT folder, scan_count FROM library_meta WHERE id = 1",
@@ -79,7 +79,7 @@ pub fn read_library_meta() -> rusqlite::Result<(String, usize)> {
     })
 }
 
-pub fn update_library_meta(folder: &str, scan_count: usize) -> rusqlite::Result<()> {
+pub(crate) fn update_library_meta(folder: &str, scan_count: usize) -> rusqlite::Result<()> {
     with_conn_mut(|c| {
         c.execute(
             "UPDATE library_meta SET folder = ?1, scan_count = ?2 WHERE id = 1",
@@ -89,7 +89,7 @@ pub fn update_library_meta(folder: &str, scan_count: usize) -> rusqlite::Result<
     })
 }
 
-pub fn load_song_path_strings() -> rusqlite::Result<std::collections::HashSet<String>> {
+pub(crate) fn load_song_path_strings() -> rusqlite::Result<std::collections::HashSet<String>> {
     with_conn(|c| {
         let mut stmt = c.prepare("SELECT path FROM songs")?;
         let rows = stmt.query_map([], |r| r.get::<_, String>(0))?;
@@ -98,7 +98,7 @@ pub fn load_song_path_strings() -> rusqlite::Result<std::collections::HashSet<St
     })
 }
 
-pub fn append_songs(songs: &[Song]) -> rusqlite::Result<()> {
+pub(super) fn append_songs(songs: &[Song]) -> rusqlite::Result<()> {
     if songs.is_empty() {
         return Ok(());
     }
@@ -115,7 +115,7 @@ pub fn append_songs(songs: &[Song]) -> rusqlite::Result<()> {
     })
 }
 
-pub fn append_songs_for_scan(songs: &[Song], generation: u64) -> rusqlite::Result<()> {
+pub(crate) fn append_songs_for_scan(songs: &[Song], generation: u64) -> rusqlite::Result<()> {
     if songs.is_empty() || !scan_generation_is_current(generation) {
         return Ok(());
     }
@@ -138,7 +138,7 @@ pub fn append_songs_for_scan(songs: &[Song], generation: u64) -> rusqlite::Resul
     })
 }
 
-pub fn replace_all_songs_sorted(songs: &[Song]) -> rusqlite::Result<()> {
+pub(crate) fn replace_all_songs_sorted(songs: &[Song]) -> rusqlite::Result<()> {
     with_conn_mut(|c| {
         let tx = c.transaction()?;
         tx.execute("DELETE FROM songs", [])?;
@@ -153,7 +153,7 @@ pub fn replace_all_songs_sorted(songs: &[Song]) -> rusqlite::Result<()> {
     })
 }
 
-pub fn delete_songs_not_in_paths(paths: &[String]) -> rusqlite::Result<()> {
+pub(crate) fn delete_songs_not_in_paths(paths: &[String]) -> rusqlite::Result<()> {
     with_conn_mut(|c| {
         if paths.is_empty() {
             c.execute("DELETE FROM songs", [])?;
@@ -169,7 +169,7 @@ pub fn delete_songs_not_in_paths(paths: &[String]) -> rusqlite::Result<()> {
     })
 }
 
-pub fn load_song_by_hash(file_hash: &str) -> rusqlite::Result<Option<Song>> {
+pub(crate) fn load_song_by_hash(file_hash: &str) -> rusqlite::Result<Option<Song>> {
     use rusqlite::OptionalExtension;
     with_conn(|c| {
         let mut stmt = c.prepare("SELECT payload FROM songs WHERE file_hash = ?1 LIMIT 1")?;
@@ -189,7 +189,7 @@ pub fn load_song_by_hash(file_hash: &str) -> rusqlite::Result<Option<Song>> {
     })
 }
 
-pub fn load_songs_by_hashes(file_hashes: &[String]) -> rusqlite::Result<Vec<Song>> {
+pub(crate) fn load_songs_by_hashes(file_hashes: &[String]) -> rusqlite::Result<Vec<Song>> {
     if file_hashes.is_empty() {
         return Ok(Vec::new());
     }
@@ -213,7 +213,7 @@ pub fn load_songs_by_hashes(file_hashes: &[String]) -> rusqlite::Result<Vec<Song
 /// JSON payload reflect a freshly downloaded source whose true Blake3 differs
 /// from the placeholder we initially stored. Also points any pending row in
 /// `analysis_queue` at the new hash so the in-flight scan keeps working.
-pub fn rekey_song(old_hash: &str, new_hash: &str, new_song: &Song) -> rusqlite::Result<()> {
+pub(crate) fn rekey_song(old_hash: &str, new_hash: &str, new_song: &Song) -> rusqlite::Result<()> {
     let payload = song_to_payload(new_song)?;
     let album_art = new_song
         .album_art_path
@@ -258,7 +258,7 @@ pub fn rekey_song(old_hash: &str, new_hash: &str, new_song: &Song) -> rusqlite::
     })
 }
 
-pub fn update_song_fields(file_hash: &str, song: &Song) -> rusqlite::Result<()> {
+pub(crate) fn update_song_fields(file_hash: &str, song: &Song) -> rusqlite::Result<()> {
     let payload = song_to_payload(song)?;
     let album_art = song
         .album_art_path
@@ -288,7 +288,7 @@ pub fn update_song_fields(file_hash: &str, song: &Song) -> rusqlite::Result<()> 
     })
 }
 
-pub fn load_all_songs() -> rusqlite::Result<Vec<Song>> {
+pub(crate) fn load_all_songs() -> rusqlite::Result<Vec<Song>> {
     with_conn(|c| {
         let mut stmt = c.prepare(
             "SELECT payload FROM songs ORDER BY artist COLLATE NOCASE, title COLLATE NOCASE",

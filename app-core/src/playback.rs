@@ -60,7 +60,7 @@ impl PixabayVideoDownloaded {
     }
 }
 
-pub fn load_transcript(file_hash: &str) -> Result<serde_json::Value, NightingaleError> {
+pub fn load_transcript(file_hash: &str) -> Result<Value, NightingaleError> {
     let cache = CacheDir::new();
     let path = resolve_transcript_path(&cache, file_hash);
     let data = std::fs::read_to_string(&path)?;
@@ -89,15 +89,15 @@ fn variant_pair_exists(cache: &CacheDir, file_hash: &str, key: &str, tempo: f64)
 }
 
 fn resolve_transcript_path(cache: &CacheDir, file_hash: &str) -> PathBuf {
-    if let Some(song) = library_db::load_song_by_hash(file_hash).ok().flatten() {
-        if let Some((_key, tempo)) = resolve_effective_key_tempo(&song) {
-            if normalize_tempo(tempo) == 1.0 {
-                return cache.transcript_path(file_hash);
-            }
-            let variant = cache.variant_transcript_path(file_hash, tempo);
-            if variant.is_file() {
-                return variant;
-            }
+    if let Some(song) = library_db::load_song_by_hash(file_hash).ok().flatten()
+        && let Some((_key, tempo)) = resolve_effective_key_tempo(&song)
+    {
+        if normalize_tempo(tempo) == 1.0 {
+            return cache.transcript_path(file_hash);
+        }
+        let variant = cache.variant_transcript_path(file_hash, tempo);
+        if variant.is_file() {
+            return variant;
         }
     }
     cache.transcript_path(file_hash)
@@ -126,15 +126,15 @@ pub fn get_audio_paths(file_hash: &str) -> AudioPaths {
     if let Some(song) = library_db::load_song_by_hash(file_hash).ok().flatten() {
         if song.no_stems {
             let tempo = normalize_tempo(song.tempo);
-            if let Some(key) = song.override_key.as_ref().or(song.key.as_ref()) {
-                if !is_base_original_selection(&song, key, tempo) {
-                    let variant = cache.variant_instrumental_path(file_hash, key, tempo);
-                    if variant.is_file() {
-                        return AudioPaths {
-                            instrumental: variant.to_string_lossy().into_owned(),
-                            vocals: None,
-                        };
-                    }
+            if let Some(key) = song.override_key.as_ref().or(song.key.as_ref())
+                && !is_base_original_selection(&song, key, tempo)
+            {
+                let variant = cache.variant_instrumental_path(file_hash, key, tempo);
+                if variant.is_file() {
+                    return AudioPaths {
+                        instrumental: variant.to_string_lossy().into_owned(),
+                        vocals: None,
+                    };
                 }
             }
             return AudioPaths {
@@ -261,7 +261,7 @@ pub fn ensure_playable_source_video(file_hash: &str) -> Result<Option<String>, N
     // file before we can decide whether it needs ffmpeg transcoding. Folder
     // file before we can decide whether it needs ffmpeg transcoding. Folder
     // sources are no-ops here (the trait just hands `song.path` back).
-    let materialised = if matches!(song.origin, crate::song::SongOrigin::LocalFile) {
+    let materialised = if matches!(song.origin, SongOrigin::LocalFile) {
         None
     } else {
         let source = crate::source::active_source()?
@@ -287,7 +287,9 @@ pub fn ensure_playable_source_video(file_hash: &str) -> Result<Option<String>, N
     }
 
     loop {
-        let mut inflight = PLAYABLE_VIDEO_INFLIGHT.lock().unwrap();
+        let mut inflight = PLAYABLE_VIDEO_INFLIGHT
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         if inflight.insert(file_hash.to_string()) {
             break;
         }
@@ -311,7 +313,10 @@ pub fn ensure_playable_source_video(file_hash: &str) -> Result<Option<String>, N
         Ok::<(), NightingaleError>(())
     })();
 
-    PLAYABLE_VIDEO_INFLIGHT.lock().unwrap().remove(file_hash);
+    PLAYABLE_VIDEO_INFLIGHT
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .remove(file_hash);
 
     match transcode_result {
         Ok(()) => Ok(Some(target.to_string_lossy().into_owned())),
@@ -990,7 +995,7 @@ fn fetch_video_listing(flavor: &str) -> Result<Vec<PendingDownload>, String> {
         order,
     );
 
-    let body: serde_json::Value = ureq::get(&url)
+    let body: Value = ureq::get(&url)
         .call()
         .map_err(|e| e.to_string())?
         .body_mut()

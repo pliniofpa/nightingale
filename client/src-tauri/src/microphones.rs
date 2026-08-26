@@ -19,18 +19,21 @@ const MAX_MONITOR_GAIN: f32 = 2.0;
 
 static MONITOR_GAIN_BITS: AtomicU32 = AtomicU32::new(DEFAULT_MONITOR_GAIN.to_bits());
 
+type SampleSink = Arc<dyn Fn(&[f32]) + Send + Sync>;
+type SampleSource = Arc<dyn Fn() -> f32 + Send + Sync>;
+
 fn monitor_gain() -> f32 {
     f32::from_bits(MONITOR_GAIN_BITS.load(Ordering::Relaxed))
 }
 
-pub fn set_monitor_gain(gain: f32) {
+pub(crate) fn set_monitor_gain(gain: f32) {
     let clamped = gain.clamp(0.0, MAX_MONITOR_GAIN);
     MONITOR_GAIN_BITS.store(clamped.to_bits(), Ordering::Relaxed);
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export)]
-pub struct MicrophoneInfo {
+pub(crate) struct MicrophoneInfo {
     pub name: String,
 }
 
@@ -38,7 +41,7 @@ pub struct MicrophoneInfo {
 /// analysis) and runs it on a sliding window built from these frames.
 #[derive(Debug, Clone, Serialize, TS)]
 #[ts(export)]
-pub struct MicSampleFrame {
+pub(crate) struct MicSampleFrame {
     pub sample_rate: u32,
     pub samples: Vec<f32>,
 }
@@ -46,14 +49,9 @@ pub struct MicSampleFrame {
 #[derive(Debug, Clone, Deserialize, Serialize, TS)]
 #[ts(export)]
 #[serde(default)]
-pub struct MicCaptureOptions {
+#[derive(Default)]
+pub(crate) struct MicCaptureOptions {
     pub emit_audio: bool,
-}
-
-impl Default for MicCaptureOptions {
-    fn default() -> Self {
-        Self { emit_audio: false }
-    }
 }
 
 fn device_display_name(device: &cpal::Device) -> String {
@@ -74,7 +72,7 @@ fn is_virtual(device: &cpal::Device) -> bool {
 }
 
 #[tauri::command]
-pub fn list_microphones() -> Result<Vec<MicrophoneInfo>, String> {
+pub(crate) fn list_microphones() -> Result<Vec<MicrophoneInfo>, String> {
     let host = cpal::default_host();
     let devices = host
         .input_devices()
@@ -121,7 +119,7 @@ fn f32_to_u32(sample: f32) -> u32 {
     ((sample.clamp(-1.0, 1.0) * 0.5 + 0.5) * u32::MAX as f32) as u32
 }
 
-fn push_mapped_input<T, F>(data: &[T], push: &Arc<dyn Fn(&[f32]) + Send + Sync>, mut map: F)
+fn push_mapped_input<T, F>(data: &[T], push: &SampleSink, mut map: F)
 where
     T: Copy,
     F: FnMut(T) -> f32,
@@ -133,7 +131,7 @@ where
 fn write_output_frames<T, F>(
     data: &mut [T],
     channels: usize,
-    next_sample: &Arc<dyn Fn() -> f32 + Send + Sync>,
+    next_sample: &SampleSource,
     mut map: F,
 ) where
     T: Copy,
@@ -204,7 +202,7 @@ fn find_device(preferred: Option<&str>) -> Result<(cpal::Device, String), String
 }
 
 #[tauri::command]
-pub fn start_mic_capture(
+pub(crate) fn start_mic_capture(
     preferred: Option<String>,
     options: Option<MicCaptureOptions>,
     on_samples: Channel<MicSampleFrame>,
@@ -261,7 +259,7 @@ fn try_build_stream(
     audio_shared: Arc<Mutex<VecDeque<f32>>>,
 ) -> Option<cpal::Stream> {
     let ch = config.channels as usize;
-    let push_samples: Arc<dyn Fn(&[f32]) + Send + Sync> = {
+    let push_samples: SampleSink = {
         let pcm_cb = Arc::clone(&pcm_shared);
         let audio_cb = Arc::clone(&audio_shared);
         Arc::new(move |data: &[f32]| {
@@ -363,7 +361,7 @@ fn try_build_output_stream(
     };
     let ch = config.channels as usize;
 
-    let next_sample: Arc<dyn Fn() -> f32 + Send + Sync> = {
+    let next_sample: SampleSource = {
         let audio_shared = Arc::clone(&audio_shared);
         Arc::new(move || -> f32 {
             if !MONITOR_ENABLED.load(Ordering::Relaxed) {
@@ -532,7 +530,7 @@ fn run_mic_loop(device: cpal::Device, name: &str, shutdown: Arc<AtomicBool>) {
 }
 
 #[tauri::command]
-pub fn stop_mic_capture() {
+pub(crate) fn stop_mic_capture() {
     let _guard = MIC_OP_LOCK.lock().unwrap_or_else(|p| p.into_inner());
     stop_internal();
 }

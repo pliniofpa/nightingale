@@ -260,10 +260,10 @@ impl AppConfig {
         }
         // One-shot promotion of the legacy `last_folder` field into the new
         // `library_source` enum so old installs keep scanning the same folder.
-        if self.library_source.is_none() {
-            if let Some(path) = self.last_folder.take() {
-                self.library_source = Some(LibrarySource::Folder { path });
-            }
+        if self.library_source.is_none()
+            && let Some(path) = self.last_folder.take()
+        {
+            self.library_source = Some(LibrarySource::Folder { path });
         }
         self
     }

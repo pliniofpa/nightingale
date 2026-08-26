@@ -39,8 +39,8 @@ fn get_media_endpoint() -> app_core::MediaEndpoint {
 }
 
 #[tauri::command]
-fn frontend_ready(window: tauri::Window) {
-    window.show().unwrap();
+fn frontend_ready(window: tauri::Window) -> Result<(), String> {
+    window.show().map_err(|error| error.to_string())
 }
 
 /// True for native fullscreen or macOS "simple" fullscreen (`set_simple_fullscreen`), where
@@ -155,7 +155,7 @@ pub fn run() {
             app.handle()
                 .plugin(tauri_plugin_updater::Builder::new().build())?;
             app_core::startup()?;
-            app_core::media_server::start();
+            app_core::media_server::start()?;
             let media_endpoint = app_core::media_server::endpoint();
 
             let config = AppConfig::load();

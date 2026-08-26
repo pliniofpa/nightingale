@@ -14,7 +14,7 @@ use super::connection::with_conn;
 use super::migrations::{is_song_migration_in_progress, song_migration_done, song_migration_total};
 use super::songs::load_song_from_payload_column;
 
-pub fn load_meta_sql() -> rusqlite::Result<SongsMeta> {
+pub(crate) fn load_meta_sql() -> rusqlite::Result<SongsMeta> {
     if is_song_migration_in_progress() {
         return with_conn(|c| {
             let (folder, _scan_count): (String, i64) = c.query_row(
@@ -231,7 +231,7 @@ fn build_song_where_clause(
     }
 }
 
-pub fn load_songs_page(params: &LoadSongsParams) -> rusqlite::Result<SongsStore> {
+pub(crate) fn load_songs_page(params: &LoadSongsParams) -> rusqlite::Result<SongsStore> {
     let (folder, scan_count) = with_conn(|c| {
         c.query_row(
             "SELECT folder, scan_count FROM library_meta WHERE id = 1",
@@ -360,13 +360,13 @@ fn iter_file_hashes_filtered(
     }
 }
 
-pub fn iter_file_hashes_filtered_not_analyzed(
+pub(crate) fn iter_file_hashes_filtered_not_analyzed(
     filters: &LibraryMenuFilters,
 ) -> rusqlite::Result<Vec<String>> {
     iter_file_hashes_filtered(filters, &["s.is_analyzed = 0"])
 }
 
-pub fn iter_file_hashes_filtered_realignable(
+pub(crate) fn iter_file_hashes_filtered_realignable(
     filters: &LibraryMenuFilters,
 ) -> rusqlite::Result<Vec<String>> {
     iter_file_hashes_filtered(
@@ -379,7 +379,7 @@ pub fn iter_file_hashes_filtered_realignable(
 }
 
 /// Unlike `iter_file_hashes_filtered_realignable`, includes LRC-provided songs.
-pub fn iter_file_hashes_filtered_full_reanalyzable(
+pub(crate) fn iter_file_hashes_filtered_full_reanalyzable(
     filters: &LibraryMenuFilters,
 ) -> rusqlite::Result<Vec<String>> {
     iter_file_hashes_filtered(
@@ -388,13 +388,13 @@ pub fn iter_file_hashes_filtered_full_reanalyzable(
     )
 }
 
-pub fn iter_file_hashes_filtered_refreshable(
+pub(crate) fn iter_file_hashes_filtered_refreshable(
     filters: &LibraryMenuFilters,
 ) -> rusqlite::Result<Vec<String>> {
     iter_file_hashes_filtered(filters, &["json_extract(s.payload, '$.usdx') IS NULL"])
 }
 
-pub fn query_library_menu_items() -> rusqlite::Result<LibraryMenuItems> {
+pub(crate) fn query_library_menu_items() -> rusqlite::Result<LibraryMenuItems> {
     with_conn(|c| {
         let (
             total,

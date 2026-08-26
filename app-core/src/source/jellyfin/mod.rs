@@ -35,9 +35,9 @@ use super::{
     apply_refreshed_metadata, flush_batch, retained_cover,
 };
 
-pub mod client;
+pub(crate) mod client;
 
-pub use client::{AuthHeaders, JellyfinClient, trim_base_url};
+pub(crate) use client::{AuthHeaders, JellyfinClient, trim_base_url};
 
 const PAGE_SIZE: usize = 200;
 const COVER_FILL_WIDTH: u32 = 300;
@@ -565,7 +565,11 @@ fn pick_string(value: Option<&str>, fallback: &str) -> String {
 /// Path of the on-disk cache file we materialise sources into. Also used as
 /// the placeholder `Song.path` for unmaterialised Jellyfin rows — there is
 /// only ever one representation.
-pub fn source_cache_path(cache: &CacheDir, file_hash: &str, container: Option<&str>) -> PathBuf {
+pub(crate) fn source_cache_path(
+    cache: &CacheDir,
+    file_hash: &str,
+    container: Option<&str>,
+) -> PathBuf {
     let dir = cache.path.join("sources");
     let _ = std::fs::create_dir_all(&dir);
     let ext = container.unwrap_or("bin");

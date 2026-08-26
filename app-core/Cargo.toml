@@ -25,5 +25,5 @@ md-5 = "0.10"
 [build-dependencies]
 dotenvy = "0.15"
 
-# [lints]
-# workspace = true
+[lints]
+workspace = true

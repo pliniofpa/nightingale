@@ -36,9 +36,9 @@ use super::{
     retained_cover,
 };
 
-pub mod client;
+pub(crate) mod client;
 
-pub use client::{AuthCreds, SubsonicClient, trim_base_url};
+pub(crate) use client::{AuthCreds, SubsonicClient, trim_base_url};
 
 const PAGE_SIZE: usize = 500;
 const COVER_SIZE: u32 = 300;
@@ -466,7 +466,11 @@ fn is_unknown_placeholder(value: &str) -> bool {
     matches!(value, "[Unknown Artist]" | "[Unknown Album]")
 }
 
-pub fn source_cache_path(cache: &CacheDir, file_hash: &str, container: Option<&str>) -> PathBuf {
+pub(crate) fn source_cache_path(
+    cache: &CacheDir,
+    file_hash: &str,
+    container: Option<&str>,
+) -> PathBuf {
     let dir = cache.path.join("sources");
     let _ = std::fs::create_dir_all(&dir);
     let ext = container.unwrap_or("bin");

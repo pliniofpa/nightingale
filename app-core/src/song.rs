@@ -128,7 +128,7 @@ fn default_tempo() -> f64 {
 }
 
 #[derive(Debug, Clone)]
-pub struct TranscriptMetaInfo {
+pub(crate) struct TranscriptMetaInfo {
     pub source: TranscriptSource,
     pub language: Option<String>,
     pub key: Option<String>,
@@ -212,51 +212,6 @@ fn read_file_derived_fields(path: &Path, is_video: bool, cache: &CacheDir) -> Fi
 }
 
 impl Song {
-    pub fn from_path(
-        path: &Path,
-        file_hash: String,
-        cache: &CacheDir,
-        is_analyzed: bool,
-        language: Option<String>,
-        transcript_source: Option<TranscriptSource>,
-        key: Option<String>,
-        override_key: Option<String>,
-        tempo: f64,
-        key_offset: i32,
-        is_video: bool,
-        usdx: Option<UsdxBundle>,
-        origin: SongOrigin,
-    ) -> Self {
-        let FileDerivedFields {
-            title,
-            artist,
-            album,
-            duration_secs,
-            album_art_path,
-        } = read_file_derived_fields(path, is_video, cache);
-
-        Self {
-            path: path.to_path_buf(),
-            file_hash,
-            title,
-            artist,
-            album,
-            duration_secs,
-            album_art_path,
-            is_analyzed,
-            language,
-            transcript_source,
-            key,
-            override_key,
-            tempo,
-            key_offset,
-            is_video,
-            usdx,
-            origin,
-            no_stems: false,
-        }
-    }
-
     /// Re-reads title/artist/album/duration/album art straight from
     /// `self.path`, overwriting the current values in place. Everything
     /// analysis-derived (key, tempo,
@@ -304,7 +259,11 @@ pub(crate) fn compute_file_hash(path: &Path) -> Result<String, std::io::Error> {
     Ok(hasher.finalize().to_hex()[..32].to_string())
 }
 
-pub fn build_song(path: &Path, cache: &CacheDir, is_video: bool) -> Result<Song, NightingaleError> {
+pub(crate) fn build_song(
+    path: &Path,
+    cache: &CacheDir,
+    is_video: bool,
+) -> Result<Song, NightingaleError> {
     let file_hash = compute_file_hash(path)?;
 
     let is_analyzed = cache.transcript_exists(&file_hash);
@@ -321,26 +280,37 @@ pub fn build_song(path: &Path, cache: &CacheDir, is_video: bool) -> Result<Song,
         (None, None, None, default_tempo(), false)
     };
 
-    let mut song = Song::from_path(
-        path,
+    let FileDerivedFields {
+        title,
+        artist,
+        album,
+        duration_secs,
+        album_art_path,
+    } = read_file_derived_fields(path, is_video, cache);
+
+    Ok(Song {
+        path: path.to_path_buf(),
         file_hash,
-        cache,
+        title,
+        artist,
+        album,
+        duration_secs,
+        album_art_path,
         is_analyzed,
         language,
         transcript_source,
         key,
-        None,
+        override_key: None,
         tempo,
-        0,
+        key_offset: 0,
         is_video,
-        None,
-        SongOrigin::LocalFile,
-    );
-    song.no_stems = no_stems;
-    Ok(song)
+        usdx: None,
+        origin: SongOrigin::LocalFile,
+        no_stems,
+    })
 }
 
-pub fn read_transcript_meta(cache: &CacheDir, hash: &str) -> TranscriptMetaInfo {
+pub(crate) fn read_transcript_meta(cache: &CacheDir, hash: &str) -> TranscriptMetaInfo {
     #[derive(serde::Deserialize)]
     struct TranscriptMeta {
         #[serde(default)]
@@ -355,22 +325,22 @@ pub fn read_transcript_meta(cache: &CacheDir, hash: &str) -> TranscriptMetaInfo 
         no_stems: bool,
     }
     let path = cache.transcript_path(hash);
-    if let Ok(data) = std::fs::read_to_string(&path) {
-        if let Ok(parsed) = serde_json::from_str::<TranscriptMeta>(&data) {
-            let src = match parsed.source.as_deref() {
-                Some("lyrics") => TranscriptSource::Lyrics,
-                Some("usdx") => TranscriptSource::Usdx,
-                Some("lrc") => TranscriptSource::Lrc,
-                _ => TranscriptSource::Generated,
-            };
-            return TranscriptMetaInfo {
-                source: src,
-                language: parsed.language,
-                key: parsed.key,
-                tempo: parsed.tempo,
-                no_stems: parsed.no_stems,
-            };
-        }
+    if let Ok(data) = std::fs::read_to_string(&path)
+        && let Ok(parsed) = serde_json::from_str::<TranscriptMeta>(&data)
+    {
+        let src = match parsed.source.as_deref() {
+            Some("lyrics") => TranscriptSource::Lyrics,
+            Some("usdx") => TranscriptSource::Usdx,
+            Some("lrc") => TranscriptSource::Lrc,
+            _ => TranscriptSource::Generated,
+        };
+        return TranscriptMetaInfo {
+            source: src,
+            language: parsed.language,
+            key: parsed.key,
+            tempo: parsed.tempo,
+            no_stems: parsed.no_stems,
+        };
     }
     TranscriptMetaInfo {
         source: TranscriptSource::Generated,
@@ -381,9 +351,9 @@ pub fn read_transcript_meta(cache: &CacheDir, hash: &str) -> TranscriptMetaInfo 
     }
 }
 
-fn read_metadata(
-    path: &Path,
-) -> Result<(String, String, String, f64, Option<Vec<u8>>), NightingaleError> {
+type MediaMetadata = (String, String, String, f64, Option<Vec<u8>>);
+
+fn read_metadata(path: &Path) -> Result<MediaMetadata, NightingaleError> {
     let tagged = lofty::read_from_path(path)
         .map_err(|e| NightingaleError::Other(format!("failed reading {}: {e}", path.display())))?;
 
@@ -412,9 +382,7 @@ fn read_metadata(
     Ok((title, artist, album, duration_secs, album_art))
 }
 
-fn read_video_metadata(
-    path: &Path,
-) -> Result<(String, String, String, f64, Option<Vec<u8>>), NightingaleError> {
+fn read_video_metadata(path: &Path) -> Result<MediaMetadata, NightingaleError> {
     let ffmpeg = crate::vendor::ffmpeg_path();
 
     // Just probe the header -- no output file means ffmpeg reads metadata and exits immediately.

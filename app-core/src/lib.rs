@@ -25,6 +25,7 @@ pub use analyzer::{
 pub use cache::{
     CacheDir, CachePaths, CacheStats, cache_roots, change_app_data_path, clear_models,
     clear_videos, default_nightingale_dir, nightingale_dir, normalized_target_path, same_path,
+    set_default_data_path,
 };
 pub use config::{AppConfig, LibrarySource};
 pub use library_db::{init_library, library_db_path};
@@ -85,7 +86,7 @@ pub fn startup() -> Result<(), String> {
     }
 
     if AppConfig::load().auto_analyze() {
-        let _ = analyzer::enqueue(SongTarget::Filter {
+        let _ = enqueue(SongTarget::Filter {
             filters: LibraryMenuFilters::default(),
         });
     }
