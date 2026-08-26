@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 
 import { setFullScreen, isFullScreen as tauriIsFullScreen } from '@/bridge/fullScreen';
 import { useMicDevices } from '@/features/microphone/queries/use-mic-devices';
+import { clampPlaybackScale } from '@/features/playback/lib/display-scale';
 import {
   ALIGN_BACKENDS,
   ASR_ENGINES,
@@ -11,6 +12,9 @@ import {
   LYRICS_VERTICAL_POSITIONS,
   MODELS,
   NAV,
+  PLAYBACK_SCALE_MAX,
+  PLAYBACK_SCALE_MIN,
+  PLAYBACK_SCALE_STEP,
   SEPARATORS,
   SETTINGS_TABS,
   VOCAL_THRESHOLD_MAX,
@@ -18,6 +22,7 @@ import {
   type SettingsTab,
 } from '@/features/settings/components/constants';
 import { MicLatencyField } from '@/features/settings/components/mic-latency-field';
+import { PlaybackPreview } from '@/features/settings/components/playback-preview';
 import {
   Hint,
   NumberButtonGroup,
@@ -44,8 +49,6 @@ const generalSettings = (config: AppConfig | undefined) => {
       preferredMic: null,
       micMonitorGain: DEFAULTS.mic_monitor_gain,
       micLatency: DEFAULTS.mic_latency_compensation_sec,
-      lyricsVertical: DEFAULTS.lyrics_vertical_position,
-      lyricsHorizontal: DEFAULTS.lyrics_horizontal_position,
     };
   }
 
@@ -54,10 +57,17 @@ const generalSettings = (config: AppConfig | undefined) => {
     preferredMic: config.preferred_mic,
     micMonitorGain: config.mic_monitor_gain ?? DEFAULTS.mic_monitor_gain,
     micLatency: config.mic_latency_compensation_sec ?? DEFAULTS.mic_latency_compensation_sec,
-    lyricsVertical: config.lyrics_vertical_position ?? DEFAULTS.lyrics_vertical_position,
-    lyricsHorizontal: config.lyrics_horizontal_position ?? DEFAULTS.lyrics_horizontal_position,
   };
 };
+
+const playbackSettings = (config: AppConfig | undefined) => ({
+  lyricsVertical: config?.lyrics_vertical_position ?? DEFAULTS.lyrics_vertical_position,
+  lyricsHorizontal: config?.lyrics_horizontal_position ?? DEFAULTS.lyrics_horizontal_position,
+  lyricsScale: clampPlaybackScale(config?.lyrics_scale),
+  pitchGraphScale: clampPlaybackScale(config?.pitch_graph_scale),
+});
+
+const pendingValue = <T,>(input: T | null, saved: T): T => input ?? saved;
 
 const analysisSettings = (config: AppConfig | undefined) => {
   if (!config) {
@@ -97,12 +107,21 @@ export const SettingsPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [tab, setTab] = useState<SettingsTab>('general');
   const general = generalSettings(config);
+  const playback = playbackSettings(config);
   const analysis = analysisSettings(config);
   const [isFullScreen, setIsFullScreen] = useState<boolean | null | undefined>(general.fullscreen);
   const [micMonitorGainInput, setMicMonitorGain] = useState<number | null>(null);
   const micMonitorGain = micMonitorGainInput ?? general.micMonitorGain;
   const [micLatencySecInput, setMicLatencySec] = useState<number | null>(null);
   const micLatencySec = micLatencySecInput ?? general.micLatency;
+  const [lyricsVerticalInput, setLyricsVertical] = useState<string | null>(null);
+  const lyricsVertical = pendingValue(lyricsVerticalInput, playback.lyricsVertical);
+  const [lyricsHorizontalInput, setLyricsHorizontal] = useState<string | null>(null);
+  const lyricsHorizontal = pendingValue(lyricsHorizontalInput, playback.lyricsHorizontal);
+  const [lyricsScaleInput, setLyricsScale] = useState<number | null>(null);
+  const lyricsScale = pendingValue(lyricsScaleInput, playback.lyricsScale);
+  const [pitchGraphScaleInput, setPitchGraphScale] = useState<number | null>(null);
+  const pitchGraphScale = pendingValue(pitchGraphScaleInput, playback.pitchGraphScale);
   const [vocalThresholdPctInput, setVocalThresholdPct] = useState<number | null>(null);
   const vocalThresholdPct = vocalThresholdPctInput ?? analysis.vocalThreshold;
 
@@ -122,6 +141,8 @@ export const SettingsPage = () => {
   );
   const modelOptions = useMemo(() => MODELS.map((model) => ({ value: model, label: model })), []);
   const micMonitorGainPct = Math.round(micMonitorGain * 100);
+  const lyricsScalePct = Math.round(lyricsScale * 100);
+  const pitchGraphScalePct = Math.round(pitchGraphScale * 100);
   const vocalThresholdDisplayPct = Math.round(vocalThresholdPct * 100);
   const batchSize = analysis.batchSize;
   const beamSize = analysis.beamSize;
@@ -144,6 +165,16 @@ export const SettingsPage = () => {
     mutate({ mic_latency_compensation_sec: latencySec });
   };
 
+  const updateLyricsScale = (scale: number) => {
+    setLyricsScale(scale);
+    mutate({ lyrics_scale: scale });
+  };
+
+  const updatePitchGraphScale = (scale: number) => {
+    setPitchGraphScale(scale);
+    mutate({ pitch_graph_scale: scale });
+  };
+
   const updateVocalThreshold = (pct: number) => {
     setVocalThresholdPct(pct);
     mutate({ vocal_detection_threshold_pct: pct });
@@ -159,6 +190,10 @@ export const SettingsPage = () => {
     mutate(DEFAULTS);
     setMicMonitorGain(DEFAULTS.mic_monitor_gain);
     setMicLatencySec(DEFAULTS.mic_latency_compensation_sec);
+    setLyricsVertical(DEFAULTS.lyrics_vertical_position);
+    setLyricsHorizontal(DEFAULTS.lyrics_horizontal_position);
+    setLyricsScale(DEFAULTS.lyrics_scale);
+    setPitchGraphScale(DEFAULTS.pitch_graph_scale);
     setVocalThresholdPct(DEFAULTS.vocal_detection_threshold_pct);
   };
 
@@ -168,11 +203,15 @@ export const SettingsPage = () => {
     isParakeet,
     micMonitorGain,
     micLatencySec,
+    lyricsScale,
+    pitchGraphScale,
     vocalThresholdPct,
     onBack: close,
     onTabChange: setTab,
     onMicMonitorGainChange: updateMicMonitorGain,
     onMicLatencyChange: updateMicLatency,
+    onLyricsScaleChange: updateLyricsScale,
+    onPitchGraphScaleChange: updatePitchGraphScale,
     onVocalThresholdChange: updateVocalThreshold,
   });
 
@@ -271,43 +310,82 @@ export const SettingsPage = () => {
                 buttonClassName={getFocusClassName(NAV.general.micLatency, 1)}
                 onLatencyChange={updateMicLatency}
               />
-
-              <Field>
-                <Label htmlFor="lyrics-vertical-position-1">Lyrics vertical position</Label>
-                <Hint>Top moves playback HUD and pitch graph to the bottom</Hint>
-                <SettingsSelect
-                  id="lyrics-vertical-position-1"
-                  label="Lyrics vertical position"
-                  placeholder="Select vertical position"
-                  value={general.lyricsVertical}
-                  options={LYRICS_VERTICAL_POSITIONS}
-                  triggerClassName={getFocusClassName(NAV.general.lyricsVerticalPosition)}
-                  onValueChange={(lyrics_vertical_position) =>
-                    mutate({
-                      lyrics_vertical_position: lyrics_vertical_position,
-                    })
-                  }
-                />
-              </Field>
-
-              <Field>
-                <Label htmlFor="lyrics-horizontal-position-1">Lyrics horizontal position</Label>
-                <Hint>Align lyrics left, center, or right during playback</Hint>
-                <SettingsSelect
-                  id="lyrics-horizontal-position-1"
-                  label="Lyrics horizontal position"
-                  placeholder="Select horizontal position"
-                  value={general.lyricsHorizontal}
-                  options={LYRICS_HORIZONTAL_POSITIONS}
-                  triggerClassName={getFocusClassName(NAV.general.lyricsHorizontalPosition)}
-                  onValueChange={(lyrics_horizontal_position) =>
-                    mutate({
-                      lyrics_horizontal_position: lyrics_horizontal_position,
-                    })
-                  }
-                />
-              </Field>
             </FieldGroup>
+          </TabsContent>
+
+          <TabsContent value="playback" className="mt-4">
+            <div className="space-y-5">
+              <div className="w-[65%]">
+                <PlaybackPreview
+                  lyricsVerticalPosition={lyricsVertical}
+                  lyricsHorizontalPosition={lyricsHorizontal}
+                  lyricsScale={lyricsScale}
+                  pitchGraphScale={pitchGraphScale}
+                />
+              </div>
+
+              <FieldGroup>
+                <Field>
+                  <Label htmlFor="lyrics-vertical-position-1">Lyrics vertical position</Label>
+                  <Hint>Top moves playback HUD and pitch graph to the bottom</Hint>
+                  <SettingsSelect
+                    id="lyrics-vertical-position-1"
+                    label="Lyrics vertical position"
+                    placeholder="Select vertical position"
+                    value={lyricsVertical}
+                    options={LYRICS_VERTICAL_POSITIONS}
+                    triggerClassName={getFocusClassName(NAV.playback.lyricsVerticalPosition)}
+                    onValueChange={(lyrics_vertical_position) => {
+                      setLyricsVertical(lyrics_vertical_position);
+                      mutate({ lyrics_vertical_position });
+                    }}
+                  />
+                </Field>
+
+                <Field>
+                  <Label htmlFor="lyrics-horizontal-position-1">Lyrics horizontal position</Label>
+                  <Hint>Align lyrics left, center, or right during playback</Hint>
+                  <SettingsSelect
+                    id="lyrics-horizontal-position-1"
+                    label="Lyrics horizontal position"
+                    placeholder="Select horizontal position"
+                    value={lyricsHorizontal}
+                    options={LYRICS_HORIZONTAL_POSITIONS}
+                    triggerClassName={getFocusClassName(NAV.playback.lyricsHorizontalPosition)}
+                    onValueChange={(lyrics_horizontal_position) => {
+                      setLyricsHorizontal(lyrics_horizontal_position);
+                      mutate({ lyrics_horizontal_position });
+                    }}
+                  />
+                </Field>
+
+                <Field>
+                  <Label>Lyrics scale</Label>
+                  <Hint>Size of lyrics during playback ({lyricsScalePct}%)</Hint>
+                  <Slider
+                    min={PLAYBACK_SCALE_MIN * 100}
+                    max={PLAYBACK_SCALE_MAX * 100}
+                    step={PLAYBACK_SCALE_STEP * 100}
+                    value={[lyricsScalePct]}
+                    onValueChange={([pct]) => updateLyricsScale(pct / 100)}
+                    className={getFocusClassName(NAV.playback.lyricsScale)}
+                  />
+                </Field>
+
+                <Field>
+                  <Label>Pitch graph scale</Label>
+                  <Hint>Size of pitch graph during playback ({pitchGraphScalePct}%)</Hint>
+                  <Slider
+                    min={PLAYBACK_SCALE_MIN * 100}
+                    max={PLAYBACK_SCALE_MAX * 100}
+                    step={PLAYBACK_SCALE_STEP * 100}
+                    value={[pitchGraphScalePct]}
+                    onValueChange={([pct]) => updatePitchGraphScale(pct / 100)}
+                    className={getFocusClassName(NAV.playback.pitchGraphScale)}
+                  />
+                </Field>
+              </FieldGroup>
+            </div>
           </TabsContent>
 
           <TabsContent value="analysis" className="mt-4">

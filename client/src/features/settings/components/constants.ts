@@ -1,14 +1,18 @@
+import { DEFAULT_PLAYBACK_SCALE } from '@/features/playback/lib/display-scale';
 import {
   DEFAULT_MIC_LATENCY_COMPENSATION_SEC,
   MAX_MIC_LATENCY_COMPENSATION_SEC,
 } from '@/features/playback/lib/pitch/constants';
 import type { AppConfig } from '@/types/AppConfig';
 
-export type SettingsTab = 'general' | 'analysis';
+export { PLAYBACK_SCALE_MAX, PLAYBACK_SCALE_MIN } from '@/features/playback/lib/display-scale';
+
+export type SettingsTab = 'general' | 'playback' | 'analysis';
 export type SettingsOption = { value: string; label: string; description?: string };
 
 export const SETTINGS_TABS: { value: SettingsTab; label: string }[] = [
   { value: 'general', label: 'General' },
+  { value: 'playback', label: 'Playback' },
   { value: 'analysis', label: 'Analysis' },
 ];
 
@@ -87,6 +91,8 @@ export const DEFAULTS = {
   auto_analyze: false,
   lyrics_vertical_position: 'bottom',
   lyrics_horizontal_position: 'center',
+  lyrics_scale: DEFAULT_PLAYBACK_SCALE,
+  pitch_graph_scale: DEFAULT_PLAYBACK_SCALE,
 } satisfies Pick<
   AppConfig,
   | 'separator'
@@ -101,12 +107,15 @@ export const DEFAULTS = {
   | 'auto_analyze'
   | 'lyrics_vertical_position'
   | 'lyrics_horizontal_position'
+  | 'lyrics_scale'
+  | 'pitch_graph_scale'
 >;
 
 export const MIC_MONITOR_GAIN_STEP = 0.01;
 export const MIC_MONITOR_GAIN_MAX = 2;
 export const MIC_LATENCY_STEP = 0.005;
 export const MIC_LATENCY_MAX = MAX_MIC_LATENCY_COMPENSATION_SEC;
+export const PLAYBACK_SCALE_STEP = 0.05;
 // Vocal-detection threshold is stored as a fraction of peak RMS (0-1) but shown
 // as a percentage. Capped at 60% since anything higher trims almost everything.
 export const VOCAL_THRESHOLD_STEP = 0.01;
@@ -121,8 +130,12 @@ export const NAV = {
     microphone: 2,
     micMonitorGain: 3,
     micLatency: 4,
-    lyricsVerticalPosition: 5,
-    lyricsHorizontalPosition: 6,
+  },
+  playback: {
+    lyricsVerticalPosition: 1,
+    lyricsHorizontalPosition: 2,
+    lyricsScale: 3,
+    pitchGraphScale: 4,
   },
 } as const;
 
@@ -156,10 +169,13 @@ export function getAnalysisNav(isParakeet: boolean) {
 
 export function getSettingsStops(tab: SettingsTab, isParakeet: boolean) {
   if (tab === 'general') {
-    return [2, 2, 1, 1, 2, 1, 1, 2];
+    return [3, 2, 1, 1, 2, 2];
+  }
+  if (tab === 'playback') {
+    return [3, 1, 1, 1, 1, 2];
   }
 
   return isParakeet
-    ? [2, 1, 1, 1, 2, 1, NUMBER_PICKER_SIZE, 2]
-    : [2, 1, 1, 1, NUMBER_PICKER_SIZE, 1, 2, 1, NUMBER_PICKER_SIZE, 2];
+    ? [3, 1, 1, 1, 2, 1, NUMBER_PICKER_SIZE, 2]
+    : [3, 1, 1, 1, NUMBER_PICKER_SIZE, 1, 2, 1, NUMBER_PICKER_SIZE, 2];
 }

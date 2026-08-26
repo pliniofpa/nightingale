@@ -8,6 +8,10 @@ import {
   MIC_MONITOR_GAIN_MAX,
   MIC_MONITOR_GAIN_STEP,
   NAV,
+  PLAYBACK_SCALE_MAX,
+  PLAYBACK_SCALE_MIN,
+  PLAYBACK_SCALE_STEP,
+  SETTINGS_TABS,
   VOCAL_THRESHOLD_MAX,
   VOCAL_THRESHOLD_MIN,
   VOCAL_THRESHOLD_STEP,
@@ -46,11 +50,15 @@ type UseSettingsNavigationOptions = {
   isParakeet: boolean;
   micMonitorGain: number;
   micLatencySec: number;
+  lyricsScale: number;
+  pitchGraphScale: number;
   vocalThresholdPct: number;
   onBack: () => void;
   onTabChange: (tab: SettingsTab) => void;
   onMicMonitorGainChange: (gain: number) => void;
   onMicLatencyChange: (latencySec: number) => void;
+  onLyricsScaleChange: (scale: number) => void;
+  onPitchGraphScaleChange: (scale: number) => void;
   onVocalThresholdChange: (pct: number) => void;
 };
 
@@ -60,11 +68,15 @@ export function useSettingsNavigation({
   isParakeet,
   micMonitorGain,
   micLatencySec,
+  lyricsScale,
+  pitchGraphScale,
   vocalThresholdPct,
   onBack,
   onTabChange,
   onMicMonitorGainChange,
   onMicLatencyChange,
+  onLyricsScaleChange,
+  onPitchGraphScaleChange,
   onVocalThresholdChange,
 }: UseSettingsNavigationOptions) {
   const stops = useMemo(() => getSettingsStops(tab, isParakeet), [tab, isParakeet]);
@@ -94,6 +106,23 @@ export function useSettingsNavigation({
         return false;
       };
 
+      const adjustPlayback = (): boolean => {
+        const delta = action.right ? PLAYBACK_SCALE_STEP : -PLAYBACK_SCALE_STEP;
+        if (segment === NAV.playback.lyricsScale) {
+          onLyricsScaleChange(
+            Math.min(PLAYBACK_SCALE_MAX, Math.max(PLAYBACK_SCALE_MIN, lyricsScale + delta)),
+          );
+          return true;
+        }
+        if (segment === NAV.playback.pitchGraphScale) {
+          onPitchGraphScaleChange(
+            Math.min(PLAYBACK_SCALE_MAX, Math.max(PLAYBACK_SCALE_MIN, pitchGraphScale + delta)),
+          );
+          return true;
+        }
+        return false;
+      };
+
       const adjustAnalysis = (): boolean => {
         if (segment !== getAnalysisNav(isParakeet).vocalThreshold) {
           return false;
@@ -106,7 +135,7 @@ export function useSettingsNavigation({
       };
 
       if (segment === NAV.tabSegment && action.confirm) {
-        onTabChange(slot === 0 ? 'general' : 'analysis');
+        onTabChange(SETTINGS_TABS[slot].value);
         return true;
       }
 
@@ -114,7 +143,10 @@ export function useSettingsNavigation({
         return false;
       }
 
-      return tab === 'general' ? adjustGeneral() : adjustAnalysis();
+      if (tab === 'general') {
+        return adjustGeneral();
+      }
+      return tab === 'playback' ? adjustPlayback() : adjustAnalysis();
     },
   });
 

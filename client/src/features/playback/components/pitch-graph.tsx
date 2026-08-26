@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { clampPlaybackScale } from '@/features/playback/lib/display-scale';
 import { PITCH_BUFFER_SIZE } from '@/features/playback/lib/pitch/constants';
 import type { PitchSeries } from '@/features/playback/lib/pitch/state';
 import { freqToSemitone, snapToRefOctave } from '@/features/playback/lib/pitch/state';
@@ -51,8 +52,8 @@ function displayScale(windowHeight: number): number {
   return Math.max(MIN_DISPLAY_SCALE, windowHeight / REFERENCE_HEIGHT);
 }
 
-function computeLayout(windowHeight: number, windowWidth: number): CanvasLayout {
-  const scale = displayScale(windowHeight);
+function computeLayout(windowHeight: number, windowWidth: number, userScale: number): CanvasLayout {
+  const scale = displayScale(windowHeight) * userScale;
   const width = Math.min(BASE_DISPLAY_WIDTH * scale, Math.max(240, windowWidth - 32));
   const height = BASE_DISPLAY_HEIGHT * scale;
   const paddingX = 8 * scale;
@@ -302,9 +303,10 @@ function useWindowSize(): { height: number; width: number } {
 type PitchGraphProps = {
   series: PitchSeries;
   position?: 'top' | 'bottom';
+  scale?: number | null;
 };
 
-export function PitchGraph({ series, position = 'top' }: PitchGraphProps) {
+export function PitchGraph({ series, position = 'top', scale = 1 }: PitchGraphProps) {
   const { micReady: visible } = usePlaybackMicState();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { height: windowHeight, width: windowWidth } = useWindowSize();
@@ -320,11 +322,11 @@ export function PitchGraph({ series, position = 'top' }: PitchGraphProps) {
       return;
     }
 
-    const layout = computeLayout(windowHeight, windowWidth);
+    const layout = computeLayout(windowHeight, windowWidth, clampPlaybackScale(scale));
 
     setupCanvas(canvas, ctx, layout);
     drawPitchSeries(ctx, layout, series);
-  }, [series, visible, windowHeight, windowWidth]);
+  }, [series, visible, windowHeight, windowWidth, scale]);
 
   if (!visible) {
     return null;

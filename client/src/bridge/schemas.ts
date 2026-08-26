@@ -68,6 +68,8 @@ export const appConfigSchema: z.ZodType<AppConfig> = z.object({
   last_video_flavor: nullableNumber,
   lyrics_vertical_position: nullableString,
   lyrics_horizontal_position: nullableString,
+  lyrics_scale: nullableNumber,
+  pitch_graph_scale: nullableNumber,
   separator: nullableString,
   asr_engine: nullableString,
   align_backend: nullableString,

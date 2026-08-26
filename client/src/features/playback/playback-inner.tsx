@@ -33,13 +33,22 @@ type PlaybackLayoutProps = {
   config: AppConfig | null;
 };
 
+function displaySettings(config: AppConfig | null) {
+  return {
+    lyricsVerticalPosition: config?.lyrics_vertical_position ?? 'bottom',
+    lyricsHorizontalPosition: config?.lyrics_horizontal_position ?? 'center',
+    lyricsScale: config?.lyrics_scale,
+    pitchGraphScale: config?.pitch_graph_scale,
+  };
+}
+
 function PlaybackLayout({ song, config }: PlaybackLayoutProps) {
   const { isReady, paused } = usePlaybackTransportState();
   const { handleContinue, handleExit } = usePlaybackTransportActions();
   const { segments } = usePlaybackTranscriptState();
   const { series } = usePlaybackMicState();
-  const lyricsVerticalPosition = config?.lyrics_vertical_position ?? 'bottom';
-  const lyricsHorizontalPosition = config?.lyrics_horizontal_position ?? 'center';
+  const { lyricsVerticalPosition, lyricsHorizontalPosition, lyricsScale, pitchGraphScale } =
+    displaySettings(config);
   const hudPosition = lyricsVerticalPosition === 'top' ? 'bottom' : 'top';
 
   usePlaybackInput(config);
@@ -57,11 +66,12 @@ function PlaybackLayout({ song, config }: PlaybackLayoutProps) {
             config={config}
             position={hudPosition}
           />
-          <PitchGraph series={series} position={hudPosition} />
+          <PitchGraph series={series} position={hudPosition} scale={pitchGraphScale} />
           <LyricsDisplay
             segments={segments}
             verticalPosition={lyricsVerticalPosition}
             horizontalPosition={lyricsHorizontalPosition}
+            scale={lyricsScale}
           />
         </>
       )}

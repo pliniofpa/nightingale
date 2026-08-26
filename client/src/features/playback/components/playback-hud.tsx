@@ -398,18 +398,16 @@ function PlaybackHudImpl({ title, artist, config, position = 'top' }: PlaybackHu
           <p ref={timerRef} className="text-sm text-white/70 md:text-base">
             0:00 / {formatTime(duration)}
           </p>
+          <output
+            ref={gapCaptionRef}
+            aria-live="polite"
+            className="truncate text-xs font-medium text-white/60 md:text-sm"
+            style={{ display: 'none' }}
+          />
           <div className={`flex gap-2 ${skipButtonsClass}`}>
             <SkipButton ref={skipIntroRef} label="Skip Intro" onClick={handleSkipIntro} />
             <SkipButton ref={skipOutroRef} label="Skip Outro" onClick={handleSkipOutro} />
           </div>
-          <output
-            ref={gapCaptionRef}
-            aria-live="polite"
-            className={`truncate text-xs font-medium text-white/60 md:text-sm ${
-              position === 'bottom' ? 'order-first' : ''
-            }`}
-            style={{ display: 'none' }}
-          />
         </div>
 
         <div className={`flex min-w-0 items-end ${hudFlowClass}`}>

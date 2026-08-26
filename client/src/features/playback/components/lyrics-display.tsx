@@ -1,5 +1,6 @@
 import { memo, useLayoutEffect, useRef, useState } from 'react';
 
+import { clampPlaybackScale } from '@/features/playback/lib/display-scale';
 import {
   usePlaybackTransportActions,
   usePlaybackTransportState,
@@ -227,6 +228,7 @@ type LyricsDisplayProps = {
   segments: Segment[];
   verticalPosition?: LyricsVerticalPosition | null;
   horizontalPosition?: LyricsHorizontalPosition | null;
+  scale?: number | null;
 };
 
 const lyricPositions = (props: LyricsDisplayProps) => ({
@@ -237,6 +239,9 @@ const lyricPositions = (props: LyricsDisplayProps) => ({
 function LyricsDisplayImpl(props: LyricsDisplayProps) {
   const { segments } = props;
   const { vertical, horizontal } = lyricPositions(props);
+  const scale = clampPlaybackScale(props.scale);
+  const currentFontSize = `clamp(${1.35 * scale}rem, ${7 * scale}svh, ${2.5 * scale}rem)`;
+  const nextFontSize = `clamp(${0.9 * scale}rem, ${4.5 * scale}svh, ${1.5 * scale}rem)`;
   const { isPlaying, paused } = usePlaybackTransportState();
   const { subscribe, getCurrentTime } = usePlaybackTransportActions();
   const animate = isPlaying && !paused;
@@ -364,10 +369,11 @@ function LyricsDisplayImpl(props: LyricsDisplayProps) {
           <p
             className={lineClass(
               segHasReading,
-              'text-[clamp(1.35rem,7svh,2.5rem)] leading-tight font-bold',
+              'leading-tight font-bold',
               'gap-x-3 gap-y-1',
               horizontal,
             )}
+            style={{ fontSize: currentFontSize }}
           >
             {seg.words.map((word, wi) => (
               <WordToken
@@ -375,7 +381,7 @@ function LyricsDisplayImpl(props: LyricsDisplayProps) {
                 word={word}
                 hasReading={segHasReading}
                 isLast={wi === seg.words.length - 1}
-                readingClass="text-[clamp(0.65rem,3svh,1rem)]"
+                readingClass="text-[0.4em]"
                 refSetter={(el) => {
                   wordRefs.current[wi] = el;
                 }}
@@ -393,12 +399,8 @@ function LyricsDisplayImpl(props: LyricsDisplayProps) {
           style={{ display: 'none' }}
         >
           <p
-            className={lineClass(
-              nextHasReading,
-              'text-[clamp(0.9rem,4.5svh,1.5rem)] leading-tight',
-              'gap-x-2 gap-y-0.5',
-              horizontal,
-            )}
+            className={lineClass(nextHasReading, 'leading-tight', 'gap-x-2 gap-y-0.5', horizontal)}
+            style={{ fontSize: nextFontSize }}
           >
             {nextSeg.words.map((word, wi) => (
               <WordToken
@@ -406,7 +408,7 @@ function LyricsDisplayImpl(props: LyricsDisplayProps) {
                 word={word}
                 hasReading={nextHasReading}
                 isLast={wi === nextSeg.words.length - 1}
-                readingClass="text-[clamp(0.55rem,2.25svh,0.7rem)]"
+                readingClass="text-[0.467em]"
                 style={nextLineStyle(word)}
               />
             ))}
