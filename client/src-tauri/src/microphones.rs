@@ -19,7 +19,7 @@ const MAX_MONITOR_GAIN: f32 = 2.0;
 static MONITOR_GAIN_BITS: AtomicU32 = AtomicU32::new(DEFAULT_MONITOR_GAIN.to_bits());
 
 type SampleSink = Arc<dyn Fn(&[f32]) + Send + Sync>;
-type SampleSource = Arc<dyn Fn() -> f32 + Send + Sync>;
+type SampleSource = Arc<Mutex<Box<dyn FnMut() -> f32 + Send>>>;
 
 fn monitor_gain() -> f32 {
     f32::from_bits(MONITOR_GAIN_BITS.load(Ordering::Relaxed))
@@ -107,6 +107,10 @@ pub(crate) fn list_microphones() -> Result<Vec<MicrophoneInfo>, String> {
         };
 
         for device in devices {
+            if device.default_input_config().is_err() {
+                continue;
+            }
+
             let name = device_display_name(&device);
             let id = device
                 .id()
@@ -172,6 +176,13 @@ fn write_output_frames<T, F>(
     T: Copy,
     F: FnMut(f32) -> T,
 {
+    let Ok(mut next_sample) = next_sample.try_lock() else {
+        for sample in data {
+            *sample = map(0.0);
+        }
+        return;
+    };
+
     for frame in data.chunks_mut(channels) {
         let out_sample = map(next_sample());
         for out in frame {
@@ -389,6 +400,7 @@ fn try_build_stream(
 
 fn try_build_output_stream(
     device: &cpal::Device,
+    input_sample_rate: cpal::SampleRate,
     audio_shared: Arc<Mutex<VecDeque<f32>>>,
 ) -> Option<cpal::Stream> {
     let default_cfg = match device.default_output_config() {
@@ -405,19 +417,41 @@ fn try_build_output_stream(
         buffer_size: cpal::BufferSize::Default,
     };
     let ch = config.channels as usize;
+    let sample_rate_ratio = f64::from(input_sample_rate) / f64::from(config.sample_rate);
 
     let next_sample: SampleSource = {
         let audio_shared = Arc::clone(&audio_shared);
-        Arc::new(move || -> f32 {
+        let mut current = 0.0;
+        let mut next = 0.0;
+        let mut position = 0.0;
+        let mut initialized = false;
+        Arc::new(Mutex::new(Box::new(move || -> f32 {
             if !MONITOR_ENABLED.load(Ordering::Relaxed) {
                 return 0.0;
             }
-            if let Ok(mut q) = audio_shared.try_lock() {
-                q.pop_front().unwrap_or(0.0) * monitor_gain()
-            } else {
-                0.0
+
+            if !initialized {
+                if let Ok(mut queue) = audio_shared.try_lock() {
+                    current = queue.pop_front().unwrap_or(0.0);
+                    next = queue.pop_front().unwrap_or(0.0);
+                }
+                initialized = true;
             }
-        })
+
+            let sample = current + (next - current) * position as f32;
+            position += sample_rate_ratio;
+            while position >= 1.0 {
+                current = next;
+                next = audio_shared
+                    .try_lock()
+                    .ok()
+                    .and_then(|mut queue| queue.pop_front())
+                    .unwrap_or(0.0);
+                position -= 1.0;
+            }
+
+            sample * monitor_gain()
+        })))
     };
 
     use cpal::SampleFormat;
@@ -539,18 +573,10 @@ fn run_mic_loop(device: cpal::Device, name: &str, shutdown: Arc<AtomicBool>) {
         warn!("[mic] failed to open '{name}'");
         return;
     };
-    // Extract the audio host from the input device so we use the same host for monitoring.
-    // This ensures we get proper support for devices on specific hosts (e.g., ASIO input
-    // should use ASIO output). Falls back to default host if extraction fails.
-    let monitor_host = device
-        .id()
-        .ok()
-        .and_then(|id| cpal::host_from_id(id.0).ok())
-        .unwrap_or_else(cpal::default_host);
-    let monitor_stream = monitor_host
+    let monitor_stream = cpal::default_host()
         .default_output_device()
         .and_then(|output_device| {
-            try_build_output_stream(&output_device, Arc::clone(&audio_shared))
+            try_build_output_stream(&output_device, sr, Arc::clone(&audio_shared))
         });
     if monitor_stream.is_none() {
         warn!("[mic] no output monitoring stream available");

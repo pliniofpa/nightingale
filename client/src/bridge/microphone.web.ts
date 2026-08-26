@@ -140,29 +140,8 @@ const listDevices = async (): Promise<MicrophoneInfo[]> => {
     );
   }
 
-  let devices = await mediaDevices.enumerateDevices();
-  let inputs = devices.filter((device) => device.kind === 'audioinput');
-
-  // Browsers commonly hide device labels and may expose only the default
-  // input until microphone permission has been granted. Briefly opening the
-  // default input grants access, after which enumeration returns the complete
-  // set. Tracks are stopped immediately; capture is started separately.
-  if (inputs.length === 0 || inputs.some((device) => !device.label.trim())) {
-    let permissionStream: MediaStream;
-    try {
-      permissionStream = await mediaDevices.getUserMedia({ audio: true });
-    } catch (error) {
-      const detail = error instanceof Error ? error.message : String(error);
-      throw new Error(`Microphone permission is required to list devices: ${detail}`, {
-        cause: error,
-      });
-    }
-    for (const track of permissionStream.getTracks()) {
-      track.stop();
-    }
-    devices = await mediaDevices.enumerateDevices();
-    inputs = devices.filter((device) => device.kind === 'audioinput');
-  }
+  const devices = await mediaDevices.enumerateDevices();
+  const inputs = devices.filter((device) => device.kind === 'audioinput');
 
   return inputs.map((device, index) => {
     const name = device.label.trim() || `Microphone ${index + 1}`;
