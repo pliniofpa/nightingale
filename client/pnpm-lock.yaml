@@ -133,8 +133,8 @@ importers:
         specifier: ^7.0.2001
         version: 7.0.2001
       rulesync:
-        specifier: ^16.14.0
-        version: 16.14.0(@types/node@25.5.0)(ajv-formats@3.0.1(ajv@8.18.0))(ajv@8.18.0)(jose@6.2.2)(valibot@1.4.2(typescript@5.8.3))
+        specifier: ^16.17.0
+        version: 16.17.0(@types/node@25.5.0)(ajv-formats@3.0.1(ajv@8.18.0))(ajv@8.18.0)(jose@6.2.2)(valibot@1.4.2(typescript@5.8.3))
       stylelint:
         specifier: ^17.14.1
         version: 17.14.1(typescript@5.8.3)
@@ -408,8 +408,8 @@ packages:
     resolution: {integrity: sha512-3eTuUO1vH2cZm2ZKHeQxnOqlTi9EfZDGgIe3BL3I4u+rJHocr9Fz86M4fjYABPvFnQG/gGK551HqDiIcETwU6Q==}
     engines: {node: '>=23.5.0 || ^22.13.0 || ^20.17.0'}
 
-  '@inquirer/checkbox@5.2.1':
-    resolution: {integrity: sha512-b6xmA/VlTe0ZgDQHDui+Nav470u7u49nRd8/iuhOcQPO9Ch7lGuogydhi2VOmNlZ+zXcM8IcPuNSwQcdJaF/kw==}
+  '@inquirer/checkbox@5.2.2':
+    resolution: {integrity: sha512-Y5/bAScMy5Y+9isCx0SKbyJebMCaXXX5em0kxkj115eZNscgV9srOHrgyfS0e5xAVymIfOh9piYBKDILktsMMg==}
     engines: {node: '>=23.5.0 || ^22.13.0 || ^20.17.0'}
     peerDependencies:
       '@types/node': '>=18'
@@ -435,8 +435,8 @@ packages:
       '@types/node':
         optional: true
 
-  '@inquirer/core@11.2.1':
-    resolution: {integrity: sha512-Qd6GJT1yVyrZZCfN8W2qKF5ApmqryXRhRKCuip8h01x2w/esJQ2XIYc6f9abMIHgKQdBfFTSOdbHRLAhuM09UA==}
+  '@inquirer/core@12.0.0':
+    resolution: {integrity: sha512-+nnvFEXIB08CZNVXpvW3B+zHW96QXvGUjNKJ8NJIPqAZi5Kd4WhYt2S3C234ReepG1qw2HOlEUbjYVHBowXObA==}
     engines: {node: '>=23.5.0 || ^22.13.0 || ^20.17.0'}
     peerDependencies:
       '@types/node': '>=18'
@@ -2467,8 +2467,8 @@ packages:
     resolution: {integrity: sha512-j6vWzfrGVfyXxge+O0x5sh6cvxAog0a/4Rdd2K36zCMV5eJ+/+tOAngRO8cODMNWbVRdVlmGZQL2YS3yR8bIUA==}
     engines: {node: '>= 0.4'}
 
-  es-toolkit@1.50.0:
-    resolution: {integrity: sha512-OyZKhUVvEep9ITEiwHn8GKnMRQIVqoSIX7WnRbkWgJkllCujilqP2rD0u979tkl8wqyc8ICwlc1UBVv/Sl1G6w==}
+  es-toolkit@1.51.0:
+    resolution: {integrity: sha512-zC2lQGkM7QX+Gm6iM3+WIdZJzthsEd14LvRNJneSO2hzyz/zNBENR8+YXWo1cKxgPBtV6ksPYHELbcwBRzmdCw==}
 
   escalade@3.2.0:
     resolution: {integrity: sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA==}
@@ -2552,8 +2552,8 @@ packages:
     resolution: {integrity: sha512-eRnCtTTtGZFpQCwhJiUOuxPQWRXVKYDn0b2PeHfXL6/Zi53SLAzAHfVhVWK2AryC/WH05kGfxhFIPvTF0SXQzg==}
     engines: {node: '>= 4.9.1'}
 
-  fastmcp@4.15.1:
-    resolution: {integrity: sha512-BciUhvkDzUwGTQDOTwk0OsXz0dSK6xcAZZOhlgMG4yOXJvi5wT9mwgjOk3O/cdxHZHOFauqy3YNY4CRYr5gV4w==}
+  fastmcp@4.16.5:
+    resolution: {integrity: sha512-PUs0lBYN12tdzgelgPrLxz8AjkYcNUqBGs0NW8As8D7X0pUuNkHonTFSpEcQi/z9vp6b/oWhET3MhONs5yrKZA==}
     hasBin: true
     peerDependencies:
       ajv: ^8.0.0
@@ -2710,10 +2710,6 @@ packages:
     resolution: {integrity: sha512-awConJSVCHVGND6x3tmMaKcQvwXLhjdkmomy2W+Goaui8YPgYgXJZewhg3fWC+DlfqqQuWg8AwqjGTD2nAPVWg==}
     engines: {node: '>=6'}
 
-  globby@16.2.3:
-    resolution: {integrity: sha512-VZX7TV7jmd/pn71vdnLKtgwy1IWqc3KjI9x1/UtPkwoKk5fKrNLY30ltDe3cAM5xruIN7YuuaulFt133jRrKZg==}
-    engines: {node: '>=20'}
-
   globby@16.2.4:
     resolution: {integrity: sha512-c8B/VNLmxRcmqqenRA9t+9IyOjf9+V6lTxPaUJLqOCONdQkWZ0ETYgX0qbtJqPsgCNusT9MZ5Jeidw8Eb9tn2g==}
     engines: {node: '>=20'}
@@ -2751,10 +2747,6 @@ packages:
   hashery@1.5.1:
     resolution: {integrity: sha512-iZyKG96/JwPz1N55vj2Ie2vXbhu440zfUfJvSwEqEbeLluk7NnapfGqa7LH0mOsnDxTF85Mx8/dyR6HfqcbmbQ==}
     engines: {node: '>=20'}
-
-  hasown@2.0.2:
-    resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
-    engines: {node: '>= 0.4'}
 
   hasown@2.0.4:
     resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
@@ -3014,8 +3006,8 @@ packages:
     resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
     hasBin: true
 
-  js-yaml@5.2.3:
-    resolution: {integrity: sha512-n+mUVyUX5bVv7G/G2zyIHOhdxfuU1dY2NOFzTQUWiMUbFss8b57NFlgCCaggU78wSw5KVS9cllzeLyzyR+n5nw==}
+  js-yaml@5.3.0:
+    resolution: {integrity: sha512-muutsYr+e2+d3rTgUGslq5rxbBlUy3cJ61IsHag2QNDQV+7zXWjkUpmALIajhrlLlrgRUiymj6U3zUr/TMK84Q==}
     hasBin: true
 
   jsesc@3.1.0:
@@ -3758,8 +3750,8 @@ packages:
     resolution: {integrity: sha512-nLTrUKm2UyiL7rlhapu/Zl45FwNgkZGaCpZbIHajDYgwlJCOzLSk+cIPAnsEqV955GjILJnKbdQC1nVPz+gAYQ==}
     engines: {node: '>= 18'}
 
-  rulesync@16.14.0:
-    resolution: {integrity: sha512-Kzs6eagaFFHsUJnYs+95wRyPXCKkASGD6p7O6h0HXkmNIOYm4i5nE7MuE27SD+9ykZaNCS48IXiGSo951UMXbA==}
+  rulesync@16.17.0:
+    resolution: {integrity: sha512-C5TKtQWkG1+zIHNccr36yt2XHRQBZK34/6Mi1Ab8A3WzGzpFFAB3QWqydikXqzxj3BlDFnpo0yus3kxdQLbkmw==}
     engines: {node: '>=22.0.0', pnpm: '>=10'}
     hasBin: true
 
@@ -4694,10 +4686,10 @@ snapshots:
 
   '@inquirer/ansi@2.0.7': {}
 
-  '@inquirer/checkbox@5.2.1(@types/node@25.5.0)':
+  '@inquirer/checkbox@5.2.2(@types/node@25.5.0)':
     dependencies:
       '@inquirer/ansi': 2.0.7
-      '@inquirer/core': 11.2.1(@types/node@25.5.0)
+      '@inquirer/core': 12.0.0(@types/node@25.5.0)
       '@inquirer/figures': 2.0.8
       '@inquirer/type': 4.0.7(@types/node@25.5.0)
     optionalDependencies:
@@ -4723,7 +4715,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 25.5.0
 
-  '@inquirer/core@11.2.1(@types/node@25.5.0)':
+  '@inquirer/core@12.0.0(@types/node@25.5.0)':
     dependencies:
       '@inquirer/ansi': 2.0.7
       '@inquirer/figures': 2.0.8
@@ -4807,28 +4799,6 @@ snapshots:
       raw-body: 3.0.2
       zod: 3.25.76
       zod-to-json-schema: 3.25.1(zod@3.25.76)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@modelcontextprotocol/sdk@1.27.1(zod@4.4.3)':
-    dependencies:
-      '@hono/node-server': 1.19.11(hono@4.12.8)
-      ajv: 8.18.0
-      ajv-formats: 3.0.1(ajv@8.18.0)
-      content-type: 1.0.5
-      cors: 2.8.6
-      cross-spawn: 7.0.6
-      eventsource: 3.0.7
-      eventsource-parser: 3.0.6
-      express: 5.2.1
-      express-rate-limit: 8.3.1(express@5.2.1)
-      hono: 4.12.8
-      jose: 6.2.2
-      json-schema-typed: 8.0.2
-      pkce-challenge: 5.0.1
-      raw-body: 3.0.2
-      zod: 4.4.3
-      zod-to-json-schema: 3.25.1(zod@4.4.3)
     transitivePeerDependencies:
       - supports-color
 
@@ -6550,9 +6520,9 @@ snapshots:
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
       has-tostringtag: 1.0.2
-      hasown: 2.0.2
+      hasown: 2.0.4
 
-  es-toolkit@1.50.0: {}
+  es-toolkit@1.51.0: {}
 
   escalade@3.2.0: {}
 
@@ -6671,9 +6641,9 @@ snapshots:
 
   fastest-levenshtein@1.0.16: {}
 
-  fastmcp@4.15.1(@valibot/to-json-schema@1.7.1(valibot@1.4.2(typescript@5.8.3)))(ajv-formats@3.0.1(ajv@8.18.0))(ajv@8.18.0)(effect@3.22.1)(jose@6.2.2)(sury@10.0.4):
+  fastmcp@4.16.5(@valibot/to-json-schema@1.7.1(valibot@1.4.2(typescript@5.8.3)))(ajv-formats@3.0.1(ajv@8.18.0))(ajv@8.18.0)(effect@3.22.1)(jose@6.2.2)(sury@10.0.4):
     dependencies:
-      '@modelcontextprotocol/sdk': 1.27.1(zod@4.4.3)
+      '@modelcontextprotocol/sdk': 1.30.0(zod@4.4.3)
       '@standard-schema/spec': 1.1.0
       execa: 9.6.1
       file-type: 21.3.4
@@ -6812,7 +6782,7 @@ snapshots:
       get-proto: 1.0.1
       gopd: 1.2.0
       has-symbols: 1.1.0
-      hasown: 2.0.2
+      hasown: 2.0.4
       math-intrinsics: 1.1.0
 
   get-nonce@1.0.1: {}
@@ -6844,15 +6814,6 @@ snapshots:
       ini: 1.3.8
       kind-of: 6.0.3
       which: 1.3.1
-
-  globby@16.2.3:
-    dependencies:
-      '@sindresorhus/merge-streams': 4.0.0
-      fast-glob: 3.3.3
-      ignore: 7.0.6
-      is-path-inside: 4.0.0
-      slash: 5.1.0
-      unicorn-magic: 0.4.0
 
   globby@16.2.4:
     dependencies:
@@ -6890,10 +6851,6 @@ snapshots:
   hashery@1.5.1:
     dependencies:
       hookified: 1.15.1
-
-  hasown@2.0.2:
-    dependencies:
-      function-bind: 1.1.2
 
   hasown@2.0.4:
     dependencies:
@@ -7108,7 +7065,7 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
-  js-yaml@5.2.3:
+  js-yaml@5.3.0:
     dependencies:
       argparse: 2.0.1
 
@@ -8065,9 +8022,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  rulesync@16.14.0(@types/node@25.5.0)(ajv-formats@3.0.1(ajv@8.18.0))(ajv@8.18.0)(jose@6.2.2)(valibot@1.4.2(typescript@5.8.3)):
+  rulesync@16.17.0(@types/node@25.5.0)(ajv-formats@3.0.1(ajv@8.18.0))(ajv@8.18.0)(jose@6.2.2)(valibot@1.4.2(typescript@5.8.3)):
     dependencies:
-      '@inquirer/checkbox': 5.2.1(@types/node@25.5.0)
+      '@inquirer/checkbox': 5.2.2(@types/node@25.5.0)
       '@modelcontextprotocol/sdk': 1.30.0(zod@4.4.3)
       '@octokit/request-error': 7.1.1
       '@octokit/rest': 22.0.1
@@ -8075,11 +8032,11 @@ snapshots:
       '@valibot/to-json-schema': 1.7.1(valibot@1.4.2(typescript@5.8.3))
       commander: 15.0.0
       effect: 3.22.1
-      es-toolkit: 1.50.0
-      fastmcp: 4.15.1(@valibot/to-json-schema@1.7.1(valibot@1.4.2(typescript@5.8.3)))(ajv-formats@3.0.1(ajv@8.18.0))(ajv@8.18.0)(effect@3.22.1)(jose@6.2.2)(sury@10.0.4)
-      globby: 16.2.3
+      es-toolkit: 1.51.0
+      fastmcp: 4.16.5(@valibot/to-json-schema@1.7.1(valibot@1.4.2(typescript@5.8.3)))(ajv-formats@3.0.1(ajv@8.18.0))(ajv@8.18.0)(effect@3.22.1)(jose@6.2.2)(sury@10.0.4)
+      globby: 16.2.4
       gray-matter: 4.0.3
-      js-yaml: 5.2.3
+      js-yaml: 5.3.0
       jsonc-parser: 3.3.1
       minisearch: 7.2.0
       smol-toml: 1.8.0

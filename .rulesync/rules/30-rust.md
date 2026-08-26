@@ -1,6 +1,6 @@
 ---
 root: false
-targets: ['pi']
+targets: ['*']
 description: 'Strict Rust correctness, async, API, and adapter rules'
 globs:
   - '**/*.rs'

@@ -1,6 +1,6 @@
 ---
 root: false
-targets: ['pi']
+targets: ['*']
 description: 'Karaoke playback, lyrics, audio, and media synchronization correctness'
 ---
 

@@ -1,6 +1,6 @@
 ---
 root: false
-targets: ['pi']
+targets: ['*']
 description: 'Strict accessible Tailwind and shadcn styling rules'
 globs:
   - '**/*.css'

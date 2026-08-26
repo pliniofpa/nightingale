@@ -8,3 +8,6 @@ allowBuilds:
   esbuild: true
   msw: false
   tldjs: true
+
+minimumReleaseAgeExclude:
+  - rulesync@16.17.0

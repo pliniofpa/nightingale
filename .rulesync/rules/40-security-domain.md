@@ -1,6 +1,6 @@
 ---
 root: false
-targets: ['pi']
+targets: ['*']
 description: 'Security boundaries and karaoke-domain correctness'
 ---
 

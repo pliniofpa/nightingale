@@ -1,8 +1,8 @@
 {
   "$schema": "https://github.com/dyoshikawa/rulesync/releases/latest/download/config-schema.json",
-  "targets": ["pi"],
+  "targets": ["*"],
   "features": ["rules"],
   "outputRoots": ["."],
-  "delete": true,
+  "delete": false,
   "verbose": false,
 }

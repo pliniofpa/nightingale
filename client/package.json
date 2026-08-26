@@ -28,7 +28,7 @@
     "quality": "pnpm quality:web && pnpm quality:rust && pnpm rules:check",
     "quality:rust": "pnpm format:rust:check && cd .. && cargo check --workspace --all-targets --all-features --locked && cd client && pnpm lint:rust",
     "quality:web": "pnpm format:check && pnpm lint && pnpm typecheck",
-    "rules:check": "cd .. && client/node_modules/.bin/rulesync doctor --strict && client/node_modules/.bin/rulesync generate --check",
+    "rules:check": "cd .. && client/node_modules/.bin/rulesync doctor --strict && client/node_modules/.bin/rulesync generate --dry-run --silent",
     "rules:generate": "cd .. && client/node_modules/.bin/rulesync generate",
     "tauri": "tauri",
     "typecheck": "tsc --noEmit"
@@ -77,7 +77,7 @@
     "oxfmt": "^0.64.0",
     "oxlint": "^1.79.0",
     "oxlint-tsgolint": "^7.0.2001",
-    "rulesync": "^16.14.0",
+    "rulesync": "^16.17.0",
     "stylelint": "^17.14.1",
     "stylelint-config-standard": "^40.0.0",
     "typescript": "~5.8.3",

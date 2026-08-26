@@ -1,6 +1,6 @@
 ---
 root: false
-targets: ['pi']
+targets: ['*']
 description: 'Shared karaoke core and desktop/self-hosted adapter boundaries'
 ---
 

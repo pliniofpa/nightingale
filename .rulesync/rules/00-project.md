@@ -1,6 +1,6 @@
 ---
 root: true
-targets: ['pi']
+targets: ['*']
 description: 'Nightingale engineering contract and required quality gates'
 ---
 

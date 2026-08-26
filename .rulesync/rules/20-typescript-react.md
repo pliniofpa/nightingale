@@ -1,6 +1,6 @@
 ---
 root: false
-targets: ['pi']
+targets: ['*']
 description: 'Strict TypeScript, React, accessibility, and browser/native parity rules'
 globs:
   - '**/*.ts'
