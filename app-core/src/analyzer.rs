@@ -94,6 +94,7 @@ impl Drop for ServerProcess {
         let pid = self.child.id();
         info!("[analyzer] Killing server process (pid={pid})");
         SERVER_PID.store(0, Ordering::SeqCst);
+        lock_unpoisoned(&SERVER_INTERRUPT).take();
         if let Ok(stream) = self.writer.get_ref().try_clone() {
             let _ = stream.shutdown(Shutdown::Both);
         }
@@ -103,6 +104,7 @@ impl Drop for ServerProcess {
 }
 
 static ANALYZER_SERVER: LazyLock<Mutex<Option<ServerProcess>>> = LazyLock::new(|| Mutex::new(None));
+static SERVER_INTERRUPT: LazyLock<Mutex<Option<TcpStream>>> = LazyLock::new(|| Mutex::new(None));
 
 fn lock_unpoisoned<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex.lock().unwrap_or_else(PoisonError::into_inner)
@@ -285,6 +287,17 @@ fn spawn_server() -> Result<ServerProcess, NightingaleError> {
         }
     };
 
+    let interrupt = match writer.get_ref().try_clone() {
+        Ok(stream) => stream,
+        Err(error) => {
+            let _ = child.kill();
+            let _ = child.wait();
+            SERVER_PID.store(0, Ordering::SeqCst);
+            return Err(error.into());
+        }
+    };
+    *lock_unpoisoned(&SERVER_INTERRUPT) = Some(interrupt);
+
     drain_lines_to_log(stdout_reader, "stdout");
     if let Some(stderr) = child.stderr.take() {
         drain_lines_to_log(BufReader::new(stderr), "stderr");
@@ -313,6 +326,7 @@ fn ensure_server(
 struct AnalyzerState {
     queue: VecDeque<String>,
     active_hash: Option<String>,
+    cancelled: HashSet<String>,
     worker_running: bool,
 }
 
@@ -320,6 +334,7 @@ static ANALYZER: LazyLock<Mutex<AnalyzerState>> = LazyLock::new(|| {
     Mutex::new(AnalyzerState {
         queue: VecDeque::new(),
         active_hash: None,
+        cancelled: HashSet::new(),
         worker_running: false,
     })
 });
@@ -350,6 +365,26 @@ fn update_queue_status(file_hash: &str, status: QueuedStatus) {
 
 fn remove_from_queue(file_hash: &str) {
     let _ = library_db::analysis_queue_delete(file_hash);
+}
+
+fn take_cancelled(initial_hash: &str, file_hash: &str) -> bool {
+    let mut state = lock_unpoisoned(&ANALYZER);
+    state.cancelled.remove(initial_hash) | state.cancelled.remove(file_hash)
+}
+
+fn discard_cancelled_job(initial_hash: &str, file_hash: &str) -> bool {
+    if !take_cancelled(initial_hash, file_hash) {
+        return false;
+    }
+
+    remove_from_queue(initial_hash);
+    remove_from_queue(file_hash);
+    lock_unpoisoned(&FORCE_TRANSCRIBE).remove(initial_hash);
+    lock_unpoisoned(&FORCE_TRANSCRIBE).remove(file_hash);
+    lock_unpoisoned(&STEMS_ONLY).remove(initial_hash);
+    lock_unpoisoned(&STEMS_ONLY).remove(file_hash);
+    info!("[analyzer] Analysis cancelled for {file_hash}");
+    true
 }
 
 pub(crate) fn update_song_analyzed(
@@ -487,6 +522,57 @@ pub fn enqueue(target: SongTarget) -> Result<usize, String> {
         ),
     };
     Ok(enqueue_hashes(hashes, skip_persisted))
+}
+
+pub fn cancel_analysis(target: SongTarget) -> Result<usize, String> {
+    let hashes = resolve_target(target, library_db::iter_file_hashes_filtered_analysis_busy)?;
+    let persisted = AnalysisQueue::load();
+    let has_active_row = persisted
+        .entries
+        .values()
+        .any(|status| matches!(status, QueuedStatus::Analyzing(_)));
+    let mut state = lock_unpoisoned(&ANALYZER);
+    let mut affected = Vec::new();
+    let mut interrupt = false;
+
+    for hash in hashes {
+        let persisted_busy = persisted.entries.get(&hash).is_some_and(|status| {
+            matches!(status, QueuedStatus::Queued | QueuedStatus::Analyzing(_))
+        });
+        let active =
+            state.active_hash.as_deref() == Some(&hash) && (persisted_busy || has_active_row);
+        let queued = state.queue.iter().any(|queued_hash| queued_hash == &hash);
+
+        if !persisted_busy && !active && !queued {
+            continue;
+        }
+
+        state.queue.retain(|queued_hash| queued_hash != &hash);
+        let persisted_analyzing = matches!(
+            persisted.entries.get(&hash),
+            Some(QueuedStatus::Analyzing(_))
+        );
+        if active || persisted_analyzing {
+            state.cancelled.insert(hash.clone());
+        }
+        if persisted_analyzing || (active && has_active_row) {
+            interrupt = true;
+        }
+        affected.push(hash);
+    }
+    drop(state);
+
+    for hash in &affected {
+        remove_from_queue(hash);
+        lock_unpoisoned(&FORCE_TRANSCRIBE).remove(hash);
+        lock_unpoisoned(&STEMS_ONLY).remove(hash);
+    }
+
+    if interrupt && let Some(stream) = lock_unpoisoned(&SERVER_INTERRUPT).as_ref() {
+        let _ = stream.shutdown(Shutdown::Both);
+    }
+
+    Ok(affected.len())
 }
 
 pub fn shutdown_server() {
@@ -743,22 +829,30 @@ fn spawn_worker() {
 
 fn process_song(initial_hash: &str, cache: &CacheDir) {
     let Some(song) = library_db::load_song_by_hash(initial_hash).ok().flatten() else {
-        warn!("[analyzer] Song with hash {initial_hash} not found in store, skipping");
+        if !discard_cancelled_job(initial_hash, initial_hash) {
+            warn!("[analyzer] Song with hash {initial_hash} not found in store, skipping");
+        }
         return;
     };
 
     let (song, local_path, file_hash_owned) = match prepare_audio_for_analysis(&song, cache) {
         Ok(out) => out,
         Err(e) => {
-            warn!("[analyzer] Failed to prepare audio for analysis: {e}");
-            update_queue_status(
-                initial_hash,
-                QueuedStatus::Failed(format!("audio prep failed: {e}")),
-            );
+            if !discard_cancelled_job(initial_hash, initial_hash) {
+                warn!("[analyzer] Failed to prepare audio for analysis: {e}");
+                update_queue_status(
+                    initial_hash,
+                    QueuedStatus::Failed(format!("audio prep failed: {e}")),
+                );
+            }
             return;
         }
     };
     let file_hash = file_hash_owned.as_str();
+
+    if discard_cancelled_job(initial_hash, file_hash) {
+        return;
+    }
 
     info!(
         "[analyzer] Starting analysis: {} (hash={})",
@@ -826,10 +920,16 @@ fn process_song(initial_hash: &str, cache: &CacheDir) {
         cmd_json["language"] = serde_json::json!(lang);
     }
 
+    if discard_cancelled_job(initial_hash, file_hash) {
+        return;
+    }
+
     let json_str = match serde_json::to_string(&cmd_json) {
         Ok(json) => json,
         Err(error) => {
-            update_queue_status(file_hash, QueuedStatus::Failed(error.to_string()));
+            if !discard_cancelled_job(initial_hash, file_hash) {
+                update_queue_status(file_hash, QueuedStatus::Failed(error.to_string()));
+            }
             return;
         }
     };
@@ -839,8 +939,15 @@ fn process_song(initial_hash: &str, cache: &CacheDir) {
         let mut guard = lock_unpoisoned(&ANALYZER_SERVER);
 
         if let Err(e) = ensure_server(&mut guard) {
-            warn!("[analyzer] Failed to start server: {e}");
-            update_queue_status(file_hash, QueuedStatus::Failed(e.to_string()));
+            if !discard_cancelled_job(initial_hash, file_hash) {
+                warn!("[analyzer] Failed to start server: {e}");
+                update_queue_status(file_hash, QueuedStatus::Failed(e.to_string()));
+            }
+            return;
+        }
+
+        if discard_cancelled_job(initial_hash, file_hash) {
+            *guard = None;
             return;
         }
 
@@ -851,9 +958,28 @@ fn process_song(initial_hash: &str, cache: &CacheDir) {
             );
             return;
         };
-        match send_and_monitor(server, &json_str, Some(file_hash)) {
+        match send_and_monitor(server, &json_str, Some(file_hash), Some(initial_hash)) {
             Ok(SongResult::Done) => {
-                finalize_song(file_hash, cache);
+                let mut state = lock_unpoisoned(&ANALYZER);
+                let cancelled =
+                    state.cancelled.remove(initial_hash) | state.cancelled.remove(file_hash);
+                if cancelled {
+                    drop(state);
+                    remove_from_queue(initial_hash);
+                    remove_from_queue(file_hash);
+                    lock_unpoisoned(&FORCE_TRANSCRIBE).remove(initial_hash);
+                    lock_unpoisoned(&FORCE_TRANSCRIBE).remove(file_hash);
+                    lock_unpoisoned(&STEMS_ONLY).remove(initial_hash);
+                    lock_unpoisoned(&STEMS_ONLY).remove(file_hash);
+                    *guard = None;
+                } else {
+                    finalize_song(file_hash, cache);
+                }
+                return;
+            }
+            Ok(SongResult::Cancelled) => {
+                let _ = discard_cancelled_job(initial_hash, file_hash);
+                *guard = None;
                 return;
             }
             Ok(SongResult::Oom) => {
@@ -874,6 +1000,11 @@ fn process_song(initial_hash: &str, cache: &CacheDir) {
                 return;
             }
             Err(e) => {
+                if discard_cancelled_job(initial_hash, file_hash) {
+                    *guard = None;
+                    return;
+                }
+
                 warn!("[analyzer] Server crashed: {e}");
                 *guard = None;
 
@@ -1016,8 +1147,11 @@ fn run_key_pass(
             .as_mut()
             .ok_or_else(|| NightingaleError::Other("analyzer server unavailable".into()))?;
         // `None` progress hash keeps this off the status pipe (no queue rows).
-        match send_and_monitor(server, &json_str, None) {
+        match send_and_monitor(server, &json_str, None, None) {
             Ok(SongResult::Done) => return Ok(()),
+            Ok(SongResult::Cancelled) => {
+                return Err(NightingaleError::Other("key detection cancelled".into()));
+            }
             Ok(SongResult::Oom) | Err(_) => {
                 *guard = None;
                 if !retried {
@@ -1096,6 +1230,7 @@ fn prepare_audio_for_analysis(
 
 enum SongResult {
     Done,
+    Cancelled,
     Oom,
     Error(String),
 }
@@ -1123,6 +1258,7 @@ fn send_and_monitor(
     server: &mut ServerProcess,
     json_cmd: &str,
     progress_hash: Option<&str>,
+    initial_hash: Option<&str>,
 ) -> Result<SongResult, NightingaleError> {
     server.writer.write_all(json_cmd.as_bytes())?;
     server.writer.write_all(b"\n")?;
@@ -1130,11 +1266,27 @@ fn send_and_monitor(
 
     let mut line_buf = String::new();
     loop {
+        if progress_hash.is_some_and(|hash| {
+            let state = lock_unpoisoned(&ANALYZER);
+            state.cancelled.contains(hash)
+                || initial_hash.is_some_and(|initial| state.cancelled.contains(initial))
+        }) {
+            return Ok(SongResult::Cancelled);
+        }
+
         line_buf.clear();
         let bytes = server.reader.read_line(&mut line_buf)?;
 
         if bytes == 0 {
             return Err("Server closed connection unexpectedly".into());
+        }
+
+        if progress_hash.is_some_and(|hash| {
+            let state = lock_unpoisoned(&ANALYZER);
+            state.cancelled.contains(hash)
+                || initial_hash.is_some_and(|initial| state.cancelled.contains(initial))
+        }) {
+            return Ok(SongResult::Cancelled);
         }
 
         let line = line_buf.trim();

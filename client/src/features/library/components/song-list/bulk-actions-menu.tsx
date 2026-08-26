@@ -5,6 +5,7 @@ import {
   MicIcon,
   RefreshCwIcon,
   Trash2Icon,
+  XCircleIcon,
   EllipsisIcon,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -23,9 +24,28 @@ import {
 } from '@/shared/components/ui/dropdown-menu';
 import { cn } from '@/shared/utils/cn';
 
+type CancelAnalysisItemProps = {
+  count: number;
+  onClick: () => void;
+};
+
+const CancelAnalysisItem = ({ count, onClick }: CancelAnalysisItemProps) => {
+  if (count === 0) {
+    return null;
+  }
+
+  return (
+    <DropdownMenuItem variant="destructive" onClick={onClick}>
+      <XCircleIcon />
+      Cancel analysis ({count})
+    </DropdownMenuItem>
+  );
+};
+
 export const BulkActionsMenu = () => {
   const {
     enqueueAll,
+    cancelAnalysisAll,
     realignAll,
     reanalyzeAllFull,
     reanalyzeAllTranscript,
@@ -34,7 +54,8 @@ export const BulkActionsMenu = () => {
     deleteSongCacheAll,
   } = useAnalysis();
   const { data } = useSongs();
-  const analyzedCount = data?.pages[0]?.analyzed_count ?? 0;
+  const { analyzed_count: analyzedCount = 0, analysis_busy_count: analysisBusyCount = 0 } =
+    data?.pages[0] ?? {};
 
   const [open, setOpen] = useState(false);
   const { focus, actionsRef } = useMenuFocus();
@@ -74,6 +95,7 @@ export const BulkActionsMenu = () => {
           <AudioLinesIcon />
           Analyze all
         </DropdownMenuItem>
+        <CancelAnalysisItem count={analysisBusyCount} onClick={() => void cancelAnalysisAll()} />
         <DropdownMenuItem onClick={() => void refreshMetadataAll()}>
           <ImageIcon />
           Refresh metadata

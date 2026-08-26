@@ -14,6 +14,10 @@ export const enqueue = async (target: SongTarget): Promise<number> => {
   return await invoke<number>('enqueue', { target });
 };
 
+export const cancelAnalysis = async (target: SongTarget): Promise<number> => {
+  return await invoke<number>('cancel_analysis', { target });
+};
+
 export const deleteSongCache = async (target: SongTarget): Promise<number> => {
   return await invoke<number>('delete_song_cache', { target });
 };

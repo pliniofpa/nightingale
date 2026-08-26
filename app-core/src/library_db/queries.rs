@@ -291,29 +291,43 @@ pub(crate) fn load_songs_page(params: &LoadSongsParams) -> rusqlite::Result<Song
         })?
     };
 
-    let (processed_count, analyzed_count) = if let Some(ref where_sql) = where_sql {
-        let sql = format!(
-            "SELECT COUNT(*), COALESCE(SUM(CASE WHEN s.is_analyzed = 1 THEN 1 ELSE 0 END), 0)
-             FROM songs s WHERE {where_sql}"
-        );
-        with_conn(|c| {
-            let (count, analyzed): (i64, i64) = c.query_row(
-                &sql,
-                rusqlite::params_from_iter(bind_strings.iter().map(|s| s.as_str())),
-                |r| Ok((r.get(0)?, r.get(1)?)),
-            )?;
-            Ok((count as usize, analyzed as usize))
-        })?
-    } else {
-        with_conn(|c| {
-            let (count, analyzed): (i64, i64) = c.query_row(
-                "SELECT COUNT(*), COALESCE(SUM(CASE WHEN is_analyzed = 1 THEN 1 ELSE 0 END), 0) FROM songs",
-                [],
-                |r| Ok((r.get(0)?, r.get(1)?)),
-            )?;
-            Ok((count as usize, analyzed as usize))
-        })?
-    };
+    let (processed_count, analyzed_count, analysis_busy_count) =
+        if let Some(ref where_sql) = where_sql {
+            let sql = format!(
+                "SELECT COUNT(*),
+                        COALESCE(SUM(CASE WHEN s.is_analyzed = 1 THEN 1 ELSE 0 END), 0),
+                        COALESCE(SUM(CASE WHEN EXISTS (
+                            SELECT 1 FROM analysis_queue aq
+                            WHERE aq.file_hash = s.file_hash
+                              AND aq.status IN ('queued', 'analyzing')
+                        ) THEN 1 ELSE 0 END), 0)
+                 FROM songs s WHERE {where_sql}"
+            );
+            with_conn(|c| {
+                let (count, analyzed, analysis_busy): (i64, i64, i64) = c.query_row(
+                    &sql,
+                    rusqlite::params_from_iter(bind_strings.iter().map(|s| s.as_str())),
+                    |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
+                )?;
+                Ok((count as usize, analyzed as usize, analysis_busy as usize))
+            })?
+        } else {
+            with_conn(|c| {
+                let (count, analyzed, analysis_busy): (i64, i64, i64) = c.query_row(
+                    "SELECT COUNT(*),
+                            COALESCE(SUM(CASE WHEN s.is_analyzed = 1 THEN 1 ELSE 0 END), 0),
+                            COALESCE(SUM(CASE WHEN EXISTS (
+                                SELECT 1 FROM analysis_queue aq
+                                WHERE aq.file_hash = s.file_hash
+                                  AND aq.status IN ('queued', 'analyzing')
+                            ) THEN 1 ELSE 0 END), 0)
+                     FROM songs s",
+                    [],
+                    |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
+                )?;
+                Ok((count as usize, analyzed as usize, analysis_busy as usize))
+            })?
+        };
 
     Ok(SongsStore {
         count: scan_count as usize,
@@ -321,6 +335,7 @@ pub(crate) fn load_songs_page(params: &LoadSongsParams) -> rusqlite::Result<Song
         processed,
         processed_count,
         analyzed_count,
+        analysis_busy_count,
     })
 }
 
@@ -364,6 +379,17 @@ pub(crate) fn iter_file_hashes_filtered_not_analyzed(
     filters: &LibraryMenuFilters,
 ) -> rusqlite::Result<Vec<String>> {
     iter_file_hashes_filtered(filters, &["s.is_analyzed = 0"])
+}
+
+pub(crate) fn iter_file_hashes_filtered_analysis_busy(
+    filters: &LibraryMenuFilters,
+) -> rusqlite::Result<Vec<String>> {
+    iter_file_hashes_filtered(
+        filters,
+        &[
+            "EXISTS (SELECT 1 FROM analysis_queue aq WHERE aq.file_hash = s.file_hash AND aq.status IN ('queued', 'analyzing'))",
+        ],
+    )
 }
 
 pub(crate) fn iter_file_hashes_filtered_realignable(

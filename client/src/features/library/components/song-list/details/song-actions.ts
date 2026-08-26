@@ -7,6 +7,7 @@ import {
   PencilLineIcon,
   RefreshCwIcon,
   Trash2Icon,
+  XCircleIcon,
 } from 'lucide-react';
 
 import type { Song } from '@/types/Song';
@@ -18,6 +19,7 @@ type AnalysisHandler = (fileHash: string) => void | Promise<void>;
 
 type AnalysisHandlers = {
   enqueueOne: AnalysisHandler;
+  cancelAnalysisOne: AnalysisHandler;
   deleteSongCache: AnalysisHandler;
   reanalyzeFull: AnalysisHandler;
   reanalyzeTranscript: AnalysisHandler;
@@ -57,13 +59,22 @@ export function buildActionGroups({
 
   if (status.isReady !== true) {
     const notReadyGroup: ActionItemProps[] = [
-      {
-        icon: AudioLinesIcon,
-        title: analysisBusy ? 'Analysis in progress' : 'Analyze song',
-        description: 'Prepare lyrics, timing, key, tempo, and stems.',
-        disabled: analysisBusy,
-        onClick: () => analysis.enqueueOne(song.file_hash),
-      },
+      analysisBusy
+        ? {
+            icon: XCircleIcon,
+            title: 'Cancel analysis',
+            description: 'Stop analysis and remove this song from the queue.',
+            destructive: true,
+            onClick: run(`Cancelled analysis for "${song.title}"`, () =>
+              analysis.cancelAnalysisOne(song.file_hash),
+            ),
+          }
+        : {
+            icon: AudioLinesIcon,
+            title: 'Analyze song',
+            description: 'Prepare lyrics, timing, key, tempo, and stems.',
+            onClick: () => analysis.enqueueOne(song.file_hash),
+          },
     ];
 
     if (supportsProvideLyrics) {

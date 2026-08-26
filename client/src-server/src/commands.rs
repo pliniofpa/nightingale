@@ -258,6 +258,12 @@ async fn dispatch(events: std::sync::Arc<EventBus>, name: &str, payload: Value) 
                 app_core::enqueue(args.target).map_err(ApiError::internal)?,
             ))
         }
+        "cancel_analysis" => {
+            let args: SongTargetArgs = deserialize(payload)?;
+            Ok(Value::from(
+                app_core::cancel_analysis(args.target).map_err(ApiError::internal)?,
+            ))
+        }
         "delete_song_cache" => {
             let args: SongTargetArgs = deserialize(payload)?;
             Ok(Value::from(

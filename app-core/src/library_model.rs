@@ -49,6 +49,8 @@ pub struct SongsStore {
     /// the filtered set.
     #[serde(default)]
     pub analyzed_count: usize,
+    #[serde(default)]
+    pub analysis_busy_count: usize,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, TS)]
