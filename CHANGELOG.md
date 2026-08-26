@@ -21,10 +21,12 @@ below.
 - Change "AI generated" to "AI transcribed" in song list.
 - Add bulk song actions and a Refresh Metadata action for reloading metadata from the library source.
 - Queued or in-progress song analysis can now be cancelled per song or in bulk across filtered songs.
+- Analyzer setup now installs the released `transformers` 5.13+ package instead of cloning a pinned Git commit.
 
 ### Fixes
 
 - The lyrics editor now allows re-aligning analyzed songs without requiring a lyrics change.
+- Empty transcription results now finish without attempting forced alignment.
 
 ## [1.1.0] - 2026-08-14
 
