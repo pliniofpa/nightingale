@@ -1,4 +1,3 @@
-use cpal::device_description::DeviceType;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashSet, VecDeque};
@@ -66,13 +65,6 @@ fn device_display_name(device: &cpal::Device) -> String {
     desc.to_string()
 }
 
-fn is_virtual(device: &cpal::Device) -> bool {
-    let Ok(desc) = device.description() else {
-        return false;
-    };
-    matches!(desc.device_type(), DeviceType::Virtual)
-}
-
 /// Returns all available audio host APIs on this platform with human-readable labels.
 /// On Windows: includes both WASAPI and ASIO (when available)
 /// On other platforms: uses the platform's default audio API
@@ -93,47 +85,49 @@ fn audio_hosts() -> Vec<(cpal::HostId, &'static str)> {
         .collect()
 }
 
-/// Helper function to create MicrophoneInfo from a device, serializing the device ID
-/// for later lookup. Returns None if the device ID cannot be extracted.
-fn microphone_info(device: &cpal::Device, host: &str) -> Option<MicrophoneInfo> {
-    let id = device.id().ok()?.to_string();
-    Some(MicrophoneInfo {
-        id,
-        name: device_display_name(device),
-        host: host.to_string(),
-    })
-}
-
 /// Discovers all available input microphones across all audio host APIs.
-/// Iterates through available hosts (WASAPI, ASIO, etc.) and collects devices,
-/// filtering out invalid configs and virtual devices. Deduplicates by device ID
-/// to handle cases where the same device appears on multiple hosts.
+/// Devices retain their host-qualified IDs so identically named WASAPI, ASIO,
+/// and virtual inputs remain independently selectable.
 #[tauri::command]
 pub(crate) fn list_microphones() -> Result<Vec<MicrophoneInfo>, String> {
     let mut seen: HashSet<String> = HashSet::new();
     let mut out = Vec::new();
+    let mut errors = Vec::new();
 
     for (host_id, host_name) in audio_hosts() {
         let Ok(host) = cpal::host_from_id(host_id) else {
             continue;
         };
-        let devices = host
-            .input_devices()
-            .map_err(|e| format!("{host_name} input devices: {e}"))?;
-        for device in devices {
-            if device.default_input_config().is_err() || is_virtual(&device) {
+        let devices = match host.input_devices() {
+            Ok(devices) => devices,
+            Err(error) => {
+                errors.push(format!("{host_name}: {error}"));
                 continue;
             }
-            if let Some(info) = microphone_info(&device, host_name) {
-                // Deduplicate by device ID; only add if we haven't seen this ID before
-                if seen.insert(info.id.clone()) {
-                    out.push(info);
-                }
+        };
+
+        for device in devices {
+            let name = device_display_name(&device);
+            let id = device
+                .id()
+                .map(|id| id.to_string())
+                .unwrap_or_else(|_| name.clone());
+            let key = format!("{host_name}:{id}").to_lowercase();
+            if seen.insert(key) {
+                out.push(MicrophoneInfo {
+                    id,
+                    name,
+                    host: host_name.to_string(),
+                });
             }
         }
     }
 
-    Ok(out)
+    if out.is_empty() && !errors.is_empty() {
+        Err(format!("input devices: {}", errors.join("; ")))
+    } else {
+        Ok(out)
+    }
 }
 
 fn i16_to_f32(sample: i16) -> f32 {
@@ -221,32 +215,27 @@ fn stop_internal() {
 }
 
 fn find_device(preferred: Option<&str>) -> Result<(cpal::Device, String), String> {
-    if let Some(name) = preferred {
-        // First, try to parse the preference as a serialized device ID from a specific host
-        if let Ok(device_id) = name.parse::<cpal::DeviceId>() {
-            let host = cpal::host_from_id(device_id.0)
-                .map_err(|e| format!("audio host unavailable: {e}"))?;
-            if let Ok(devices) = host.input_devices() {
-                for dev in devices {
-                    if dev.id().ok().as_ref() == Some(&device_id) {
-                        let name = device_display_name(&dev);
-                        return Ok((dev, name));
-                    }
+    if let Some(preference) = preferred {
+        for (host_id, _) in audio_hosts() {
+            let Ok(host) = cpal::host_from_id(host_id) else {
+                continue;
+            };
+            let Ok(devices) = host.input_devices() else {
+                continue;
+            };
+            for dev in devices {
+                let display_name = device_display_name(&dev);
+                let id_matches = dev
+                    .id()
+                    .map(|id| id.to_string() == preference)
+                    .unwrap_or(false);
+                // Name matching preserves preferences saved by older versions.
+                if id_matches || display_name == preference {
+                    return Ok((dev, display_name));
                 }
             }
         }
-
-        // Fallback: search the default host by display name (for backwards compatibility)
-        let host = cpal::default_host();
-        let devices = host
-            .input_devices()
-            .map_err(|e| format!("input devices: {e}"))?;
-        for dev in devices {
-            if device_display_name(&dev) == name {
-                return Ok((dev, name.to_string()));
-            }
-        }
-        return Err(format!("Microphone '{name}' not found"));
+        return Err(format!("Microphone '{preference}' not found"));
     }
 
     // No preference: use the system default input device

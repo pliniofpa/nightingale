@@ -125,26 +125,53 @@ const teardown = (): void => {
   active = null;
 };
 
-const listDevices = async (): Promise<MicrophoneInfo[]> => {
+const browserMediaDevices = (): MediaDevices | undefined => {
   if (typeof navigator === 'undefined') {
-    return [];
+    return undefined;
   }
-  /**
-   * Without prior `getUserMedia` permission, browsers return devices with
-   * empty `label` strings; the deviceId is still stable enough for the
-   * preferred-mic selection logic, so we synthesise a label fallback.
-   */
-  const devices = await navigator.mediaDevices.enumerateDevices();
-  return devices
-    .filter((d) => d.kind === 'audioinput')
-    .map((d, idx) => {
-      const name = d.label?.trim() || d.deviceId || `Microphone ${idx + 1}`;
-      return {
-        id: d.deviceId || name,
-        name,
-        host: 'Browser',
-      };
-    });
+  return navigator.mediaDevices;
+};
+
+const listDevices = async (): Promise<MicrophoneInfo[]> => {
+  const mediaDevices = browserMediaDevices();
+  if (!mediaDevices) {
+    throw new Error(
+      'Microphone discovery is unavailable. Open Nightingale over HTTPS or localhost.',
+    );
+  }
+
+  let devices = await mediaDevices.enumerateDevices();
+  let inputs = devices.filter((device) => device.kind === 'audioinput');
+
+  // Browsers commonly hide device labels and may expose only the default
+  // input until microphone permission has been granted. Briefly opening the
+  // default input grants access, after which enumeration returns the complete
+  // set. Tracks are stopped immediately; capture is started separately.
+  if (inputs.length === 0 || inputs.some((device) => !device.label.trim())) {
+    let permissionStream: MediaStream;
+    try {
+      permissionStream = await mediaDevices.getUserMedia({ audio: true });
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      throw new Error(`Microphone permission is required to list devices: ${detail}`, {
+        cause: error,
+      });
+    }
+    for (const track of permissionStream.getTracks()) {
+      track.stop();
+    }
+    devices = await mediaDevices.enumerateDevices();
+    inputs = devices.filter((device) => device.kind === 'audioinput');
+  }
+
+  return inputs.map((device, index) => {
+    const name = device.label.trim() || `Microphone ${index + 1}`;
+    return {
+      id: device.deviceId || name,
+      name,
+      host: 'Browser',
+    };
+  });
 };
 
 const findDeviceId = async (preferred: string | null): Promise<string | undefined> => {

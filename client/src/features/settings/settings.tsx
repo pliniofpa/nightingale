@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { setFullScreen, isFullScreen as tauriIsFullScreen } from '@/bridge/fullScreen';
-import { useMicDevices } from '@/features/microphone/queries/use-mic-devices';
+import { useMicDevicesQuery, type MicDevice } from '@/features/microphone/queries/use-mic-devices';
 import { clampPlaybackScale } from '@/features/playback/lib/display-scale';
 import {
   ALIGN_BACKENDS,
@@ -98,8 +98,66 @@ const analysisSettings = (config: AppConfig | undefined) => {
 const isSettingsTab = (value: string): value is SettingsTab =>
   SETTINGS_TABS.some((tab) => tab.value === value);
 
+const microphoneOptions = (devices: MicDevice[], preferred: string | null | undefined) => {
+  const options = [
+    { value: DEFAULT_MIC_ID, label: 'Default' },
+    ...devices.map(({ deviceId, label }) => ({ value: deviceId, label })),
+  ];
+  if (
+    typeof preferred === 'string' &&
+    preferred !== '' &&
+    !options.some((option) => option.value === preferred)
+  ) {
+    options.push({ value: preferred, label: `Selected microphone: ${preferred}` });
+  }
+  return options;
+};
+
+type MicDevicesQuery = ReturnType<typeof useMicDevicesQuery>;
+
+const microphoneDiscoveryHint = (query: MicDevicesQuery): string => {
+  if (query.isError) {
+    const detail = query.error instanceof Error ? query.error.message : String(query.error);
+    return `Could not list microphones: ${detail}`;
+  }
+  if (query.isFetching) {
+    return 'Looking for available microphones…';
+  }
+  return 'Select which microphone to use for pitch scoring';
+};
+
+const MicrophoneRetryButton = ({ query }: { query: MicDevicesQuery }) => {
+  if (!query.isError) {
+    return null;
+  }
+  return (
+    <Button variant="outline" size="sm" onClick={() => void query.refetch()}>
+      Retry microphone discovery
+    </Button>
+  );
+};
+
+const useLegacyMicrophoneMigration = (
+  preferred: string | null | undefined,
+  devices: MicDevice[],
+  mutate: (config: Partial<AppConfig>) => void,
+): void => {
+  useEffect(() => {
+    if (typeof preferred !== 'string' || preferred === '') {
+      return;
+    }
+    const legacyMatch = devices.find(
+      (device) => device.name === preferred && device.deviceId !== preferred,
+    );
+    if (legacyMatch) {
+      mutate({ preferred_mic: legacyMatch.deviceId });
+    }
+  }, [devices, mutate, preferred]);
+};
+
 export const SettingsPage = () => {
-  const micDevices = useMicDevices();
+  const micDevicesQuery = useMicDevicesQuery();
+  const micDevices = micDevicesQuery.data;
   const navigate = useNavigate();
   const { data: config } = useConfig();
   const { mutate } = useConfigMutation();
@@ -132,20 +190,10 @@ export const SettingsPage = () => {
   const isParakeet = asrEngine === 'parakeet';
   const analysisNav = getAnalysisNav(isParakeet);
 
-  const micOptions = useMemo(() => {
-    const options = [
-      { value: DEFAULT_MIC_ID, label: 'Default' },
-      ...micDevices.map(({ deviceId, label }) => ({ value: deviceId, label })),
-    ];
-    // If a preferred microphone is saved but not currently available (e.g., device disconnected),
-    // add it as an option with a label indicating it's the selected device. This allows users
-    // to see which microphone they had selected even if it's temporarily unavailable.
-    const preferred = config?.preferred_mic;
-    if (preferred && !options.some((option) => option.value === preferred)) {
-      options.push({ value: preferred, label: `Selected microphone: ${preferred}` });
-    }
-    return options;
-  }, [config?.preferred_mic, micDevices]);
+  const micOptions = useMemo(
+    () => microphoneOptions(micDevices, general.preferredMic),
+    [general.preferredMic, micDevices],
+  );
   const modelOptions = useMemo(() => MODELS.map((model) => ({ value: model, label: model })), []);
   const micMonitorGainPct = Math.round(micMonitorGain * 100);
   const lyricsScalePct = Math.round(lyricsScale * 100);
@@ -153,6 +201,8 @@ export const SettingsPage = () => {
   const vocalThresholdDisplayPct = Math.round(vocalThresholdPct * 100);
   const batchSize = analysis.batchSize;
   const beamSize = analysis.beamSize;
+
+  useLegacyMicrophoneMigration(general.preferredMic, micDevices, mutate);
 
   useEffect(() => {
     const updateIsFullScreen = async () => {
@@ -281,7 +331,7 @@ export const SettingsPage = () => {
 
               <Field>
                 <Label>Microphone</Label>
-                <Hint>Select which microphone to use for pitch scoring</Hint>
+                <Hint>{microphoneDiscoveryHint(micDevicesQuery)}</Hint>
                 <SettingsSelect
                   label="Microphone"
                   placeholder="Default microphone"
@@ -292,6 +342,7 @@ export const SettingsPage = () => {
                     mutate({ preferred_mic: value === DEFAULT_MIC_ID ? null : value })
                   }
                 />
+                <MicrophoneRetryButton query={micDevicesQuery} />
               </Field>
 
               <Field>

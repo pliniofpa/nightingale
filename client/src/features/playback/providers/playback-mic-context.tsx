@@ -175,11 +175,12 @@ export function PlaybackMicProvider({ config, children }: PlaybackMicProviderPro
 
   const stateValue = useMemo<PlaybackMicState>(() => {
     const micReady = micCaptureActive && micPitchActive && micUserEnabled;
+    const selectedMic = micDevices.find((device) => device.deviceId === selectedMicId);
     return {
       micUserEnabled,
       micMonitorUserEnabled,
       selectedMicId,
-      micName: selectedMicId ?? 'Default',
+      micName: selectedMic?.label ?? selectedMicId ?? 'Default',
       pitchScore: micReady ? score : null,
       rawScore: score,
       series,
@@ -195,6 +196,7 @@ export function PlaybackMicProvider({ config, children }: PlaybackMicProviderPro
     series,
     micCaptureActive,
     micPitchActive,
+    micDevices,
   ]);
 
   const actionsValue = useMemo<PlaybackMicActions>(
