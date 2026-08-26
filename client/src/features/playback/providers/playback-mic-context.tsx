@@ -71,7 +71,7 @@ type CaptureStateInput = {
 const captureState = (input: CaptureStateInput) => {
   const playbackActive = input.isReady && input.isPlaying && !input.paused;
   const micPitchEnabled = playbackActive && input.micEnabled;
-  const micMonitorEnabled = playbackActive && input.monitorEnabled;
+  const micMonitorEnabled = input.monitorEnabled;
 
   return {
     micPitchEnabled,

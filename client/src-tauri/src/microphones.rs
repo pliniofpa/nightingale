@@ -13,6 +13,7 @@ use ts_rs::TS;
 const SAMPLE_CHUNK: usize = 512;
 const AUDIO_QUEUE_CAP: usize = 24_000;
 const PCM_QUEUE_CAP: usize = 24_000;
+const MONITOR_START_BUFFER: usize = 512;
 const DEFAULT_MONITOR_GAIN: f32 = 0.65;
 const MAX_MONITOR_GAIN: f32 = 2.0;
 
@@ -165,6 +166,21 @@ where
 {
     let floats: Vec<f32> = data.iter().copied().map(&mut map).collect();
     push(&floats);
+}
+
+fn strongest_input_channel(data: &[f32], channels: usize) -> usize {
+    let mut energy = vec![0.0; channels];
+    for frame in data.chunks(channels) {
+        for (channel, sample) in frame.iter().enumerate() {
+            energy[channel] += sample * sample;
+        }
+    }
+
+    energy
+        .iter()
+        .enumerate()
+        .max_by(|(_, left), (_, right)| left.total_cmp(right))
+        .map_or(0, |(channel, _)| channel)
 }
 
 fn write_output_frames<T, F>(
@@ -320,8 +336,9 @@ fn try_build_stream(
         let audio_cb = Arc::clone(&audio_shared);
         Arc::new(move |data: &[f32]| {
             let mut mono_samples = Vec::with_capacity(data.len() / ch.max(1));
-            for chunk in data.chunks(ch) {
-                mono_samples.push(chunk.iter().sum::<f32>() / ch as f32);
+            let active_channel = strongest_input_channel(data, ch);
+            for frame in data.chunks(ch) {
+                mono_samples.push(frame.get(active_channel).copied().unwrap_or(0.0));
             }
 
             if let Ok(mut q) = pcm_cb.try_lock() {
@@ -425,16 +442,22 @@ fn try_build_output_stream(
         let mut next = 0.0;
         let mut position = 0.0;
         let mut initialized = false;
+        let mut buffered = VecDeque::new();
         Arc::new(Mutex::new(Box::new(move || -> f32 {
             if !MONITOR_ENABLED.load(Ordering::Relaxed) {
                 return 0.0;
             }
 
             if !initialized {
-                if let Ok(mut queue) = audio_shared.try_lock() {
-                    current = queue.pop_front().unwrap_or(0.0);
-                    next = queue.pop_front().unwrap_or(0.0);
+                let Ok(mut queue) = audio_shared.try_lock() else {
+                    return 0.0;
+                };
+                if queue.len() < MONITOR_START_BUFFER {
+                    return 0.0;
                 }
+                buffered.extend(queue.drain(..));
+                current = buffered.pop_front().unwrap_or(0.0);
+                next = buffered.pop_front().unwrap_or(0.0);
                 initialized = true;
             }
 
@@ -442,11 +465,12 @@ fn try_build_output_stream(
             position += sample_rate_ratio;
             while position >= 1.0 {
                 current = next;
-                next = audio_shared
-                    .try_lock()
-                    .ok()
-                    .and_then(|mut queue| queue.pop_front())
-                    .unwrap_or(0.0);
+                if buffered.is_empty() {
+                    if let Ok(mut queue) = audio_shared.try_lock() {
+                        buffered.extend(queue.drain(..));
+                    }
+                }
+                next = buffered.pop_front().unwrap_or(0.0);
                 position -= 1.0;
             }
 

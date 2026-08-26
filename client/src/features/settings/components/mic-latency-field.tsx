@@ -15,6 +15,8 @@ type MicLatencyFieldProps = {
   latencySec: number;
   sliderClassName?: string;
   buttonClassName?: string;
+  disabled?: boolean;
+  onMeasuringChange?: (measuring: boolean) => void;
   onLatencyChange: (latencySec: number) => void;
 };
 
@@ -23,6 +25,8 @@ export function MicLatencyField({
   latencySec,
   sliderClassName,
   buttonClassName,
+  disabled = false,
+  onMeasuringChange,
   onLatencyChange,
 }: MicLatencyFieldProps) {
   const [measuring, setMeasuring] = useState(false);
@@ -34,6 +38,7 @@ export function MicLatencyField({
     }
 
     setMeasuring(true);
+    onMeasuringChange?.(true);
     try {
       const measured = await measureMicLatencySec(selectedMicId);
       onLatencyChange(measured);
@@ -43,6 +48,7 @@ export function MicLatencyField({
       toast.error(`Mic latency test failed: ${message}`);
     } finally {
       setMeasuring(false);
+      onMeasuringChange?.(false);
     }
   };
 
@@ -64,7 +70,7 @@ export function MicLatencyField({
             <Button
               variant="outline"
               onClick={() => void runTest()}
-              disabled={measuring}
+              disabled={disabled || measuring}
               className={buttonClassName}
             >
               {measuring ? 'Measuring...' : 'Measure latency'}

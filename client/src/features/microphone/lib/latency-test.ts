@@ -12,15 +12,23 @@ const BEEP_DURATION_SEC = 0.16;
 const BEEP_GAIN = 0.9;
 const NOOP: StopListening = () => {};
 
-function rms(samples: number[]): number {
-  if (samples.length === 0) {
+function toneAmplitude(samples: number[], sampleRate: number, frequency: number): number {
+  if (samples.length === 0 || sampleRate <= 0) {
     return 0;
   }
-  let sum = 0;
+
+  const coefficient = 2 * Math.cos((2 * Math.PI * frequency) / sampleRate);
+  let previous = 0;
+  let beforePrevious = 0;
   for (const sample of samples) {
-    sum += sample * sample;
+    const current = sample + coefficient * previous - beforePrevious;
+    beforePrevious = previous;
+    previous = current;
   }
-  return Math.sqrt(sum / samples.length);
+
+  const power =
+    previous * previous + beforePrevious * beforePrevious - coefficient * previous * beforePrevious;
+  return (2 * Math.sqrt(Math.max(0, power))) / samples.length;
 }
 
 function clampLatency(sec: number): number {
@@ -75,6 +83,7 @@ export async function measureMicLatencySec(
   let stopListening = NOOP;
   let beepWallStart = 0;
   let baselineSum = 0;
+  let baselinePeak = 0;
   let baselineCount = 0;
   const startedAt = performance.now();
   const context = await createUnlockedAudioContext();
@@ -84,7 +93,7 @@ export async function measureMicLatencySec(
 
     return await new Promise<number>((resolve, reject) => {
       let done = false;
-      let threshold = 0.02;
+      let threshold = 0.0005;
 
       const finish = (fn: () => void) => {
         if (done) {
@@ -100,7 +109,9 @@ export async function measureMicLatencySec(
       const timer = window.setTimeout(() => {
         finish(() =>
           reject(
-            new Error('No mic response detected. Increase speaker volume or move mic closer.'),
+            new Error(
+              'The selected mic did not detect the test tone. Confirm it with the mic test, then increase speaker volume or move the mic closer.',
+            ),
           ),
         );
       }, TEST_TIMEOUT_MS);
@@ -108,10 +119,11 @@ export async function measureMicLatencySec(
       adapter
         .subscribe((frame) => {
           const now = performance.now();
-          const level = rms(frame.samples);
+          const level = toneAmplitude(frame.samples, frame.sample_rate, BEEP_FREQ_HZ);
 
           if (!beepWallStart) {
             baselineSum += level;
+            baselinePeak = Math.max(baselinePeak, level);
             baselineCount += 1;
             return;
           }
@@ -137,7 +149,7 @@ export async function measureMicLatencySec(
       window.setTimeout(
         () => {
           const baseline = baselineCount > 0 ? baselineSum / baselineCount : 0;
-          threshold = Math.max(0.02, baseline + 0.03, baseline * 6);
+          threshold = Math.max(0.0005, baseline * 3, baselinePeak * 1.5);
           playBeep(context)
             .then((start) => {
               beepWallStart = start;

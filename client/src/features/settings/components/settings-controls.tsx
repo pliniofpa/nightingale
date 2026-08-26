@@ -22,6 +22,7 @@ type SettingsSelectProps = {
   placeholder: string;
   value: string;
   options: SettingsOption[];
+  disabled?: boolean;
   triggerClassName?: string;
   onValueChange: (value: string) => void;
 };
@@ -32,11 +33,12 @@ export function SettingsSelect({
   placeholder,
   value,
   options,
+  disabled = false,
   triggerClassName,
   onValueChange,
 }: SettingsSelectProps) {
   return (
-    <Select onValueChange={onValueChange} value={value}>
+    <Select disabled={disabled} onValueChange={onValueChange} value={value}>
       <SelectTrigger id={id} className={cn('w-full', triggerClassName)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>

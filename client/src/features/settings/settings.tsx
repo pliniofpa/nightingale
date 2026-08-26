@@ -22,6 +22,7 @@ import {
   type SettingsTab,
 } from '@/features/settings/components/constants';
 import { MicLatencyField } from '@/features/settings/components/mic-latency-field';
+import { MicTestField } from '@/features/settings/components/mic-test-field';
 import { PlaybackPreview } from '@/features/settings/components/playback-preview';
 import {
   Hint,
@@ -41,6 +42,17 @@ import { useConfigMutation } from '@/shared/config/use-config-mutation';
 import type { AppConfig } from '@/types/AppConfig';
 
 const DEFAULT_MIC_ID = '__default__';
+
+const pendingMicrophone = (
+  input: string | null | undefined,
+  saved: string | null,
+): string | null => (input === undefined ? saved : input);
+
+const storedMicrophone = (value: string): string | null =>
+  value === DEFAULT_MIC_ID ? null : value;
+
+const microphoneControlsDisabled = (testBusy: boolean, latencyMeasuring: boolean): boolean =>
+  testBusy || latencyMeasuring;
 
 const generalSettings = (config: AppConfig | undefined) => {
   if (!config) {
@@ -168,6 +180,10 @@ export const SettingsPage = () => {
   const playback = playbackSettings(config);
   const analysis = analysisSettings(config);
   const [isFullScreen, setIsFullScreen] = useState<boolean | null | undefined>(general.fullscreen);
+  const [preferredMicInput, setPreferredMic] = useState<string | null | undefined>(undefined);
+  const preferredMic = pendingMicrophone(preferredMicInput, general.preferredMic);
+  const [micTestBusy, setMicTestBusy] = useState(false);
+  const [latencyMeasuring, setLatencyMeasuring] = useState(false);
   const [micMonitorGainInput, setMicMonitorGain] = useState<number | null>(null);
   const micMonitorGain = micMonitorGainInput ?? general.micMonitorGain;
   const [micLatencySecInput, setMicLatencySec] = useState<number | null>(null);
@@ -191,18 +207,19 @@ export const SettingsPage = () => {
   const analysisNav = getAnalysisNav(isParakeet);
 
   const micOptions = useMemo(
-    () => microphoneOptions(micDevices, general.preferredMic),
-    [general.preferredMic, micDevices],
+    () => microphoneOptions(micDevices, preferredMic),
+    [preferredMic, micDevices],
   );
   const modelOptions = useMemo(() => MODELS.map((model) => ({ value: model, label: model })), []);
   const micMonitorGainPct = Math.round(micMonitorGain * 100);
+  const micControlsDisabled = microphoneControlsDisabled(micTestBusy, latencyMeasuring);
   const lyricsScalePct = Math.round(lyricsScale * 100);
   const pitchGraphScalePct = Math.round(pitchGraphScale * 100);
   const vocalThresholdDisplayPct = Math.round(vocalThresholdPct * 100);
   const batchSize = analysis.batchSize;
   const beamSize = analysis.beamSize;
 
-  useLegacyMicrophoneMigration(general.preferredMic, micDevices, mutate);
+  useLegacyMicrophoneMigration(preferredMic, micDevices, mutate);
 
   useEffect(() => {
     const updateIsFullScreen = async () => {
@@ -335,12 +352,15 @@ export const SettingsPage = () => {
                 <SettingsSelect
                   label="Microphone"
                   placeholder="Default microphone"
-                  value={general.preferredMic ?? DEFAULT_MIC_ID}
+                  value={preferredMic ?? DEFAULT_MIC_ID}
                   options={micOptions}
+                  disabled={micControlsDisabled}
                   triggerClassName={getFocusClassName(NAV.general.microphone)}
-                  onValueChange={(value) =>
-                    mutate({ preferred_mic: value === DEFAULT_MIC_ID ? null : value })
-                  }
+                  onValueChange={(value) => {
+                    const next = storedMicrophone(value);
+                    setPreferredMic(next);
+                    mutate({ preferred_mic: next });
+                  }}
                 />
                 <MicrophoneRetryButton query={micDevicesQuery} />
               </Field>
@@ -362,11 +382,22 @@ export const SettingsPage = () => {
               </Field>
 
               <MicLatencyField
-                selectedMicId={general.preferredMic}
+                selectedMicId={preferredMic}
                 latencySec={micLatencySec}
+                disabled={micTestBusy}
                 sliderClassName={getFocusClassName(NAV.general.micLatency, 0)}
                 buttonClassName={getFocusClassName(NAV.general.micLatency, 1)}
+                onMeasuringChange={setLatencyMeasuring}
                 onLatencyChange={updateMicLatency}
+              />
+
+              <MicTestField
+                selectedMicId={preferredMic}
+                disabled={latencyMeasuring}
+                startButtonClassName={getFocusClassName(NAV.general.micTest, 0)}
+                playButtonClassName={getFocusClassName(NAV.general.micTest, 1)}
+                onBusyChange={setMicTestBusy}
+                onCaptureStarted={() => void micDevicesQuery.refetch()}
               />
             </FieldGroup>
           </TabsContent>
