@@ -351,7 +351,9 @@ fn iter_file_hashes_filtered(
         })
     } else {
         with_conn(|c| {
-            let mut stmt = c.prepare("SELECT file_hash FROM songs ORDER BY artist COLLATE NOCASE, title COLLATE NOCASE")?;
+            let mut stmt = c.prepare(
+                "SELECT file_hash FROM songs ORDER BY artist COLLATE NOCASE, title COLLATE NOCASE",
+            )?;
             let rows = stmt.query_map([], |r| r.get(0))?;
             rows.collect()
         })

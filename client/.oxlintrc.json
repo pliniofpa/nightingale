@@ -47,6 +47,17 @@
     "eslint/no-nested-ternary": "error",
     "eslint/no-new-wrappers": "error",
     "eslint/no-param-reassign": "error",
+    "eslint/no-underscore-dangle": [
+      "error",
+      {
+        "allow": [
+          "__NIGHTINGALE_APP_CONFIG__",
+          "__NIGHTINGALE_MEDIA_ENDPOINT__",
+          "__NIGHTINGALE_SERVER_FLAGS__",
+          "__NIGHTINGALE_SONGS_META__"
+        ]
+      }
+    ],
     "eslint/no-return-assign": "error",
     "eslint/no-shadow": "error",
     "eslint/no-var": "error",
@@ -89,7 +100,41 @@
     "react/no-direct-mutation-state": "error",
     "react/no-unstable-nested-components": "error",
     "react/no-unknown-property": "error",
-    "react/only-export-components": ["error", { "allowConstantExport": true }],
+    "react/only-export-components": [
+      "error",
+      {
+        "allowConstantExport": true,
+        "allowExportNames": [
+          "NavInputContext",
+          "badgeVariants",
+          "buttonGroupVariants",
+          "buttonVariants",
+          "isDisplayableLanguage",
+          "isEditLyricsDialogMode",
+          "isLanguageDialogMode",
+          "isPixabayTheme",
+          "nextFlavorIndex",
+          "nextThemeIndex",
+          "ringFor",
+          "tabsListVariants",
+          "themeCount",
+          "themeMode",
+          "themeName",
+          "useMenuFocus",
+          "usePlaybackMicActions",
+          "usePlaybackMicState",
+          "usePlaybackThemeActions",
+          "usePlaybackThemeState",
+          "usePlaybackTranscriptActions",
+          "usePlaybackTranscriptState",
+          "usePlaybackTransportActions",
+          "usePlaybackTransportState",
+          "useSidebar",
+          "useSidebarRowFocus",
+          "useTheme"
+        ]
+      }
+    ],
     "react/react-in-jsx-scope": "off",
     "react/rules-of-hooks": "error",
     "react/self-closing-comp": "error",
@@ -124,7 +169,22 @@
     },
     {
       "files": ["**/*.d.ts"],
-      "rules": { "import/no-unassigned-import": "off" }
+      "rules": {
+        "import/no-unassigned-import": "off",
+        "typescript/consistent-type-definitions": "off"
+      }
+    },
+    {
+      "files": ["src/bridge/microphone.tauri.ts"],
+      "rules": {
+        "unicorn/prefer-add-event-listener": "off"
+      }
+    },
+    {
+      "files": ["src/features/playback/components/shader-visualizer.tsx"],
+      "rules": {
+        "react/no-unknown-property": "off"
+      }
     }
   ]
 }

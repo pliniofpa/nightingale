@@ -1,4 +1,4 @@
-import { LibraryMenuItems } from '@/types/LibraryMenuItems';
+import type { LibraryMenuItems } from '@/types/LibraryMenuItems';
 
 import { invoke } from './runtime';
 

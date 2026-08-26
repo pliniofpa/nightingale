@@ -1,4 +1,4 @@
-import { AppConfig } from '@/types/AppConfig';
+import type { AppConfig } from '@/types/AppConfig';
 
 import { updateMicMonitorGain } from './microphone';
 import { invoke } from './runtime';
@@ -18,7 +18,7 @@ export const loadConfig = async (): Promise<AppConfig> => {
 export const saveConfig = async (config: AppConfig): Promise<AppConfig> => {
   const saved = await invoke<AppConfig>('save_config', { config });
 
-  if (saved.mic_monitor_gain != null) {
+  if (saved.mic_monitor_gain !== null) {
     updateMicMonitorGain(saved.mic_monitor_gain);
   }
 

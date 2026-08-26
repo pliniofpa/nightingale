@@ -4,12 +4,12 @@
  * React mounts). The Tauri desktop build never sets these, so both default to
  * `false` there.
  */
-export interface ServerFlags {
+export type ServerFlags = {
   /** Data folder is fixed via `NIGHTINGALE_DATA_PATH`; hide the data picker. */
   dataPathPinned: boolean;
   /** Library folder is fixed via `NIGHTINGALE_LIBRARY_PATH`; hide folder-select. */
   libraryPinned: boolean;
-}
+};
 
 const defaults: ServerFlags = { dataPathPinned: false, libraryPinned: false };
 

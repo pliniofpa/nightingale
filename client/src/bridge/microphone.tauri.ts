@@ -2,8 +2,9 @@ import type { MicCaptureOptions } from '@/types/MicCaptureOptions';
 import type { MicrophoneInfo } from '@/types/MicrophoneInfo';
 import type { MicSampleFrame } from '@/types/MicSampleFrame';
 
-import { dispatchMicFrame, type MicrophoneAdapter, subscribeMicSamples } from './microphone';
-import { Channel, invoke } from './runtime';
+import type { MicrophoneAdapter } from './microphone';
+import { dispatchMicFrame, subscribeMicSamples } from './microphone-samples';
+import { createChannel, invoke } from './runtime';
 
 /**
  * Serializes start/stop so React's stop-then-start on song change can't race
@@ -28,7 +29,7 @@ const startCapture = (preferred: string | null, options: MicCaptureOptions): Pro
      * callback id. Reusing the cached Channel would hand Rust a dead id and
      * spam "Couldn't find callback id ..." for every frame.
      */
-    const channel = new Channel<MicSampleFrame>();
+    const channel = createChannel<MicSampleFrame>();
     channel.onmessage = dispatchMicFrame;
     return await invoke<string>('start_mic_capture', {
       preferred,
@@ -46,5 +47,5 @@ export const tauriMicrophoneAdapter: MicrophoneAdapter = {
   listDevices,
   startCapture,
   stopCapture,
-  onSamples: async (cb) => subscribeMicSamples(cb),
+  subscribe: async (callback) => subscribeMicSamples(callback),
 };

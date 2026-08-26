@@ -8,7 +8,11 @@ import { isTauri } from './runtime';
  * the path against the allowed data roots before serving.
  */
 export const convertFileSrc = (path: string): string => {
-  if (!path) return '';
-  if (isTauri) return tauriConvertFileSrc(path);
+  if (!path) {
+    return '';
+  }
+  if (isTauri) {
+    return tauriConvertFileSrc(path);
+  }
   return `/api/asset?path=${encodeURIComponent(path)}`;
 };

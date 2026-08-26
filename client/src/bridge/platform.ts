@@ -20,10 +20,13 @@ import { isTauri } from './runtime';
  */
 export type UpdateChannel = 'auto' | 'linux-tauri' | 'self-hosted-web';
 
-export const UPDATE_CHANNEL: UpdateChannel = !isTauri
-  ? 'self-hosted-web'
-  : platform() === 'linux'
-    ? 'linux-tauri'
-    : 'auto';
+const updateChannel = (): UpdateChannel => {
+  if (!isTauri) {
+    return 'self-hosted-web';
+  }
+  return platform() === 'linux' ? 'linux-tauri' : 'auto';
+};
+
+export const UPDATE_CHANNEL = updateChannel();
 
 export const UPDATES_SUPPORTED: boolean = UPDATE_CHANNEL === 'auto';

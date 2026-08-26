@@ -15,7 +15,7 @@ import { isTauri } from './runtime';
 
 export type { PixabayVideoDownloaded, StemsReadyEvent } from './playback.tauri';
 
-export interface PlaybackAdapter {
+export type PlaybackAdapter = {
   /**
    * Performs any one-time async setup (e.g. fetching the Tauri media port).
    * Must be awaited before `toMediaUrl` is called synchronously.
@@ -25,7 +25,7 @@ export interface PlaybackAdapter {
   toMediaUrl(absolutePath: string): string;
   /** Stem URLs for a song, already encoded for the active transport. */
   getAudioPaths(fileHash: string): Promise<AudioPaths>;
-}
+};
 
 // ─── Tauri implementation ─────────────────────────────────────────────────
 //
@@ -35,16 +35,12 @@ export interface PlaybackAdapter {
 // endpoint is baked into the page via the init script (see
 // `client/src-tauri/src/lib.rs`), with an IPC fallback for hot-reload.
 
-declare global {
-  interface Window {
-    __NIGHTINGALE_MEDIA_ENDPOINT__?: MediaEndpoint;
-  }
-}
-
 let cachedEndpoint: MediaEndpoint | null = null;
 
 const ensureEndpoint = async (): Promise<MediaEndpoint> => {
-  if (cachedEndpoint) return cachedEndpoint;
+  if (cachedEndpoint) {
+    return cachedEndpoint;
+  }
   cachedEndpoint = window.__NIGHTINGALE_MEDIA_ENDPOINT__ ?? (await tauriGetMediaEndpoint());
   return cachedEndpoint;
 };

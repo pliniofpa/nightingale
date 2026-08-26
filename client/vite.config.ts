@@ -1,10 +1,11 @@
-import path from 'path';
+import path from 'node:path';
 
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 const host = process.env.TAURI_DEV_HOST;
+const hasHost = typeof host === 'string' && host !== '';
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
@@ -18,8 +19,8 @@ export default defineConfig(async () => ({
   server: {
     port: 1420,
     strictPort: true,
-    host: host || false,
-    hmr: host
+    host: hasHost ? host : false,
+    hmr: hasHost
       ? {
           protocol: 'ws',
           host,

@@ -23,7 +23,9 @@ export const selectFolderPath = async (): Promise<string | undefined> => {
     // server-hosted build asks the user to type a path the server can see.
     const input = window.prompt('Songs folder path (visible to the server)', '/songs');
 
-    if (!input) return undefined;
+    if (typeof input !== 'string' || input === '') {
+      return undefined;
+    }
 
     const trimmed = input.trim();
 

@@ -1,6 +1,5 @@
 import type { MediaEndpoint } from '@/types/MediaEndpoint';
-import type { AudioPaths } from '@/types/Transcript';
-import type { Transcript } from '@/types/Transcript';
+import type { AudioPaths, Transcript } from '@/types/Transcript';
 
 import { invoke, listen, type UnlistenFn } from './runtime';
 
@@ -20,10 +19,10 @@ export const ensurePlayableSourceVideo = async (fileHash: string): Promise<strin
   return await invoke<string | null>('ensure_playable_source_video', { fileHash });
 };
 
-export interface StemsReadyEvent {
+export type StemsReadyEvent = {
   file_hash: string;
   error: string | null;
-}
+};
 
 export const onStemsReady = async (cb: (event: StemsReadyEvent) => void): Promise<UnlistenFn> => {
   return await listen<StemsReadyEvent>('stems-ready', ({ payload }) => cb(payload));
@@ -37,11 +36,11 @@ export const getMediaEndpoint = async (): Promise<MediaEndpoint> => {
   return await invoke<MediaEndpoint>('get_media_endpoint');
 };
 
-export interface PixabayVideoDownloaded {
+export type PixabayVideoDownloaded = {
   flavor: string;
   path: string;
   evictedPath?: string;
-}
+};
 
 export const onPixabayVideoDownloaded = async (
   cb: (event: PixabayVideoDownloaded) => void,

@@ -26,11 +26,11 @@ type InvokeArgs = Record<string, unknown> | undefined;
  * bridge for that path (the browser owns the mic), so this class only needs
  * to satisfy the type at construction time and not actually carry traffic.
  */
-class WebChannel<T> {
-  onmessage: ((message: T) => void) | null = null;
+class WebChannel {
+  onmessage: ((message: unknown) => void) | null = null;
 }
 
-const apiCall = async <T>(name: string, args: InvokeArgs): Promise<T> => {
+const apiCall = async (name: string, args: InvokeArgs): Promise<unknown> => {
   const res = await fetch(`/api/cmd/${name}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -42,15 +42,18 @@ const apiCall = async <T>(name: string, args: InvokeArgs): Promise<T> => {
     throw new Error(body || `HTTP ${res.status}`);
   }
 
-  if (res.status === 204) return undefined as T;
+  if (res.status === 204) {
+    return undefined;
+  }
 
-  return (await res.json()) as T;
+  const body: unknown = await res.json();
+  return body;
 };
 
-interface WsEnvelope {
+type WsEnvelope = {
   type: string;
   payload?: unknown;
-}
+};
 
 type WsListener = (payload: unknown) => void;
 
@@ -64,58 +67,86 @@ const wsUrl = (): string => {
   return `${proto}//${window.location.host}/ws`;
 };
 
-const ensureSocket = (): Promise<WebSocket> => {
-  if (socket && socket.readyState === WebSocket.OPEN) return Promise.resolve(socket);
+function parseWsEnvelope(data: unknown): WsEnvelope | null {
+  let parsed: unknown;
 
-  if (connecting) return connecting;
+  try {
+    parsed = typeof data === 'string' ? JSON.parse(data) : null;
+  } catch {
+    return null;
+  }
+
+  if (
+    typeof parsed !== 'object' ||
+    parsed === null ||
+    !('type' in parsed) ||
+    typeof parsed.type !== 'string'
+  ) {
+    return null;
+  }
+
+  return {
+    type: parsed.type,
+    payload: 'payload' in parsed ? parsed.payload : undefined,
+  };
+}
+
+function dispatchWsMessage(message: MessageEvent<unknown>): void {
+  const envelope = parseWsEnvelope(message.data);
+  if (!envelope) {
+    return;
+  }
+
+  const subscribers = wsListeners.get(envelope.type);
+  if (!subscribers) {
+    return;
+  }
+
+  for (const fn of subscribers) {
+    try {
+      fn(envelope.payload);
+    } catch {
+      // Listeners must not break the fan-out loop.
+    }
+  }
+}
+
+const ensureSocket = (): Promise<WebSocket> => {
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    return Promise.resolve(socket);
+  }
+
+  if (connecting) {
+    return connecting;
+  }
 
   connecting = new Promise((resolve, reject) => {
     const next = new WebSocket(wsUrl());
 
-    next.onopen = () => {
+    next.addEventListener('open', () => {
       socket = next;
       connecting = null;
       resolve(next);
-    };
+    });
 
-    next.onerror = (err) => {
+    next.addEventListener('error', (error) => {
       connecting = null;
-      reject(err);
-    };
+      reject(error);
+    });
 
-    next.onclose = () => {
-      if (socket === next) socket = null;
-    };
-
-    next.onmessage = (msg) => {
-      let envelope: WsEnvelope;
-
-      try {
-        envelope = JSON.parse(msg.data) as WsEnvelope;
-      } catch {
-        return;
+    next.addEventListener('close', () => {
+      if (socket === next) {
+        socket = null;
       }
+    });
 
-      const subscribers = wsListeners.get(envelope.type);
-
-      if (!subscribers) return;
-
-      for (const fn of subscribers) {
-        try {
-          fn(envelope.payload);
-        } catch {
-          // Listeners must not break the fan-out loop.
-        }
-      }
-    };
+    next.addEventListener('message', dispatchWsMessage);
   });
 
   return connecting;
 };
 
-const webInvoke = async <T>(name: string, args?: InvokeArgs): Promise<T> => apiCall<T>(name, args);
-
-const webListen = async <T>(event: string, cb: EventCallback<T>): Promise<UnlistenFn> => {
+const webListen = async (event: string, cb: EventCallback<unknown>): Promise<UnlistenFn> => {
   // Wait for the WS to actually open before resolving. Server-side events go
   // out over a `tokio::broadcast` channel that only delivers to clients with
   // an active outbound task, so anything emitted before this socket finishes
@@ -136,7 +167,7 @@ const webListen = async <T>(event: string, cb: EventCallback<T>): Promise<Unlist
     wsListeners.set(event, subscribers);
   }
 
-  const wrapped: WsListener = (payload) => cb({ payload: payload as T });
+  const wrapped: WsListener = (payload) => cb({ payload });
 
   subscribers.add(wrapped);
 
@@ -145,20 +176,28 @@ const webListen = async <T>(event: string, cb: EventCallback<T>): Promise<Unlist
 
     set?.delete(wrapped);
 
-    if (set && set.size === 0) wsListeners.delete(event);
+    if (set && set.size === 0) {
+      wsListeners.delete(event);
+    }
   };
 };
 
 // ─── Exports ────────────────────────────────────────────────────────────────
 
-export const invoke: <T>(name: string, args?: InvokeArgs) => Promise<T> = isTauri
-  ? (tauriInvoke as <T>(name: string, args?: InvokeArgs) => Promise<T>)
-  : webInvoke;
+export function invoke<T>(name: string, args?: InvokeArgs): Promise<T>;
+export function invoke(name: string, args?: InvokeArgs): Promise<unknown> {
+  return isTauri ? tauriInvoke(name, args) : apiCall(name, args);
+}
 
-export const listen: <T>(event: string, cb: EventCallback<T>) => Promise<UnlistenFn> = isTauri
-  ? (tauriListen as <T>(event: string, cb: EventCallback<T>) => Promise<UnlistenFn>)
-  : webListen;
+export function listen<T>(event: string, cb: EventCallback<T>): Promise<UnlistenFn>;
+export function listen(event: string, cb: EventCallback<unknown>): Promise<UnlistenFn> {
+  return isTauri ? tauriListen(event, cb) : webListen(event, cb);
+}
 
-export const Channel = isTauri ? TauriChannel : (WebChannel as unknown as typeof TauriChannel);
+export type RuntimeChannel<T> = { onmessage: ((message: T) => void) | null };
+
+export function createChannel<T>(): RuntimeChannel<T> {
+  return isTauri ? new TauriChannel<T>() : new WebChannel();
+}
 
 export type { UnlistenFn };

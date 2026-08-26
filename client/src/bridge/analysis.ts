@@ -1,5 +1,5 @@
 import type { LibraryMenuFilters } from '@/types/LibraryMenuFilters';
-import { ShiftDone } from '@/types/ShiftDone';
+import type { ShiftDone } from '@/types/ShiftDone';
 import type { SongTarget } from '@/types/SongTarget';
 
 import { invoke, listen } from './runtime';

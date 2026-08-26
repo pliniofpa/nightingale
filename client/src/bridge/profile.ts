@@ -1,4 +1,4 @@
-import { ProfileStore } from '@/types/ProfileStore';
+import type { ProfileStore } from '@/types/ProfileStore';
 
 import { invoke } from './runtime';
 

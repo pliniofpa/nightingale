@@ -1,4 +1,4 @@
-import { CacheStats } from '@/types/CacheStats';
+import type { CacheStats } from '@/types/CacheStats';
 
 import { invoke } from './runtime';
 

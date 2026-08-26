@@ -1,18 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
+import { App } from '@/app/app';
 import { isTauri } from '@/bridge/runtime';
-
-import App from './App';
+import { webBootstrapSchema } from '@/bridge/schemas';
 
 document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-interface WebBootstrap {
-  config: typeof window.__NIGHTINGALE_APP_CONFIG__;
-  songsMeta: typeof window.__NIGHTINGALE_SONGS_META__;
-  dataPathPinned?: boolean;
-  libraryPinned?: boolean;
-}
 
 /**
  * Tauri injects `window.__NIGHTINGALE_*` ahead of script execution via the
@@ -21,30 +14,35 @@ interface WebBootstrap {
  * code can read them synchronously.
  */
 async function loadWebBootstrap(): Promise<void> {
-  if (isTauri) return;
+  if (isTauri) {
+    return;
+  }
 
   try {
     const res = await fetch('/api/bootstrap');
     if (!res.ok) {
-      console.warn('bootstrap fetch failed', res.status);
       return;
     }
-    const data = (await res.json()) as WebBootstrap;
-    if (data.config) window.__NIGHTINGALE_APP_CONFIG__ = data.config;
-    if (data.songsMeta) window.__NIGHTINGALE_SONGS_META__ = data.songsMeta;
+    const data: unknown = await res.json();
+    const bootstrap = webBootstrapSchema.parse(data);
+    window.__NIGHTINGALE_APP_CONFIG__ = bootstrap.config;
+    window.__NIGHTINGALE_SONGS_META__ = bootstrap.songsMeta;
     window.__NIGHTINGALE_SERVER_FLAGS__ = {
-      dataPathPinned: Boolean(data.dataPathPinned),
-      libraryPinned: Boolean(data.libraryPinned),
+      dataPathPinned: Boolean(bootstrap.dataPathPinned),
+      libraryPinned: Boolean(bootstrap.libraryPinned),
     };
-  } catch (e) {
-    console.warn('bootstrap fetch failed', e);
-  }
+  } catch {}
 }
 
 void loadWebBootstrap().then(() => {
-  ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+  const root = document.getElementById('root');
+  if (root === null) {
+    throw new Error('Missing application root');
+  }
+  ReactDOM.createRoot(root).render(
     <React.StrictMode>
       <App />
     </React.StrictMode>,
   );
+  return undefined;
 });
