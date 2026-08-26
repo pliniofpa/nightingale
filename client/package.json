@@ -84,7 +84,8 @@
     "vite": "^8.0.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,mjs,cjs}": "pnpm run lint",
+    "*.{js,jsx,ts,tsx,mjs,cjs}": "pnpm run lint:code",
+    "*.css": "pnpm exec stylelint",
     "*": "pnpm run format:staged"
   },
   "engines": {
