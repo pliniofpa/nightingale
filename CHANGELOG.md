@@ -22,6 +22,10 @@ below.
 - Add bulk song actions and a Refresh Metadata action for reloading metadata from the library source.
 - Queued or in-progress song analysis can now be cancelled per song or in bulk across filtered songs.
 
+### Fixes
+
+- The lyrics editor now allows re-aligning analyzed songs without requiring a lyrics change.
+
 ## [1.1.0] - 2026-08-14
 
 ### Features
