@@ -398,17 +398,24 @@ fn read_video_metadata(path: &Path) -> Result<MediaMetadata, NightingaleError> {
     let mut album = String::new();
     let mut duration_secs = 0.0;
     let mut found_duration = false;
+    let mut reading_audio_stream = false;
     let stderr = String::from_utf8_lossy(&output.stderr);
 
     for line in stderr.lines() {
         let trimmed = line.trim();
+        if trimmed.starts_with("Stream #") {
+            reading_audio_stream = trimmed.contains(" Audio:");
+        }
         if let Some(rest) = trimmed.strip_prefix("Duration:") {
             found_duration = true;
             if let Some(ts) = rest.split(',').next() {
                 duration_secs = parse_ffmpeg_duration(ts.trim());
             }
         }
-        if let Some(val) = strip_meta_tag(trimmed, "title") {
+        if reading_audio_stream
+            && title.is_empty()
+            && let Some(val) = strip_meta_tag(trimmed, "title")
+        {
             title = val;
         }
         if let Some(val) = strip_meta_tag(trimmed, "artist") {
