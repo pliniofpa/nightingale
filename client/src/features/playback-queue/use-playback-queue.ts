@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 
 import {
@@ -11,6 +10,8 @@ import {
   removePlaybackQueueEntry,
   type PlaybackQueueEntry,
 } from '@/bridge/playback-queue';
+import type { PlaybackTarget } from '@/bridge/playback-session';
+import { usePlaybackLauncher } from '@/features/playback/hooks/use-playback-launcher';
 import {
   preparePlayback,
   type PreparePlaybackInput,
@@ -77,41 +78,51 @@ export function useClearPlaybackQueue() {
   });
 }
 
+type StartInput = {
+  entry: PlaybackQueueEntry;
+  target: PlaybackTarget;
+};
+
 type StartResult = {
   id: string;
   song: Song;
   entries: PlaybackQueueEntry[];
+  target: PlaybackTarget;
 };
 
 export function useStartNextPlaybackQueueSong(entries: PlaybackQueueEntry[]) {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { launch, reserveTarget } = usePlaybackLauncher();
   const { mutate, isLoading } = useMutation({
-    mutationFn: async (entry: PlaybackQueueEntry): Promise<StartResult> => {
+    mutationFn: async ({ entry, target }: StartInput): Promise<StartResult> => {
       const song = await preparePlayback({
         song: entry.song,
         tempo: entry.tempo,
         keyOffset: entry.keyOffset,
       });
       const nextEntries = await removePlaybackQueueEntry(entry.id);
-      return { id: entry.id, song, entries: nextEntries };
+      return { id: entry.id, song, entries: nextEntries, target };
     },
-    onSuccess: ({ id, song, entries: nextEntries }) => {
+    onSuccess: ({ id, song, entries: nextEntries, target }) => {
       queryClient.setQueryData(PLAYBACK_QUEUE, nextEntries);
-      void navigate('/playback', {
-        replace: true,
-        state: { song, queuePlayback: true, playbackId: id },
-      });
+      void launch({ song, queuePlayback: true, playbackId: id }, target);
     },
-    onError: (error: Error) => toast.error(`Could not start queued song: ${error.message}`),
+    onError: (error: Error, { target }) => {
+      target?.close();
+      toast.error(`Could not start queued song: ${error.message}`);
+    },
   });
 
   const playNext = useCallback(() => {
     if (entries.length === 0 || isLoading) {
       return;
     }
-    mutate(entries[0]);
-  }, [entries, isLoading, mutate]);
+    const target = reserveTarget();
+    if (target === undefined) {
+      return;
+    }
+    mutate({ entry: entries[0], target });
+  }, [entries, isLoading, mutate, reserveTarget]);
 
   return { playNext, isPreparing: isLoading };
 }

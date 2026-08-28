@@ -18,11 +18,12 @@ const NO_FOCUS_RING = 'focus-visible:ring-0 focus-visible:border-transparent';
 
 type PauseOverlayProps = {
   open: boolean;
+  exitLabel: string;
   onExit: () => void;
   onContinue: () => void;
 };
 
-export const PauseOverlay = ({ open, onExit, onContinue }: PauseOverlayProps) => {
+export const PauseOverlay = ({ open, exitLabel, onExit, onContinue }: PauseOverlayProps) => {
   const onConfirm = useCallback(
     (index: number) => {
       if (index === 0) {
@@ -60,7 +61,7 @@ export const PauseOverlay = ({ open, onExit, onContinue }: PauseOverlayProps) =>
             onClick={onExit}
             className={cn(NO_FOCUS_RING, open && focusedIndex === 1 && RING)}
           >
-            Exit to Menu
+            {exitLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

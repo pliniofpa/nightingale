@@ -35,6 +35,7 @@ type Props = {
   scores: ScoreRecord[];
   activeProfile: string | null;
   nextPending: boolean;
+  exitLabel: string;
   onBack: () => void;
   onNext?: () => void;
 };
@@ -46,6 +47,7 @@ export const ResultDialog = ({
   scores,
   activeProfile,
   nextPending,
+  exitLabel,
   onBack,
   onNext,
 }: Props) => {
@@ -132,7 +134,7 @@ export const ResultDialog = ({
               disabled={nextPending}
               onClick={onBack}
             >
-              Back to Menu
+              {exitLabel}
             </Button>
             {onNext ? (
               <Button

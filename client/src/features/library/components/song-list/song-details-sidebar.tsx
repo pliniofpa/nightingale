@@ -1,9 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { ListPlusIcon, PlayIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
 
 import { useAddPlaybackQueueEntry } from '@/features/playback-queue/use-playback-queue';
+import { usePlaybackLauncher } from '@/features/playback/hooks/use-playback-launcher';
 import { usePreparePlaybackMutation } from '@/features/playback/mutations/use-prepare-playback-mutation';
 import { useBestScoresBySongForActiveProfile } from '@/features/profiles/hooks/use-best-scores-by-song';
 import { Button } from '@/shared/components/ui/button';
@@ -51,11 +51,11 @@ function AddToQueueButton({ song, tempo, keyOffset, ready, preparing }: AddToQue
 }
 
 export const SongDetailsSidebar = ({ song, queueStatus, onClose }: SongDetailsSidebarProps) => {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const bestScores = useBestScoresBySongForActiveProfile();
   const { detailsRef, closeDetails } = useSongDetailsNav(onClose);
   const { mutate: preparePlayback, isLoading: preparingPlayback } = usePreparePlaybackMutation();
+  const { launch, reserveTarget } = usePlaybackLauncher();
   const [tempo, setTempo] = useState(song.tempo);
   const [keyOffset, setKeyOffset] = useState(song.key_offset);
 
@@ -82,19 +82,24 @@ export const SongDetailsSidebar = ({ song, queueStatus, onClose }: SongDetailsSi
   }, [keyPending, queryClient]);
 
   const handlePlay = () => {
+    const target = reserveTarget();
+    if (target === undefined) {
+      return;
+    }
+    const start = (preparedSong: Song) =>
+      launch({ song: preparedSong, queuePlayback: false }, target);
     const hasAdjustments = keyOffset !== song.key_offset || tempo !== song.tempo;
 
     if (!hasAdjustments) {
-      void navigate('/playback', { state: { song } });
+      void start(song);
       return;
     }
 
     preparePlayback(
       { song, tempo, keyOffset },
       {
-        onSuccess: (preparedSong) => {
-          void navigate('/playback', { state: { song: preparedSong } });
-        },
+        onSuccess: (preparedSong) => void start(preparedSong),
+        onError: () => target?.close(),
       },
     );
   };

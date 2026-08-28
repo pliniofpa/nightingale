@@ -21,6 +21,8 @@ import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 
 import { ensureMp3Stems, onStemsReady } from '@/bridge/playback';
+import { isSessionPlayback } from '@/bridge/playback-session';
+import { closePlaybackWindow } from '@/bridge/window';
 import {
   type AudioPlayer,
   type TimeSubscriber,
@@ -133,6 +135,10 @@ export function PlaybackTransportProvider({
 
   const handleExit = useCallback(() => {
     audio.cleanup();
+    if (isSessionPlayback()) {
+      void closePlaybackWindow();
+      return;
+    }
     void navigate('/', { replace: true });
   }, [audio, navigate]);
 

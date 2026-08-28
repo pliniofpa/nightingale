@@ -1,3 +1,5 @@
+import { getCurrentWindow } from '@tauri-apps/api/window';
+
 import { invoke, isTauri } from './runtime';
 
 export const triggerFrontendReady = async (): Promise<void> => {
@@ -19,4 +21,12 @@ export const minimizeWindow = async (): Promise<void> => {
     return;
   }
   return invoke<void>('minimize_window');
+};
+
+export const closePlaybackWindow = async (): Promise<void> => {
+  if (isTauri) {
+    await getCurrentWindow().close();
+    return;
+  }
+  window.close();
 };

@@ -2,7 +2,7 @@ use app_core::{
     ensure_mp3_stems_ready_payload, load_lyrics_file, save_lyrics_and_realign,
     search_lrclib_for_hash, shift_key_done_payload, shift_tempo_done_payload, AnalysisQueue,
     AppConfig, CacheStats, LibraryMenuItems, LibrarySource, LoadSongsParams,
-    PixabayVideoDownloaded, ProfileStore, SongTarget, SongsStore,
+    PixabayVideoDownloaded, PlaybackSession, ProfileStore, SongTarget, SongsStore,
 };
 use axum::{
     extract::{Path as AxumPath, State},
@@ -148,6 +148,25 @@ async fn dispatch(state: AppState, name: &str, payload: Value) -> CmdResult {
             let entries = state.playback_queue.clear().map_err(ApiError::internal)?;
             events.emit("playback-queue-changed", &entries);
             Ok(serde_json::to_value(entries).map_err(serde_err)?)
+        }
+
+        // ── Playback session ─────────────────────────────────────────────
+        "load_playback_session" => {
+            let session = state.playback_sessions.load().map_err(ApiError::internal)?;
+            Ok(serde_json::to_value(session).map_err(serde_err)?)
+        }
+        "save_playback_session" => {
+            #[derive(Deserialize)]
+            struct Args {
+                session: PlaybackSession,
+            }
+            let args: Args = deserialize(payload)?;
+            let session = state
+                .playback_sessions
+                .save(args.session)
+                .map_err(ApiError::internal)?;
+            events.emit("playback-session-changed", &session);
+            Ok(serde_json::to_value(session).map_err(serde_err)?)
         }
 
         // ── Scanner ──────────────────────────────────────────────────────

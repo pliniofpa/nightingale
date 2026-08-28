@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { loadConfig, saveConfig } from '@/bridge/config';
 import { isFullScreen as tauriIsFullScreen, setFullScreen } from '@/bridge/fullScreen';
+import { isSessionPlayback } from '@/bridge/playback-session';
 import { isTauri } from '@/bridge/runtime';
 import { minimizeWindow, triggerFrontendReady, windowImmersive } from '@/bridge/window';
 
@@ -49,6 +50,7 @@ export function TauriAppShell({ children }: { children: React.ReactNode }) {
 
 function TitleBar() {
   const [fullscreen, setFullscreen] = useState(false);
+  const sessionPlayback = isSessionPlayback();
 
   useEffect(() => {
     const win = getCurrentWindow();
@@ -87,18 +89,58 @@ function TitleBar() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.style.setProperty('--titlebar-offset', fullscreen ? '0px' : '2rem');
+    document.documentElement.style.setProperty(
+      '--titlebar-offset',
+      fullscreen || sessionPlayback ? '0px' : '2rem',
+    );
 
     return () => {
       document.documentElement.style.removeProperty('--titlebar-offset');
     };
-  }, [fullscreen]);
+  }, [fullscreen, sessionPlayback]);
 
   if (fullscreen) {
     return null;
   }
 
   const win = getCurrentWindow();
+
+  if (sessionPlayback) {
+    return (
+      <div className="fixed right-2 top-2 z-50 flex h-8 items-center overflow-hidden rounded-md border border-border bg-background/85 shadow-md backdrop-blur-sm">
+        <div
+          className="h-full w-12 cursor-move border-r border-border"
+          aria-hidden
+          title="Drag playback window"
+          onMouseDown={() => void win.startDragging()}
+        />
+        <button
+          type="button"
+          className="inline-flex size-7 items-center justify-center text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          aria-label="Minimize"
+          onClick={() => void minimizeWindow()}
+        >
+          <MinusIcon className="size-3.5" strokeWidth={2} />
+        </button>
+        <button
+          type="button"
+          className="inline-flex size-7 items-center justify-center text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          aria-label="Maximize"
+          onClick={() => void win.toggleMaximize()}
+        >
+          <SquareIcon className="size-3" strokeWidth={2} />
+        </button>
+        <button
+          type="button"
+          className="inline-flex size-7 items-center justify-center text-muted-foreground transition-colors hover:bg-destructive/15 hover:text-destructive"
+          aria-label="Close"
+          onClick={() => void win.close()}
+        >
+          <XIcon className="size-3.5" strokeWidth={2} />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <header className="flex h-8 shrink-0 select-none items-stretch border-b border-border bg-background">

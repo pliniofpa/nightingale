@@ -6,6 +6,7 @@ mod lyrics;
 mod microphones;
 mod playback;
 mod playback_queue;
+mod playback_session;
 mod profile;
 mod scanner;
 mod vendor;
@@ -14,7 +15,7 @@ use analyzer::{
     cancel_analysis, delete_song_cache, enqueue, realign, reanalyze_force_transcribe,
     reanalyze_full, reanalyze_transcript, refresh_metadata, shift_key, shift_tempo,
 };
-use app_core::{AppConfig, PlaybackQueue, SongsStore};
+use app_core::{AppConfig, PlaybackQueue, PlaybackSessionStore, SongsStore};
 use base64::{engine::general_purpose::STANDARD as B64, Engine as _};
 use cache::{calculate_cache_stats, clear_all, clear_models_command, clear_videos_command};
 use config::{load_config, save_config};
@@ -28,6 +29,7 @@ use playback_queue::{
     add_playback_queue_entry, clear_playback_queue, load_playback_queue,
     remove_playback_queue_entry,
 };
+use playback_session::{load_playback_session, save_playback_session};
 use profile::{add_score, create_profile, delete_profile, load_profiles, switch_profile};
 use scanner::{
     clear_library_source, jellyfin_login, jellyfin_ping, load_analysis_queue,
@@ -86,6 +88,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .manage(PlaybackQueue::default())
+        .manage(PlaybackSessionStore::default())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
@@ -114,6 +117,9 @@ pub fn run() {
             add_playback_queue_entry,
             remove_playback_queue_entry,
             clear_playback_queue,
+            // Playback session
+            load_playback_session,
+            save_playback_session,
             // Scanner
             trigger_scan,
             set_library_source,

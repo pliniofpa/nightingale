@@ -10,6 +10,7 @@ mod lyrics;
 pub mod media_server;
 mod playback;
 mod playback_queue;
+mod playback_session;
 mod profile;
 mod scanner;
 mod secret;
@@ -45,6 +46,7 @@ pub use playback::{
     shift_tempo_done_payload,
 };
 pub use playback_queue::{PlaybackQueue, PlaybackQueueEntry};
+pub use playback_session::{PlaybackSession, PlaybackSessionStore};
 pub use profile::ProfileStore;
 pub use scanner::start_scan;
 pub use song::{Song, SongOrigin};

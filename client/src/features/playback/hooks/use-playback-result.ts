@@ -6,7 +6,6 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 
 import successSoundUrl from '@/assets/sounds/success.mp3';
@@ -40,7 +39,6 @@ export type PlaybackResult = {
 
 export function usePlaybackResult(song: Song, queuePlayback: boolean): PlaybackResult {
   const fileHash = song.file_hash;
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: profileData, isLoading: profilesLoading } = useProfiles();
   const { data: entries = [] } = usePlaybackQueueQuery();
@@ -79,7 +77,7 @@ export function usePlaybackResult(song: Song, queuePlayback: boolean): PlaybackR
     const shouldShowResult = queuePlayback || finalScore > 0;
 
     if (!shouldShowResult) {
-      void navigate('/', { replace: true });
+      handleExit();
       return;
     }
 
@@ -99,7 +97,7 @@ export function usePlaybackResult(song: Song, queuePlayback: boolean): PlaybackR
     isFinished,
     skipOutroPending,
     fileHash,
-    navigate,
+    handleExit,
     profileData,
     profilesLoading,
     queryClient,
