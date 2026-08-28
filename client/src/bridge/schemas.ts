@@ -147,4 +147,8 @@ export const webBootstrapSchema = z.object({
   libraryPinned: z.boolean().optional(),
 });
 
-export const playbackLocationStateSchema = z.object({ song: songSchema });
+export const playbackLocationStateSchema = z.object({
+  song: songSchema,
+  queuePlayback: z.boolean().optional(),
+  playbackId: z.string().optional(),
+});

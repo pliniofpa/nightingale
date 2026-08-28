@@ -12,6 +12,10 @@ import { toast } from 'sonner';
 import successSoundUrl from '@/assets/sounds/success.mp3';
 import { addScore } from '@/bridge/profile';
 import {
+  usePlaybackQueueQuery,
+  useStartNextPlaybackQueueSong,
+} from '@/features/playback-queue/use-playback-queue';
+import {
   usePlaybackMicState,
   usePlaybackTranscriptActions,
   usePlaybackTranscriptState,
@@ -29,14 +33,18 @@ export type PlaybackResult = {
   score: number;
   scores: ScoreRecord[];
   activeProfile: string | null;
-  onFinish: () => void;
+  nextPending: boolean;
+  onBack: () => void;
+  onNext?: () => void;
 };
 
-export function usePlaybackResult(song: Song): PlaybackResult {
+export function usePlaybackResult(song: Song, queuePlayback: boolean): PlaybackResult {
   const fileHash = song.file_hash;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: profileData, isLoading: profilesLoading } = useProfiles();
+  const { data: entries = [] } = usePlaybackQueueQuery();
+  const { isPreparing, playNext } = useStartNextPlaybackQueueSong(entries);
 
   const { isFinished } = usePlaybackTransportState();
   const { handleExit } = usePlaybackTransportActions();
@@ -68,7 +76,7 @@ export function usePlaybackResult(song: Song): PlaybackResult {
 
     const finalScore = scoreRef.current;
     const active = profileData?.active ?? null;
-    const shouldShowResult = finalScore > 0;
+    const shouldShowResult = queuePlayback || finalScore > 0;
 
     if (!shouldShowResult) {
       void navigate('/', { replace: true });
@@ -81,12 +89,11 @@ export function usePlaybackResult(song: Song): PlaybackResult {
           await addScore(fileHash, finalScore);
           await queryClient.invalidateQueries({ queryKey: PROFILES });
         }
-        setResultScore(finalScore);
-        setShowResult(true);
       } catch (e) {
         toast.error(`Could not save score: ${e instanceof Error ? e.message : String(e)}`);
-        void navigate('/', { replace: true });
       }
+      setResultScore(finalScore);
+      setShowResult(true);
     })();
   }, [
     isFinished,
@@ -98,6 +105,7 @@ export function usePlaybackResult(song: Song): PlaybackResult {
     queryClient,
     clearSkipOutroPending,
     scoreRef,
+    queuePlayback,
   ]);
 
   useEffect(() => {
@@ -114,16 +122,20 @@ export function usePlaybackResult(song: Song): PlaybackResult {
     };
   }, [showResult]);
 
-  const onFinish = useCallback(() => {
+  const onBack = useCallback(() => {
     setShowResult(false);
     handleExit();
   }, [handleExit]);
+  const onNext = useCallback(() => playNext(), [playNext]);
+  const hasNext = queuePlayback && entries.length > 0;
 
   return {
     open: showResult,
     score: resultScore,
     scores: profileData?.scores ?? [],
     activeProfile: profileData?.active ?? null,
-    onFinish,
+    nextPending: isPreparing,
+    onBack,
+    onNext: hasNext ? onNext : undefined,
   };
 }

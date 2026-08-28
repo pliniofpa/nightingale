@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useRef, type RefObject } from 'react';
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 
+import type { PlaybackQueueEntry } from '@/bridge/playback-queue';
 import { useAnalysisQueue, useSongs } from '@/features/library/queries/use-songs';
 import { useLibraryFilter } from '@/features/menu/hooks/use-library-filter';
 import { useSearch } from '@/features/menu/hooks/use-search';
 import { useMenuFocus } from '@/features/menu/providers/menu-focus-context';
+import { usePlaybackQueueQuery } from '@/features/playback-queue/use-playback-queue';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/shared/components/ui/empty';
 import { Separator } from '@/shared/components/ui/separator';
 import { useConfig } from '@/shared/config/use-config';
@@ -11,10 +13,12 @@ import { useConfigMutation } from '@/shared/config/use-config-mutation';
 import { useLatestRef } from '@/shared/hooks/use-latest-ref';
 import { usePersistentScroll } from '@/shared/hooks/use-persistent-scroll';
 import { cn } from '@/shared/utils/cn';
+import type { QueuedStatus } from '@/types/QueuedStatus';
 import type { Song } from '@/types/Song';
 
 import { Filters, type SongListView } from './filters';
 import { Progress } from './progress';
+import { QueueSidebar } from './queue-sidebar';
 import { songKey } from './shared/song-key';
 import { SongDetailsSidebar } from './song-details-sidebar';
 import type { SongItemProps } from './types';
@@ -76,8 +80,48 @@ const SongCollection = ({
   );
 };
 
+type SongSidePanelProps = {
+  queueOpen: boolean;
+  playbackQueue: PlaybackQueueEntry[];
+  song: Song | null;
+  queueEntries?: Record<string, QueuedStatus>;
+  onCloseQueue: () => void;
+  onCloseSong: () => void;
+};
+
+function SongSidePanel({
+  queueOpen,
+  playbackQueue,
+  song,
+  queueEntries,
+  onCloseQueue,
+  onCloseSong,
+}: SongSidePanelProps) {
+  if (queueOpen) {
+    return (
+      <QueueSidebar
+        key={playbackQueue.map(({ id }) => id).join(':')}
+        entries={playbackQueue}
+        onClose={onCloseQueue}
+      />
+    );
+  }
+  if (song) {
+    return (
+      <SongDetailsSidebar
+        key={songKey(song)}
+        song={song}
+        queueStatus={queueEntries?.[song.file_hash]}
+        onClose={onCloseSong}
+      />
+    );
+  }
+  return null;
+}
+
 export const SongList = () => {
   const { data: queue } = useAnalysisQueue();
+  const { data: playbackQueue = [] } = usePlaybackQueueQuery();
   const { data: config } = useConfig();
   const { mutate: saveConfig, isPending: isSavingView } = useConfigMutation();
   const { focus, actionsRef, setFocus, selectedSong, setSelectedSong } = useMenuFocus();
@@ -85,6 +129,7 @@ export const SongList = () => {
   const { search } = useSearch();
   const { artist, album, playlist, query, status, transcript_source } = useLibraryFilter();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useSongs();
+  const [queueOpen, setQueueOpen] = useState(false);
   const view: SongListView = config?.song_list_view === 'grid' ? 'grid' : 'table';
   const songs = useMemo(() => data?.pages.flatMap((page) => page.processed) ?? [], [data]);
   const selectedKey = selectedSong ? songKey(selectedSong) : null;
@@ -125,6 +170,7 @@ export const SongList = () => {
         return;
       }
 
+      setQueueOpen(false);
       setSelectedSong(song);
     };
     return () => {
@@ -161,7 +207,15 @@ export const SongList = () => {
     status,
     transcript_source,
   ]);
-  const selectSong = (song: (typeof songs)[number]) => setSelectedSong(song);
+  const selectSong = (song: (typeof songs)[number]) => {
+    setQueueOpen(false);
+    setSelectedSong(song);
+  };
+  const openQueue = () => {
+    setSelectedSong(null);
+    setQueueOpen(true);
+    setFocus((previous) => ({ ...previous, active: true, panel: 'songDetails' }));
+  };
 
   const getItemProps = (song: (typeof songs)[number], index: number): SongItemProps => ({
     song,
@@ -177,12 +231,14 @@ export const SongList = () => {
       <main
         className={cn(
           'min-w-0 flex-1 flex-col gap-3 p-3 sm:p-4',
-          currentSelectedSong ? 'hidden xl:flex' : 'flex',
+          currentSelectedSong || queueOpen ? 'hidden xl:flex' : 'flex',
         )}
       >
         <Filters
           view={view}
+          queueCount={playbackQueue.length}
           isSavingView={isSavingView}
+          onOpenQueue={openQueue}
           onViewChange={(nextView) => saveConfig({ song_list_view: nextView })}
         />
         <Separator />
@@ -198,14 +254,14 @@ export const SongList = () => {
         />
       </main>
 
-      {currentSelectedSong ? (
-        <SongDetailsSidebar
-          key={songKey(currentSelectedSong)}
-          song={currentSelectedSong}
-          queueStatus={queue?.entries[currentSelectedSong.file_hash]}
-          onClose={() => setSelectedSong(null)}
-        />
-      ) : null}
+      <SongSidePanel
+        queueOpen={queueOpen}
+        playbackQueue={playbackQueue}
+        song={currentSelectedSong}
+        queueEntries={queue?.entries}
+        onCloseQueue={() => setQueueOpen(false)}
+        onCloseSong={() => setSelectedSong(null)}
+      />
     </div>
   );
 };

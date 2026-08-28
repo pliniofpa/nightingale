@@ -1,6 +1,6 @@
 /**
  * Playback session: audio engine, visual background, lyrics HUD, and pause overlay.
- * Route shell (`Playback`) mounts this with a `key` of `file_hash` so state resets per track.
+ * Route shell (`Playback`) keys this session so state resets for every queued entry.
  *
  * `PlaybackInner` itself is the provider shell; `PlaybackLayout` is the
  * presentational tree that consumes the playback contexts via hooks.
@@ -26,12 +26,10 @@ import type { Song } from '@/types/Song';
 export type PlaybackInnerProps = {
   song: Song;
   config: AppConfig | null;
+  queuePlayback: boolean;
 };
 
-type PlaybackLayoutProps = {
-  song: Song;
-  config: AppConfig | null;
-};
+type PlaybackLayoutProps = PlaybackInnerProps;
 
 function displaySettings(config: AppConfig | null) {
   return {
@@ -42,7 +40,7 @@ function displaySettings(config: AppConfig | null) {
   };
 }
 
-function PlaybackLayout({ song, config }: PlaybackLayoutProps) {
+function PlaybackLayout({ song, config, queuePlayback }: PlaybackLayoutProps) {
   const { isReady, paused } = usePlaybackTransportState();
   const { handleContinue, handleExit } = usePlaybackTransportActions();
   const { segments } = usePlaybackTranscriptState();
@@ -52,7 +50,7 @@ function PlaybackLayout({ song, config }: PlaybackLayoutProps) {
   const hudPosition = lyricsVerticalPosition === 'top' ? 'bottom' : 'top';
 
   usePlaybackInput(config);
-  const result = usePlaybackResult(song);
+  const result = usePlaybackResult(song, queuePlayback);
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-black" style={{ contain: 'strict' }}>
@@ -84,16 +82,18 @@ function PlaybackLayout({ song, config }: PlaybackLayoutProps) {
         song={song}
         scores={result.scores}
         activeProfile={result.activeProfile}
-        onFinish={result.onFinish}
+        nextPending={result.nextPending}
+        onBack={result.onBack}
+        onNext={result.onNext}
       />
     </div>
   );
 }
 
-export function PlaybackInner({ song, config }: PlaybackInnerProps) {
+export function PlaybackInner({ song, config, queuePlayback }: PlaybackInnerProps) {
   return (
     <PlaybackProviders song={song} config={config}>
-      <PlaybackLayout song={song} config={config} />
+      <PlaybackLayout song={song} config={config} queuePlayback={queuePlayback} />
     </PlaybackProviders>
   );
 }

@@ -42,39 +42,45 @@ export type PreparePlaybackInput = {
   keyOffset: number;
 };
 
+export async function preparePlayback({
+  song,
+  tempo,
+  keyOffset,
+}: PreparePlaybackInput): Promise<Song> {
+  let preparedSong = song;
+
+  if (keyOffset !== song.key_offset && typeof song.key === 'string' && song.key !== '') {
+    const target = calculateKeyShift(song.key, keyOffset);
+    const result = await waitForShift(song.file_hash, onShiftKeyDone, () =>
+      shiftKey(song.file_hash, target.key, target.pitchRatio, target.keyOffset),
+    );
+    preparedSong = {
+      ...preparedSong,
+      override_key: result.key === song.key ? null : result.key,
+      key_offset: keyOffset,
+      tempo: result.tempo ?? preparedSong.tempo,
+    };
+  }
+
+  if (tempo !== song.tempo) {
+    const result = await waitForShift(song.file_hash, onShiftTempoDone, () =>
+      shiftTempo(song.file_hash, tempo),
+    );
+    preparedSong = {
+      ...preparedSong,
+      override_key: result.key === song.key ? null : result.key,
+      tempo: result.tempo ?? tempo,
+    };
+  }
+
+  return preparedSong;
+}
+
 export const usePreparePlaybackMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ song, tempo, keyOffset }: PreparePlaybackInput): Promise<Song> => {
-      let preparedSong = song;
-
-      if (keyOffset !== song.key_offset && typeof song.key === 'string' && song.key !== '') {
-        const target = calculateKeyShift(song.key, keyOffset);
-        const result = await waitForShift(song.file_hash, onShiftKeyDone, () =>
-          shiftKey(song.file_hash, target.key, target.pitchRatio, target.keyOffset),
-        );
-        preparedSong = {
-          ...preparedSong,
-          override_key: result.key === song.key ? null : result.key,
-          key_offset: keyOffset,
-          tempo: result.tempo ?? preparedSong.tempo,
-        };
-      }
-
-      if (tempo !== song.tempo) {
-        const result = await waitForShift(song.file_hash, onShiftTempoDone, () =>
-          shiftTempo(song.file_hash, tempo),
-        );
-        preparedSong = {
-          ...preparedSong,
-          override_key: result.key === song.key ? null : result.key,
-          tempo: result.tempo ?? tempo,
-        };
-      }
-
-      return preparedSong;
-    },
+    mutationFn: preparePlayback,
     onError: (error: Error) => {
       toast.error(`Couldn't prepare playback: ${error.message}`);
     },

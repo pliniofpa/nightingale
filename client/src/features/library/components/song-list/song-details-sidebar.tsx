@@ -1,8 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { PlayIcon } from 'lucide-react';
+import { ListPlusIcon, PlayIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
+import { useAddPlaybackQueueEntry } from '@/features/playback-queue/use-playback-queue';
 import { usePreparePlaybackMutation } from '@/features/playback/mutations/use-prepare-playback-mutation';
 import { useBestScoresBySongForActiveProfile } from '@/features/profiles/hooks/use-best-scores-by-song';
 import { Button } from '@/shared/components/ui/button';
@@ -23,6 +24,31 @@ type SongDetailsSidebarProps = {
   queueStatus?: QueuedStatus;
   onClose: () => void;
 };
+
+type AddToQueueButtonProps = {
+  song: Song;
+  tempo: number;
+  keyOffset: number;
+  ready: boolean;
+  preparing: boolean;
+};
+
+function AddToQueueButton({ song, tempo, keyOffset, ready, preparing }: AddToQueueButtonProps) {
+  const { mutate: addToQueue, isLoading } = useAddPlaybackQueueEntry();
+
+  return (
+    <Button
+      variant="outline"
+      size="icon-lg"
+      disabled={!ready || preparing || isLoading}
+      onClick={() => addToQueue({ song, tempo, keyOffset })}
+      aria-label={`Add ${song.title} to playback queue`}
+      title="Add to queue"
+    >
+      <ListPlusIcon />
+    </Button>
+  );
+}
 
 export const SongDetailsSidebar = ({ song, queueStatus, onClose }: SongDetailsSidebarProps) => {
   const navigate = useNavigate();
@@ -107,10 +133,13 @@ export const SongDetailsSidebar = ({ song, queueStatus, onClose }: SongDetailsSi
         />
       </div>
 
-      <footer className="border-t p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <footer
+        className="flex gap-2 border-t p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        data-song-details-nav-group
+      >
         <Button
           size="lg"
-          className="h-8 w-full disabled:bg-primary/50 disabled:text-primary-foreground/45 disabled:opacity-100"
+          className="h-8 flex-1 disabled:bg-primary/50 disabled:text-primary-foreground/45 disabled:opacity-100"
           disabled={status.isReady !== true || preparingPlayback}
           aria-busy={preparingPlayback}
           onClick={handlePlay}
@@ -125,6 +154,13 @@ export const SongDetailsSidebar = ({ song, queueStatus, onClose }: SongDetailsSi
             </>
           )}
         </Button>
+        <AddToQueueButton
+          song={song}
+          tempo={tempo}
+          keyOffset={keyOffset}
+          ready={status.isReady === true}
+          preparing={preparingPlayback}
+        />
       </footer>
     </aside>
   );

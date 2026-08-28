@@ -44,11 +44,13 @@ pub(crate) async fn handle_cmd(
     body: Option<Json<Value>>,
 ) -> Result<Json<Value>, ApiError> {
     let payload = body.map(|Json(v)| v).unwrap_or(Value::Null);
-    let value = dispatch(state.events.clone(), &name, payload).await?;
+    let value = dispatch(state, &name, payload).await?;
     Ok(Json(value))
 }
 
-async fn dispatch(events: std::sync::Arc<EventBus>, name: &str, payload: Value) -> CmdResult {
+async fn dispatch(state: AppState, name: &str, payload: Value) -> CmdResult {
+    let events = state.events.clone();
+
     match name {
         // ── Init/window stubs ────────────────────────────────────────────
         "frontend_ready" | "window_immersive" | "minimize_window" => Ok(Value::Null),
@@ -106,6 +108,46 @@ async fn dispatch(events: std::sync::Arc<EventBus>, name: &str, payload: Value) 
             let mut store = ProfileStore::load();
             store.add_score(&args.song_hash, args.score);
             Ok(Value::Null)
+        }
+
+        // ── Playback queue ───────────────────────────────────────────────
+        "load_playback_queue" => {
+            let entries = state.playback_queue.entries().map_err(ApiError::internal)?;
+            Ok(serde_json::to_value(entries).map_err(serde_err)?)
+        }
+        "add_playback_queue_entry" => {
+            #[derive(Deserialize)]
+            #[serde(rename_all = "camelCase")]
+            struct Args {
+                file_hash: String,
+                tempo: f64,
+                key_offset: i32,
+            }
+            let args: Args = deserialize(payload)?;
+            let entries = state
+                .playback_queue
+                .add(&args.file_hash, args.tempo, args.key_offset)
+                .map_err(ApiError::bad_request)?;
+            events.emit("playback-queue-changed", &entries);
+            Ok(serde_json::to_value(entries).map_err(serde_err)?)
+        }
+        "remove_playback_queue_entry" => {
+            #[derive(Deserialize)]
+            struct Args {
+                id: String,
+            }
+            let args: Args = deserialize(payload)?;
+            let entries = state
+                .playback_queue
+                .remove(&args.id)
+                .map_err(ApiError::internal)?;
+            events.emit("playback-queue-changed", &entries);
+            Ok(serde_json::to_value(entries).map_err(serde_err)?)
+        }
+        "clear_playback_queue" => {
+            let entries = state.playback_queue.clear().map_err(ApiError::internal)?;
+            events.emit("playback-queue-changed", &entries);
+            Ok(serde_json::to_value(entries).map_err(serde_err)?)
         }
 
         // ── Scanner ──────────────────────────────────────────────────────

@@ -9,6 +9,7 @@ mod lrc;
 mod lyrics;
 pub mod media_server;
 mod playback;
+mod playback_queue;
 mod profile;
 mod scanner;
 mod secret;
@@ -43,6 +44,7 @@ pub use playback::{
     prefetch_one_per_flavor, shift_key, shift_key_done_payload, shift_tempo,
     shift_tempo_done_payload,
 };
+pub use playback_queue::{PlaybackQueue, PlaybackQueueEntry};
 pub use profile::ProfileStore;
 pub use scanner::start_scan;
 pub use song::{Song, SongOrigin};

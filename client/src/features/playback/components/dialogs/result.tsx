@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/components/ui/dialog';
+import { Spinner } from '@/shared/components/ui/spinner';
 import {
   Table,
   TableBody,
@@ -33,17 +34,28 @@ type Props = {
   song: Song;
   scores: ScoreRecord[];
   activeProfile: string | null;
-  onFinish: () => void;
+  nextPending: boolean;
+  onBack: () => void;
+  onNext?: () => void;
 };
 
-export const ResultDialog = ({ open, score, onFinish, song, scores, activeProfile }: Props) => {
+export const ResultDialog = ({
+  open,
+  score,
+  song,
+  scores,
+  activeProfile,
+  nextPending,
+  onBack,
+  onNext,
+}: Props) => {
   const board = topScoresForSong(scores, song.file_hash, TOP_LIMIT);
 
   const { focusedIndex } = useDialogNav({
     open,
-    itemCount: 1,
-    onConfirm: () => onFinish(),
-    onBack: onFinish,
+    itemCount: onNext ? 2 : 1,
+    onConfirm: (index) => (index === 0 ? onBack() : onNext?.()),
+    onBack,
   });
 
   return (
@@ -115,11 +127,34 @@ export const ResultDialog = ({ open, score, onFinish, song, scores, activeProfil
           <DialogFooter className="mt-2 sm:justify-center">
             <Button
               type="button"
+              variant="outline"
               className={cn('w-full sm:w-auto', NO_FOCUS_RING, open && focusedIndex === 0 && RING)}
-              onClick={onFinish}
+              disabled={nextPending}
+              onClick={onBack}
             >
               Back to Menu
             </Button>
+            {onNext ? (
+              <Button
+                type="button"
+                className={cn(
+                  'w-full sm:w-auto',
+                  NO_FOCUS_RING,
+                  open && focusedIndex === 1 && RING,
+                )}
+                disabled={nextPending}
+                aria-busy={nextPending}
+                onClick={onNext}
+              >
+                {nextPending ? (
+                  <>
+                    <Spinner className="size-4" /> Preparing…
+                  </>
+                ) : (
+                  'Next Song'
+                )}
+              </Button>
+            ) : null}
           </DialogFooter>
         </div>
       </DialogContent>

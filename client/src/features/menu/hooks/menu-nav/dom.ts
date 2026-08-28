@@ -1,6 +1,6 @@
 export const SIDEBAR_SUB_SELECTOR = '[data-sidebar-sub-index]';
 export const SIDEBAR_NAV_SELECTOR = '[data-sidebar-nav-index]';
-export const ACTIONS_SELECTOR = '[data-actions-focus]';
+export const ACTIONS_SELECTOR = '[data-actions-index]';
 export const SONG_SELECTOR = '[data-song-index]';
 
 export type SongGridDirection = 'up' | 'down' | 'left' | 'right';
@@ -54,8 +54,17 @@ export function getHoveredSidebarIndex(target: Element | null): number | null {
   return finiteDatasetNumber(sidebarEl?.dataset.sidebarNavIndex);
 }
 
-export function isActionsTarget(target: Element | null): boolean {
-  return target?.closest(ACTIONS_SELECTOR) !== null;
+export function getActionsCount(): number {
+  return document.querySelectorAll(ACTIONS_SELECTOR).length;
+}
+
+export function getActionTarget(index: number): HTMLElement | null {
+  return document.querySelector<HTMLElement>(`[data-actions-index="${index}"]`);
+}
+
+export function getHoveredActionsIndex(target: Element | null): number | null {
+  const actionsEl = target?.closest<HTMLElement>(ACTIONS_SELECTOR);
+  return finiteDatasetNumber(actionsEl?.dataset.actionsIndex);
 }
 
 export function getHoveredSongIndex(target: Element | null): number | null {
@@ -121,10 +130,10 @@ function verticalGridTarget(
     return null;
   }
   const targetRowIndex = direction === 'up' ? currentRow - 1 : currentRow + 1;
-  const targetTop = rowTops.at(targetRowIndex);
-  if (targetTop === undefined) {
+  if (targetRowIndex < 0 || targetRowIndex >= rowTops.length) {
     return null;
   }
+  const targetTop = rowTops[targetRowIndex];
 
   const targetRow = positions
     .filter((position) => Math.abs(position.top - targetTop) < 2)

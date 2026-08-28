@@ -1,5 +1,7 @@
 use std::sync::Arc;
 
+use app_core::PlaybackQueue;
+
 use crate::events::EventBus;
 use crate::jukebox::JukeboxStore;
 
@@ -7,6 +9,7 @@ use crate::jukebox::JukeboxStore;
 pub(crate) struct AppState {
     pub events: Arc<EventBus>,
     pub jukebox: Arc<JukeboxStore>,
+    pub playback_queue: Arc<PlaybackQueue>,
     pub data_path_pinned: bool,
     pub library_pinned: bool,
 }
@@ -16,6 +19,7 @@ impl AppState {
         Self {
             events: Arc::new(EventBus::new()),
             jukebox: Arc::new(JukeboxStore::new()),
+            playback_queue: Arc::new(PlaybackQueue::default()),
             data_path_pinned,
             library_pinned,
         }
