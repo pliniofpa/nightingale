@@ -8,7 +8,10 @@
 use rusqlite::params;
 
 use crate::library_menu::{LibraryMenuItem, LibraryMenuItems};
-use crate::library_model::{LibraryMenuFilters, LoadSongsParams, SongsMeta, SongsStore};
+use crate::library_model::{
+    LibraryMenuFilters, LoadSongsParams, SongSort, SongSortColumn, SongsMeta, SongsStore,
+    SortDirection,
+};
 
 use super::connection::with_conn;
 use super::migrations::{is_song_migration_in_progress, song_migration_done, song_migration_total};
@@ -231,6 +234,29 @@ fn build_song_where_clause(
     }
 }
 
+fn song_order(sort: Option<SongSort>) -> Option<String> {
+    let sort = sort?;
+    let direction = match sort.direction {
+        SortDirection::Ascending => "ASC",
+        SortDirection::Descending => "DESC",
+    };
+    let expression = match sort.column {
+        SongSortColumn::Title => "s.title COLLATE NOCASE",
+        SongSortColumn::Artist => "s.artist COLLATE NOCASE",
+        SongSortColumn::Album => "s.album COLLATE NOCASE",
+        SongSortColumn::Duration => "s.duration_secs",
+        SongSortColumn::Status => {
+            "CASE WHEN EXISTS (SELECT 1 FROM analysis_queue aq WHERE aq.file_hash = s.file_hash AND aq.status = 'analyzing') THEN 0 \
+             WHEN EXISTS (SELECT 1 FROM analysis_queue aq WHERE aq.file_hash = s.file_hash AND aq.status = 'failed') THEN 1 \
+             WHEN s.is_analyzed = 0 AND NOT EXISTS (SELECT 1 FROM analysis_queue aq WHERE aq.file_hash = s.file_hash) THEN 2 \
+             WHEN EXISTS (SELECT 1 FROM analysis_queue aq WHERE aq.file_hash = s.file_hash AND aq.status = 'queued') THEN 3 \
+             ELSE 4 END"
+        }
+    };
+
+    Some(format!("{expression} {direction}, s.id {direction}"))
+}
+
 pub(crate) fn load_songs_page(params: &LoadSongsParams) -> rusqlite::Result<SongsStore> {
     let (folder, scan_count) = with_conn(|c| {
         c.query_row(
@@ -259,12 +285,21 @@ pub(crate) fn load_songs_page(params: &LoadSongsParams) -> rusqlite::Result<Song
     } else {
         ""
     };
+    let requested_order = song_order(params.sort);
+    let default_filtered_order =
+        format!("{queue_order}{playlist_order}s.artist COLLATE NOCASE, s.title COLLATE NOCASE");
+    let filtered_order = requested_order
+        .as_deref()
+        .unwrap_or(&default_filtered_order);
+    let unfiltered_order = requested_order
+        .as_deref()
+        .unwrap_or("s.artist COLLATE NOCASE, s.title COLLATE NOCASE");
 
     let processed = if let Some(ref where_sql) = where_sql {
         let sql = format!(
             "SELECT payload FROM songs s
              WHERE {where_sql}
-             ORDER BY {queue_order}{playlist_order}s.artist COLLATE NOCASE, s.title COLLATE NOCASE
+             ORDER BY {filtered_order}
              LIMIT {} OFFSET {}",
             params.take as i64, params.skip as i64
         );
@@ -278,11 +313,12 @@ pub(crate) fn load_songs_page(params: &LoadSongsParams) -> rusqlite::Result<Song
         })?
     } else {
         with_conn(|c| {
-            let mut stmt = c.prepare(
-                "SELECT payload FROM songs
-                 ORDER BY artist COLLATE NOCASE, title COLLATE NOCASE
-                 LIMIT ?1 OFFSET ?2",
-            )?;
+            let sql = format!(
+                "SELECT payload FROM songs s
+                 ORDER BY {unfiltered_order}
+                 LIMIT ?1 OFFSET ?2"
+            );
+            let mut stmt = c.prepare(&sql)?;
             let rows = stmt.query_map(
                 params![params.take as i64, params.skip as i64],
                 load_song_from_payload_column,

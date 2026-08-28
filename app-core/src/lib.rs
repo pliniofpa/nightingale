@@ -32,7 +32,10 @@ pub use cache::{
 pub use config::{AppConfig, LibrarySource};
 pub use library_db::{init_library, library_db_path};
 pub use library_menu::{LibraryMenuItem, LibraryMenuItems, load_library_menu_items};
-pub use library_model::{LibraryMenuFilters, LoadSongsParams, SongTarget, SongsMeta, SongsStore};
+pub use library_model::{
+    LibraryMenuFilters, LoadSongsParams, SongSort, SongSortColumn, SongTarget, SongsMeta,
+    SongsStore, SortDirection,
+};
 pub use lyrics::{
     LrclibCandidate, LyricsFile, apply_timed_lyrics, load_lyrics_file, provide_lrc,
     save_lyrics_and_realign, search_lrclib_for_hash,
