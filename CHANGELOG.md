@@ -26,6 +26,7 @@ below.
 
 ### Fixes
 
+- Video files now use audio-stream title metadata, preventing subtitle titles from replacing song names.
 - The lyrics editor now allows re-aligning analyzed songs without requiring a lyrics change.
 - Empty transcription results now finish without attempting forced alignment.
 
