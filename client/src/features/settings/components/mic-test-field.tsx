@@ -10,6 +10,7 @@ import { Label } from '@/shared/components/ui/label';
 import { Hint } from './settings-controls';
 
 const MAX_RECORDING_MS = 5000;
+const MAX_RECORDING_SECONDS = MAX_RECORDING_MS / 1000;
 
 type MicRecording = {
   samples: Float32Array;
@@ -41,6 +42,7 @@ export function MicTestField({
 }: MicTestFieldProps) {
   const [recording, setRecording] = useState<MicRecording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const recordingActiveRef = useRef(false);
   const chunksRef = useRef<number[][]>([]);
@@ -48,6 +50,7 @@ export function MicTestField({
   const sampleRateRef = useRef(0);
   const stopListeningRef = useRef<StopListening | null>(null);
   const timerRef = useRef<number | null>(null);
+  const counterRef = useRef<number | null>(null);
   const playbackRef = useRef<MicPlayback | null>(null);
 
   const stopPlayback = useCallback(() => {
@@ -77,6 +80,10 @@ export function MicTestField({
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+    if (counterRef.current !== null) {
+      window.clearInterval(counterRef.current);
+      counterRef.current = null;
+    }
     stopListeningRef.current?.();
     stopListeningRef.current = null;
     await microphoneAdapter.stopCapture().catch(() => {});
@@ -105,6 +112,10 @@ export function MicTestField({
     sampleRateRef.current = 0;
     recordingActiveRef.current = true;
     setIsRecording(true);
+    setRecordingSeconds(0);
+    counterRef.current = window.setInterval(() => {
+      setRecordingSeconds((seconds) => Math.min(seconds + 1, MAX_RECORDING_SECONDS));
+    }, 1000);
 
     try {
       stopListeningRef.current = await microphoneAdapter.subscribe((frame) => {
@@ -136,6 +147,8 @@ export function MicTestField({
     } catch (error) {
       recordingActiveRef.current = false;
       setIsRecording(false);
+      window.clearInterval(counterRef.current);
+      counterRef.current = null;
       stopListeningRef.current?.();
       stopListeningRef.current = null;
       await microphoneAdapter.stopCapture().catch(() => {});
@@ -188,6 +201,9 @@ export function MicTestField({
       if (timerRef.current !== null) {
         window.clearTimeout(timerRef.current);
       }
+      if (counterRef.current !== null) {
+        window.clearInterval(counterRef.current);
+      }
       stopListeningRef.current?.();
       if (captureActive) {
         void microphoneAdapter.stopCapture().catch(() => {});
@@ -209,7 +225,11 @@ export function MicTestField({
   return (
     <Field>
       <Label>Microphone test</Label>
-      <Hint>Record the selected microphone for up to five seconds, then play it back.</Hint>
+      <Hint>
+        {isRecording
+          ? `Microphone recording for ${recordingSeconds} seconds…`
+          : 'Record the selected microphone for up to five seconds, then play it back.'}
+      </Hint>
       <ButtonGroup>
         <Button
           variant={isRecording ? 'default' : 'outline'}
