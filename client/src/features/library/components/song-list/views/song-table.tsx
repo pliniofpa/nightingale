@@ -1,4 +1,4 @@
-import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
+import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from 'lucide-react';
 
 import { useBestScoresBySongForActiveProfile } from '@/features/profiles/hooks/use-best-scores-by-song';
 import { cn } from '@/shared/utils/cn';
@@ -33,7 +33,7 @@ const SongTableHeader = ({ column, sort, sortingDisabled, onSort }: SongTableHea
 
   const activeDirection = sortColumn === sort?.column ? sort.direction : undefined;
   const ariaSort = activeDirection ?? 'none';
-  let icon = null;
+  let icon = <ArrowUpDownIcon className="size-3.5 shrink-0" aria-hidden="true" />;
   if (activeDirection === 'ascending') {
     icon = <ArrowUpIcon className="size-3.5 shrink-0" aria-hidden="true" />;
   } else if (activeDirection === 'descending') {
