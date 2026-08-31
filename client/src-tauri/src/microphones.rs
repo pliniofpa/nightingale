@@ -113,12 +113,12 @@ pub(crate) fn list_microphones() -> Result<Vec<MicrophoneInfo>, String> {
             }
 
             let name = device_display_name(&device);
-            let id = device
+            let raw_id = device
                 .id()
                 .map(|id| id.to_string())
                 .unwrap_or_else(|_| name.clone());
-            let key = format!("{host_name}:{id}").to_lowercase();
-            if seen.insert(key) {
+            let id = format!("{host_name}:{raw_id}");
+            if seen.insert(id.clone()) {
                 out.push(MicrophoneInfo {
                     id,
                     name,
@@ -243,7 +243,18 @@ fn stop_internal() {
 
 fn find_device(preferred: Option<&str>) -> Result<(cpal::Device, String), String> {
     if let Some(preference) = preferred {
-        for (host_id, _) in audio_hosts() {
+        let hosts = audio_hosts();
+        let qualified_preference = preference.split_once(':').filter(|(preferred_host, _)| {
+            hosts
+                .iter()
+                .any(|(_, host_name)| host_name == preferred_host)
+        });
+
+        for (host_id, host_name) in hosts {
+            if qualified_preference.is_some_and(|(preferred_host, _)| preferred_host != host_name) {
+                continue;
+            }
+
             let Ok(host) = cpal::host_from_id(host_id) else {
                 continue;
             };
@@ -252,12 +263,16 @@ fn find_device(preferred: Option<&str>) -> Result<(cpal::Device, String), String
             };
             for dev in devices {
                 let display_name = device_display_name(&dev);
-                let id_matches = dev
+                let raw_id = dev
                     .id()
-                    .map(|id| id.to_string() == preference)
-                    .unwrap_or(false);
+                    .map(|id| id.to_string())
+                    .unwrap_or_else(|_| display_name.clone());
+                let id_matches = qualified_preference.map_or_else(
+                    || raw_id == preference,
+                    |(_, preferred_id)| raw_id == preferred_id,
+                );
                 // Name matching preserves preferences saved by older versions.
-                if id_matches || display_name == preference {
+                if id_matches || (qualified_preference.is_none() && display_name == preference) {
                     return Ok((dev, display_name));
                 }
             }
