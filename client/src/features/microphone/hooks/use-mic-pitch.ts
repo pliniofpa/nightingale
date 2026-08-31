@@ -73,14 +73,9 @@ export function useMicCapture(
 ) {
   const [active, setActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const startedRef = useRef(false);
 
   useEffect(() => {
     if (!enabled) {
-      if (startedRef.current) {
-        adapter.stopCapture().catch(() => {});
-        startedRef.current = false;
-      }
       return undefined;
     }
 
@@ -91,16 +86,14 @@ export function useMicCapture(
         await adapter.startCapture(deviceId, options);
 
         if (cancelled) {
-          await adapter.stopCapture().catch(() => {});
           return;
         }
 
-        startedRef.current = true;
         setActive(true);
         setError(null);
       } catch (e) {
-        void adapter.stopCapture().catch(() => {});
         if (!cancelled) {
+          void adapter.stopCapture().catch(() => {});
           const msg = e instanceof Error ? e.message : String(e);
           setError(msg);
           setActive(false);
@@ -112,10 +105,7 @@ export function useMicCapture(
 
     return () => {
       cancelled = true;
-      if (startedRef.current) {
-        adapter.stopCapture().catch(() => {});
-        startedRef.current = false;
-      }
+      void adapter.stopCapture().catch(() => {});
     };
   }, [adapter, deviceId, enabled, options]);
 

@@ -145,6 +145,7 @@ export const NAV = {
     microphone: 2,
     micMonitorGain: 3,
     micLatency: 4,
+    micTest: 5,
   },
   playback: {
     mode: 1,
@@ -185,7 +186,7 @@ export function getAnalysisNav(isParakeet: boolean) {
 
 export function getSettingsStops(tab: SettingsTab, isParakeet: boolean) {
   if (tab === 'general') {
-    return [3, 2, 1, 1, 2, 2];
+    return [3, 2, 1, 1, 2, 2, 2];
   }
   if (tab === 'playback') {
     return [3, 1, 1, 1, 1, 1, 2];
