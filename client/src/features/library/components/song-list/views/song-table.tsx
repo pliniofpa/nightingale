@@ -34,11 +34,13 @@ const SongTableHeader = ({ column, sort, sortingDisabled, onSort }: SongTableHea
 
   const activeDirection = sortColumn === sort?.column ? sort.direction : undefined;
   const ariaSort = activeDirection ?? 'none';
-  let icon = <ArrowUpDownIcon className="size-3 shrink-0 opacity-40" aria-hidden="true" />;
+  let icon = (
+    <ArrowUpDownIcon className="size-3 shrink-0 translate-y-px opacity-40" aria-hidden="true" />
+  );
   if (activeDirection === 'ascending') {
-    icon = <ArrowUpIcon className="size-3 shrink-0" aria-hidden="true" />;
+    icon = <ArrowUpIcon className="size-3 shrink-0 translate-y-px" aria-hidden="true" />;
   } else if (activeDirection === 'descending') {
-    icon = <ArrowDownIcon className="size-3 shrink-0" aria-hidden="true" />;
+    icon = <ArrowDownIcon className="size-3 shrink-0 translate-y-px" aria-hidden="true" />;
   }
 
   return (
@@ -47,7 +49,7 @@ const SongTableHeader = ({ column, sort, sortingDisabled, onSort }: SongTableHea
         type="button"
         disabled={sortingDisabled}
         className={cn(
-          'flex w-full items-center gap-0.5 text-left outline-none focus-visible:text-foreground disabled:cursor-wait',
+          'flex w-full items-center gap-0.5 text-left outline-none hover:text-foreground focus-visible:text-foreground disabled:cursor-wait',
           column.id === 'status' && 'justify-end',
         )}
         onClick={() => onSort(sortColumn)}
