@@ -13,8 +13,11 @@ import { useConfigMutation } from '@/shared/config/use-config-mutation';
 import { useLatestRef } from '@/shared/hooks/use-latest-ref';
 import { usePersistentScroll } from '@/shared/hooks/use-persistent-scroll';
 import { cn } from '@/shared/utils/cn';
+import type { AppConfig } from '@/types/AppConfig';
 import type { QueuedStatus } from '@/types/QueuedStatus';
 import type { Song } from '@/types/Song';
+import type { SongSort } from '@/types/SongSort';
+import type { SongSortColumn } from '@/types/SongSortColumn';
 
 import { Filters, type SongListView } from './filters';
 import { Progress } from './progress';
@@ -28,15 +31,31 @@ import { SongTable } from './views/song-table';
 type SongCollectionProps = {
   songs: Song[];
   view: SongListView;
+  sort: SongSort | null;
+  sortingDisabled: boolean;
   loading: boolean;
   hasActiveFilter: boolean;
   getItemProps: (song: Song, index: number) => SongItemProps;
   setScrollContainer: (element: HTMLElement | null) => void;
   sentinelRef: RefObject<HTMLDivElement | null>;
+  onSort: (column: SongSortColumn) => void;
 };
 
 const hasFilters = (values: readonly unknown[]): boolean =>
   values.some((value) => (typeof value === 'string' ? value.trim() !== '' : Boolean(value)));
+
+const songListSort = (config: AppConfig | undefined): SongSort | null =>
+  config?.song_list_sort ?? null;
+
+const nextSongSort = (sort: SongSort | null, column: SongSortColumn): SongSort | null => {
+  if (sort?.column !== column) {
+    return { column, direction: 'ascending' };
+  }
+  if (sort.direction === 'ascending') {
+    return { column, direction: 'descending' };
+  }
+  return null;
+};
 
 const EmptySongs = ({ filtered }: { filtered: boolean }) => (
   <Empty className="px-4">
@@ -54,11 +73,14 @@ const EmptySongs = ({ filtered }: { filtered: boolean }) => (
 const SongCollection = ({
   songs,
   view,
+  sort,
+  sortingDisabled,
   loading,
   hasActiveFilter,
   getItemProps,
   setScrollContainer,
   sentinelRef,
+  onSort,
 }: SongCollectionProps) => {
   if (songs.length === 0 && !loading) {
     return <EmptySongs filtered={hasActiveFilter} />;
@@ -71,7 +93,13 @@ const SongCollection = ({
       className="themed-scrollbar song-table-shell min-h-0 max-w-full flex-1 overflow-x-hidden overflow-y-auto pb-[max(0.75rem,env(safe-area-inset-bottom))]"
     >
       {view === 'table' ? (
-        <SongTable songs={songs} getItemProps={getItemProps} />
+        <SongTable
+          songs={songs}
+          sort={sort}
+          sortingDisabled={sortingDisabled}
+          onSort={onSort}
+          getItemProps={getItemProps}
+        />
       ) : (
         <SongGrid songs={songs} getItemProps={getItemProps} />
       )}
@@ -123,7 +151,7 @@ export const SongList = () => {
   const { data: queue } = useAnalysisQueue();
   const { data: playbackQueue = [] } = usePlaybackQueueQuery();
   const { data: config } = useConfig();
-  const { mutate: saveConfig, isPending: isSavingView } = useConfigMutation();
+  const { mutate: saveConfig, isPending: isSavingConfig } = useConfigMutation();
   const { focus, actionsRef, setFocus, selectedSong, setSelectedSong } = useMenuFocus();
   const { setScrollContainer, resetScroll } = usePersistentScroll('songList');
   const { search } = useSearch();
@@ -131,6 +159,7 @@ export const SongList = () => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useSongs();
   const [queueOpen, setQueueOpen] = useState(false);
   const view: SongListView = config?.song_list_view === 'grid' ? 'grid' : 'table';
+  const sort = songListSort(config);
   const songs = useMemo(() => data?.pages.flatMap((page) => page.processed) ?? [], [data]);
   const selectedKey = selectedSong ? songKey(selectedSong) : null;
   const currentSelectedSong = songs.find((song) => songKey(song) === selectedKey) ?? selectedSong;
@@ -142,6 +171,7 @@ export const SongList = () => {
     query,
     status,
     transcript_source,
+    sort,
   ]);
   const previousFilterKeyRef = useRef(filterKey);
   const songsRef = useLatestRef(songs);
@@ -216,6 +246,9 @@ export const SongList = () => {
     setQueueOpen(true);
     setFocus((previous) => ({ ...previous, active: true, panel: 'songDetails' }));
   };
+  const sortSongs = (column: SongSortColumn) => {
+    saveConfig({ song_list_sort: nextSongSort(sort, column) });
+  };
 
   const getItemProps = (song: (typeof songs)[number], index: number): SongItemProps => ({
     song,
@@ -237,7 +270,7 @@ export const SongList = () => {
         <Filters
           view={view}
           queueCount={playbackQueue.length}
-          isSavingView={isSavingView}
+          isSavingView={isSavingConfig}
           onOpenQueue={openQueue}
           onViewChange={(nextView) => saveConfig({ song_list_view: nextView })}
         />
@@ -246,11 +279,14 @@ export const SongList = () => {
         <SongCollection
           songs={songs}
           view={view}
+          sort={sort}
+          sortingDisabled={isSavingConfig}
           loading={isLoading}
           hasActiveFilter={hasActiveFilter}
           getItemProps={getItemProps}
           setScrollContainer={setScrollContainer}
           sentinelRef={sentinelRef}
+          onSort={sortSongs}
         />
       </main>
 

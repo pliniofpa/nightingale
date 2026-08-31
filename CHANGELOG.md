@@ -20,6 +20,7 @@ below.
 - Playback settings now have a dedicated tab with a proportional live preview, lyric placement controls, and 50–250% lyric and pitch-graph scaling (100% by default).
 - Add bulk song actions and a Refresh Metadata action for reloading metadata from the library source.
 - Queued or in-progress song analysis can now be cancelled per song or in bulk across filtered songs.
+- Added compact sortable song-table headers with stable duplicate-file rendering and flicker-free transitions.
 
 ### Improvements
 

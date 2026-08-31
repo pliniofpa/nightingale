@@ -4,8 +4,11 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
-use crate::cache::{CachePaths, config_path};
 use crate::secret;
+use crate::{
+    cache::{CachePaths, config_path},
+    library_model::SongSort,
+};
 
 /// Where the user wants Nightingale to source songs from. Persisted in
 /// `config.json` and consumed by both the scanner and the analyzer.
@@ -206,6 +209,7 @@ pub struct AppConfig {
     pub vocal_detection_threshold_pct: Option<f64>,
     pub auto_analyze: Option<bool>,
     pub song_list_view: Option<String>,
+    pub song_list_sort: Option<SongSort>,
     pub language_overrides: Option<HashMap<String, String>>,
 }
 
@@ -244,6 +248,7 @@ impl Default for AppConfig {
             vocal_detection_threshold_pct: None,
             auto_analyze: None,
             song_list_view: None,
+            song_list_sort: None,
             language_overrides: None,
         }
     }

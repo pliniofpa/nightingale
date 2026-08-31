@@ -3,6 +3,32 @@ use ts_rs::TS;
 
 use crate::song::Song;
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum SongSortColumn {
+    Title,
+    Artist,
+    Album,
+    Duration,
+    Status,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum SortDirection {
+    Ascending,
+    Descending,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct SongSort {
+    pub column: SongSortColumn,
+    pub direction: SortDirection,
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize, TS)]
 #[ts(export)]
 pub struct LibraryMenuFilters {
@@ -31,6 +57,8 @@ pub enum SongTarget {
 pub struct LoadSongsParams {
     pub search: Option<String>,
     pub filters: LibraryMenuFilters,
+    #[serde(default)]
+    pub sort: Option<SongSort>,
     pub skip: usize,
     pub take: usize,
 }

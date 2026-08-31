@@ -4,14 +4,16 @@ import { Stars } from '@/shared/components/shared/stars';
 import { formatSeconds } from '@/shared/utils/format-duration';
 import type { QueuedStatus } from '@/types/QueuedStatus';
 import type { Song } from '@/types/Song';
+import type { SongSortColumn } from '@/types/SongSortColumn';
 
 import { AlbumArt } from './shared/album-art';
 import { LanguageBadge } from './shared/language-badge';
 import { StatusBadge } from './shared/status-badge';
 
-type SongColumn = {
+export type SongColumn = {
   id: string;
   header: ReactNode;
+  sortColumn?: SongSortColumn;
   thClassName: string;
   tdClassName: string;
   cell: (song: Song, queueStatus?: QueuedStatus, bestScore?: number) => ReactNode;
@@ -35,6 +37,7 @@ export const SONG_COLUMNS: SongColumn[] = [
   {
     id: 'song',
     header: 'Song',
+    sortColumn: 'title',
     thClassName: 'song-table-song px-2 py-2 font-medium',
     tdClassName: 'song-table-song px-2 py-2 align-middle font-medium',
     cell: (song, _queueStatus, bestScore) => (
@@ -50,6 +53,7 @@ export const SONG_COLUMNS: SongColumn[] = [
   {
     id: 'band',
     header: 'Artist',
+    sortColumn: 'artist',
     thClassName: 'song-table-band px-2 py-2 font-medium',
     tdClassName: 'song-table-band px-2 py-2 text-muted-foreground',
     cell: (song) => <span className="block truncate">{song.artist || '—'}</span>,
@@ -57,6 +61,7 @@ export const SONG_COLUMNS: SongColumn[] = [
   {
     id: 'album',
     header: 'Album',
+    sortColumn: 'album',
     thClassName: 'song-table-album px-2 py-2 font-medium',
     tdClassName: 'song-table-album px-2 py-2 text-muted-foreground',
     cell: (song) => <span className="block truncate">{song.album || '—'}</span>,
@@ -64,6 +69,7 @@ export const SONG_COLUMNS: SongColumn[] = [
   {
     id: 'duration',
     header: 'Duration',
+    sortColumn: 'duration',
     thClassName: 'song-table-duration px-2 py-2 font-medium',
     tdClassName:
       'song-table-duration px-2 py-2 font-variant-numeric tabular-nums text-muted-foreground',
@@ -72,6 +78,7 @@ export const SONG_COLUMNS: SongColumn[] = [
   {
     id: 'status',
     header: 'Analysis status',
+    sortColumn: 'status',
     thClassName: 'song-table-status px-2 py-2 text-right font-medium',
     tdClassName: 'song-table-status px-2 py-2 text-right',
     cell: (song, queueStatus) => <StatusBadge song={song} queueStatus={queueStatus} />,

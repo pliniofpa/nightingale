@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { getPreloadedSongsMeta, loadAnalysisQueue, loadSongs, loadSongsMeta } from '@/bridge/songs';
 import { useLibraryFilter } from '@/features/menu/hooks/use-library-filter';
 import { useSearch } from '@/features/menu/hooks/use-search';
+import { useConfig } from '@/shared/config/use-config';
 import { ANALYSIS_QUEUE, SONGS, SONGS_META, MENU } from '@/shared/query-keys';
 import type { AnalysisQueue } from '@/types/AnalysisQueue';
 import type { LoadSongsParams } from '@/types/LoadSongsParams';
@@ -39,11 +40,24 @@ export const useSongsMeta = () => {
 };
 
 export const useSongs = () => {
+  const { data: config } = useConfig();
   const { search } = useSearch();
   const { artist, album, playlist, query, status, transcript_source } = useLibraryFilter();
+  const sort = config?.song_list_sort ?? null;
 
   return useInfiniteQuery({
-    queryKey: [...SONGS, search, artist, album, playlist, query, status, transcript_source],
+    queryKey: [
+      ...SONGS,
+      search,
+      artist,
+      album,
+      playlist,
+      query,
+      status,
+      transcript_source,
+      sort?.column,
+      sort?.direction,
+    ],
     queryFn: ({ pageParam = 0 }: { pageParam?: number }) => {
       const params: LoadSongsParams = {
         search: search || null,
@@ -56,6 +70,7 @@ export const useSongs = () => {
           transcript_source: transcript_source ?? null,
           search: null,
         },
+        sort,
         skip: pageParam,
         take: PAGE_SIZE,
       };
@@ -65,6 +80,7 @@ export const useSongs = () => {
       const loaded = allPages.reduce((sum, page) => sum + page.processed.length, 0);
       return loaded < lastPage.processed_count ? loaded : undefined;
     },
+    keepPreviousData: true,
   });
 };
 
