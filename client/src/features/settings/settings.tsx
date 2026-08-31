@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { setFullScreen, isFullScreen as tauriIsFullScreen } from '@/bridge/fullScreen';
-import { useMicDevices } from '@/features/microphone/queries/use-mic-devices';
 import { clampPlaybackScale } from '@/features/playback/lib/display-scale';
 import {
   ALIGN_BACKENDS,
@@ -22,7 +21,7 @@ import {
   getAnalysisNav,
   type SettingsTab,
 } from '@/features/settings/components/constants';
-import { MicLatencyField } from '@/features/settings/components/mic-latency-field';
+import { MicrophoneSettings } from '@/features/settings/components/microphone-settings';
 import { PlaybackPreview } from '@/features/settings/components/playback-preview';
 import {
   Hint,
@@ -40,8 +39,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui
 import { useConfig } from '@/shared/config/use-config';
 import { useConfigMutation } from '@/shared/config/use-config-mutation';
 import type { AppConfig } from '@/types/AppConfig';
-
-const DEFAULT_MIC_ID = '__default__';
 
 const generalSettings = (config: AppConfig | undefined) => {
   if (!config) {
@@ -101,7 +98,6 @@ const isSettingsTab = (value: string): value is SettingsTab =>
   SETTINGS_TABS.some((tab) => tab.value === value);
 
 export const SettingsPage = () => {
-  const micDevices = useMicDevices();
   const navigate = useNavigate();
   const { data: config } = useConfig();
   const { mutate } = useConfigMutation();
@@ -134,15 +130,7 @@ export const SettingsPage = () => {
   const isParakeet = asrEngine === 'parakeet';
   const analysisNav = getAnalysisNav(isParakeet);
 
-  const micOptions = useMemo(
-    () => [
-      { value: DEFAULT_MIC_ID, label: 'Default' },
-      ...micDevices.map(({ deviceId, label }) => ({ value: deviceId, label })),
-    ],
-    [micDevices],
-  );
   const modelOptions = useMemo(() => MODELS.map((model) => ({ value: model, label: model })), []);
-  const micMonitorGainPct = Math.round(micMonitorGain * 100);
   const lyricsScalePct = Math.round(lyricsScale * 100);
   const pitchGraphScalePct = Math.round(pitchGraphScale * 100);
   const vocalThresholdDisplayPct = Math.round(vocalThresholdPct * 100);
@@ -274,42 +262,12 @@ export const SettingsPage = () => {
                 </ButtonGroup>
               </Field>
 
-              <Field>
-                <Label>Microphone</Label>
-                <Hint>Select which microphone to use for pitch scoring</Hint>
-                <SettingsSelect
-                  label="Microphone"
-                  placeholder="Default microphone"
-                  value={general.preferredMic ?? DEFAULT_MIC_ID}
-                  options={micOptions}
-                  triggerClassName={getFocusClassName(NAV.general.microphone)}
-                  onValueChange={(value) =>
-                    mutate({ preferred_mic: value === DEFAULT_MIC_ID ? null : value })
-                  }
-                />
-              </Field>
-
-              <Field>
-                <Label>Mic monitor gain</Label>
-                <Hint>
-                  Volume of your microphone played back through the speakers while monitoring (
-                  {micMonitorGainPct}%)
-                </Hint>
-                <Slider
-                  min={0}
-                  max={200}
-                  step={1}
-                  value={[micMonitorGainPct]}
-                  onValueChange={([pct]) => updateMicMonitorGain(pct / 100)}
-                  className={getFocusClassName(NAV.general.micMonitorGain)}
-                />
-              </Field>
-
-              <MicLatencyField
-                selectedMicId={general.preferredMic}
+              <MicrophoneSettings
+                savedMicId={general.preferredMic}
+                monitorGain={micMonitorGain}
                 latencySec={micLatencySec}
-                sliderClassName={getFocusClassName(NAV.general.micLatency, 0)}
-                buttonClassName={getFocusClassName(NAV.general.micLatency, 1)}
+                getFocusClassName={getFocusClassName}
+                onMonitorGainChange={updateMicMonitorGain}
                 onLatencyChange={updateMicLatency}
               />
             </FieldGroup>

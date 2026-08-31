@@ -56,6 +56,13 @@ type ActiveCapture = {
 let active: ActiveCapture | null = null;
 let workletUrl: string | null = null;
 let liveMonitorGain = DEFAULT_MONITOR_GAIN;
+let captureOpChain: Promise<unknown> = Promise.resolve();
+
+const enqueueCaptureOperation = <T>(operation: () => Promise<T>): Promise<T> => {
+  const next = captureOpChain.catch(() => undefined).then(operation);
+  captureOpChain = next;
+  return next;
+};
 
 const ensureWorkletUrl = (): string => {
   if (workletUrl !== null) {
@@ -125,21 +132,35 @@ const teardown = (): void => {
   active = null;
 };
 
-const listDevices = async (): Promise<MicrophoneInfo[]> => {
+const browserMediaDevices = (): MediaDevices | undefined => {
   if (typeof navigator === 'undefined') {
-    return [];
+    return undefined;
   }
-  /**
-   * Without prior `getUserMedia` permission, browsers return devices with
-   * empty `label` strings; the deviceId is still stable enough for the
-   * preferred-mic selection logic, so we synthesise a label fallback.
-   */
-  const devices = await navigator.mediaDevices.enumerateDevices();
-  return devices
-    .filter((d) => d.kind === 'audioinput')
-    .map((device, index) => ({
-      name: device.label.trim() || device.deviceId || `Microphone ${index + 1}`,
-    }));
+  return navigator.mediaDevices;
+};
+
+const listDevices = async (): Promise<MicrophoneInfo[]> => {
+  const mediaDevices = browserMediaDevices();
+  if (!mediaDevices) {
+    throw new Error(
+      'Microphone discovery is unavailable. Open Nightingale over HTTPS or localhost.',
+    );
+  }
+
+  const devices = await mediaDevices.enumerateDevices();
+  const inputs = devices.filter(
+    (device) =>
+      device.kind === 'audioinput' && device.deviceId !== '' && device.deviceId !== 'default',
+  );
+
+  return inputs.map((device, index) => {
+    const name = device.label.trim() || `Microphone ${index + 1}`;
+    return {
+      id: device.deviceId || name,
+      name,
+      host: 'Browser',
+    };
+  });
 };
 
 const findDeviceId = async (preferred: string | null): Promise<string | undefined> => {
@@ -157,7 +178,7 @@ const findDeviceId = async (preferred: string | null): Promise<string | undefine
   }
 };
 
-const startCapture = async (
+const startCaptureInternal = async (
   preferred: string | null,
   options: MicCaptureOptions,
 ): Promise<string> => {
@@ -223,9 +244,14 @@ const startCapture = async (
   );
 };
 
-const stopCapture = async (): Promise<void> => {
+const stopCaptureInternal = async (): Promise<void> => {
   teardown();
 };
+
+const startCapture = (preferred: string | null, options: MicCaptureOptions): Promise<string> =>
+  enqueueCaptureOperation(() => startCaptureInternal(preferred, options));
+
+const stopCapture = (): Promise<void> => enqueueCaptureOperation(stopCaptureInternal);
 
 export const webMicrophoneAdapter: MicrophoneAdapter = {
   listDevices,

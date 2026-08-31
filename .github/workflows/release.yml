@@ -117,6 +117,23 @@ jobs:
         with:
           key: ${{ matrix.target }}
 
+      - name: Setup ASIO SDK
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          ASIO_SDK_URL: ${{ vars.ASIO_SDK_URL }}
+          ASIO_SDK_SHA256: ${{ vars.ASIO_SDK_SHA256 }}
+        run: |
+          Invoke-WebRequest $env:ASIO_SDK_URL -OutFile asio.zip
+
+          $actual = (Get-FileHash asio.zip -Algorithm SHA256).Hash.ToLower()
+          if ($actual -ne $env:ASIO_SDK_SHA256) {
+            throw "ASIO SDK checksum mismatch: $actual"
+          }
+
+          Expand-Archive asio.zip -DestinationPath "$env:RUNNER_TEMP/asio-sdk"
+          "CPAL_ASIO_DIR=$env:RUNNER_TEMP/asio-sdk/ASIOSDK" >> $env:GITHUB_ENV
+
       - name: Install frontend dependencies
         working-directory: client
         run: pnpm install --frozen-lockfile
