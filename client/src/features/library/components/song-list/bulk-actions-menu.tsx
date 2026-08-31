@@ -5,6 +5,7 @@ import {
   MicIcon,
   RefreshCwIcon,
   Trash2Icon,
+  XCircleIcon,
   EllipsisIcon,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -23,9 +24,28 @@ import {
 } from '@/shared/components/ui/dropdown-menu';
 import { cn } from '@/shared/utils/cn';
 
+type CancelAnalysisItemProps = {
+  count: number;
+  onClick: () => void;
+};
+
+const CancelAnalysisItem = ({ count, onClick }: CancelAnalysisItemProps) => {
+  if (count === 0) {
+    return null;
+  }
+
+  return (
+    <DropdownMenuItem variant="destructive" onClick={onClick}>
+      <XCircleIcon />
+      Cancel analysis ({count})
+    </DropdownMenuItem>
+  );
+};
+
 export const BulkActionsMenu = () => {
   const {
     enqueueAll,
+    cancelAnalysisAll,
     realignAll,
     reanalyzeAllFull,
     reanalyzeAllTranscript,
@@ -34,30 +54,37 @@ export const BulkActionsMenu = () => {
     deleteSongCacheAll,
   } = useAnalysis();
   const { data } = useSongs();
-  const analyzedCount = data?.pages[0]?.analyzed_count ?? 0;
+  const { analyzed_count: analyzedCount = 0, analysis_busy_count: analysisBusyCount = 0 } =
+    data?.pages[0] ?? {};
 
   const [open, setOpen] = useState(false);
   const { focus, actionsRef } = useMenuFocus();
 
   useEffect(() => {
     const actions = actionsRef.current;
-    actions.onConfirmActions = () => setOpen(true);
+    actions.onConfirmActions = (index) => {
+      if (index !== 1) {
+        return false;
+      }
+      setOpen(true);
+      return true;
+    };
 
     return () => {
       actions.onConfirmActions = null;
     };
   }, [actionsRef]);
 
-  const isActionsFocused = focus.active && focus.panel === 'songList' && focus.actionsFocused;
+  const isActionsFocused =
+    focus.active && focus.panel === 'songList' && focus.actionsFocused && focus.actionsIndex === 1;
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button
-          tabIndex={-1}
           variant="outline"
           size="icon"
-          data-actions-focus="true"
+          data-actions-index="1"
           aria-label="Actions on filtered songs"
           title="Actions"
           className={cn(
@@ -74,6 +101,7 @@ export const BulkActionsMenu = () => {
           <AudioLinesIcon />
           Analyze all
         </DropdownMenuItem>
+        <CancelAnalysisItem count={analysisBusyCount} onClick={() => void cancelAnalysisAll()} />
         <DropdownMenuItem onClick={() => void refreshMetadataAll()}>
           <ImageIcon />
           Refresh metadata

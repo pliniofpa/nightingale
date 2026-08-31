@@ -1,8 +1,9 @@
-import { Grid2X2Icon, ListIcon } from 'lucide-react';
+import { Grid2X2Icon, ListIcon, ListMusicIcon } from 'lucide-react';
 import { useRef } from 'react';
 
 import { useLibraryFilter } from '@/features/menu/hooks/use-library-filter';
 import { useSearch } from '@/features/menu/hooks/use-search';
+import { useMenuFocus } from '@/features/menu/providers/menu-focus-context';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import {
@@ -15,6 +16,7 @@ import {
   SelectValue,
 } from '@/shared/components/ui/select';
 import { SidebarTrigger } from '@/shared/components/ui/sidebar';
+import { cn } from '@/shared/utils/cn';
 
 import { BulkActionsMenu } from './bulk-actions-menu';
 
@@ -23,14 +25,28 @@ export type SongListView = 'table' | 'grid';
 
 type FiltersProps = {
   view: SongListView;
+  queueCount: number;
+  onOpenQueue: () => void;
   onViewChange: (view: SongListView) => void;
   isSavingView?: boolean;
 };
 
-export const Filters = ({ view, onViewChange, isSavingView }: FiltersProps) => {
+export const Filters = ({
+  view,
+  queueCount,
+  onOpenQueue,
+  onViewChange,
+  isSavingView,
+}: FiltersProps) => {
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const { search, setSearch } = useSearch();
   const { status, transcript_source, setLibraryFilter } = useLibraryFilter();
+  const { focus } = useMenuFocus();
+  const isActionFocused = (index: number) =>
+    focus.active &&
+    focus.panel === 'songList' &&
+    focus.actionsFocused &&
+    focus.actionsIndex === index;
 
   const handleChange = (value: string) => {
     clearTimeout(timerRef.current);
@@ -96,6 +112,22 @@ export const Filters = ({ view, onViewChange, isSavingView }: FiltersProps) => {
         </SelectContent>
       </Select>
       <div className="col-span-2 flex items-center justify-end gap-2 sm:col-span-1">
+        <Button
+          variant="outline"
+          size="icon"
+          className={cn('relative', isActionFocused(0) && 'ring-2 ring-primary')}
+          data-actions-index="0"
+          onClick={onOpenQueue}
+          aria-label={`Open playback queue, ${queueCount} ${queueCount === 1 ? 'song' : 'songs'}`}
+          title="Playback queue"
+        >
+          <ListMusicIcon />
+          {queueCount > 0 ? (
+            <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+              {queueCount}
+            </span>
+          ) : null}
+        </Button>
         <BulkActionsMenu />
         <fieldset
           className="flex shrink-0 rounded-md border bg-input/20 p-0.5"
@@ -104,6 +136,8 @@ export const Filters = ({ view, onViewChange, isSavingView }: FiltersProps) => {
           <Button
             variant={view === 'table' ? 'secondary' : 'ghost'}
             size="icon-sm"
+            className={cn(isActionFocused(2) && 'ring-2 ring-primary')}
+            data-actions-index="2"
             disabled={isSavingView}
             onClick={() => onViewChange('table')}
             aria-label="Table view"
@@ -115,6 +149,8 @@ export const Filters = ({ view, onViewChange, isSavingView }: FiltersProps) => {
           <Button
             variant={view === 'grid' ? 'secondary' : 'ghost'}
             size="icon-sm"
+            className={cn(isActionFocused(3) && 'ring-2 ring-primary')}
+            data-actions-index="3"
             disabled={isSavingView}
             onClick={() => onViewChange('grid')}
             aria-label="Card grid view"

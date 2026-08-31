@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { toast } from 'sonner';
 
 import {
+  cancelAnalysis,
   deleteSongCache,
   enqueue,
   realign,
@@ -131,6 +132,13 @@ export const useAnalysis = () => {
     return {
       enqueueOne: wrap((fileHash: string) => enqueue(one(fileHash)), invalidateQueue),
       enqueueAll: wrap(() => enqueue(filtered()), invalidateQueue),
+      cancelAnalysisOne: wrap((fileHash: string) => cancelAnalysis(one(fileHash)), invalidateSongs),
+      cancelAnalysisAll: wrapBulk(
+        BulkActionKind.Immediate,
+        'Analysis cancelled',
+        () => cancelAnalysis(filtered()),
+        invalidateSongs,
+      ),
       deleteSongCache: wrap(async (fileHash: string) => {
         await deleteSongCache(one(fileHash));
         markSongCacheDeleted(fileHash);

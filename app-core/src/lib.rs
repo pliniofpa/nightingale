@@ -9,6 +9,8 @@ mod lrc;
 mod lyrics;
 pub mod media_server;
 mod playback;
+mod playback_queue;
+mod playback_session;
 mod profile;
 mod scanner;
 mod secret;
@@ -19,8 +21,8 @@ mod vendor;
 mod vendor_scripts;
 
 pub use analyzer::{
-    AnalysisQueue, delete_cache, enqueue, realign, reanalyze_force_transcribe, reanalyze_full,
-    reanalyze_transcript, refresh_metadata, shutdown_server,
+    AnalysisQueue, cancel_analysis, delete_cache, enqueue, realign, reanalyze_force_transcribe,
+    reanalyze_full, reanalyze_transcript, refresh_metadata, shutdown_server,
 };
 pub use cache::{
     CacheDir, CachePaths, CacheStats, cache_roots, change_app_data_path, clear_models,
@@ -43,6 +45,8 @@ pub use playback::{
     prefetch_one_per_flavor, shift_key, shift_key_done_payload, shift_tempo,
     shift_tempo_done_payload,
 };
+pub use playback_queue::{PlaybackQueue, PlaybackQueueEntry};
+pub use playback_session::{PlaybackSession, PlaybackSessionStore};
 pub use profile::ProfileStore;
 pub use scanner::start_scan;
 pub use song::{Song, SongOrigin};

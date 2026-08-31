@@ -2,7 +2,7 @@ use app_core::{
     ensure_mp3_stems_ready_payload, load_lyrics_file, save_lyrics_and_realign,
     search_lrclib_for_hash, shift_key_done_payload, shift_tempo_done_payload, AnalysisQueue,
     AppConfig, CacheStats, LibraryMenuItems, LibrarySource, LoadSongsParams,
-    PixabayVideoDownloaded, ProfileStore, SongTarget, SongsStore,
+    PixabayVideoDownloaded, PlaybackSession, ProfileStore, SongTarget, SongsStore,
 };
 use axum::{
     extract::{Path as AxumPath, State},
@@ -44,11 +44,13 @@ pub(crate) async fn handle_cmd(
     body: Option<Json<Value>>,
 ) -> Result<Json<Value>, ApiError> {
     let payload = body.map(|Json(v)| v).unwrap_or(Value::Null);
-    let value = dispatch(state.events.clone(), &name, payload).await?;
+    let value = dispatch(state, &name, payload).await?;
     Ok(Json(value))
 }
 
-async fn dispatch(events: std::sync::Arc<EventBus>, name: &str, payload: Value) -> CmdResult {
+async fn dispatch(state: AppState, name: &str, payload: Value) -> CmdResult {
+    let events = state.events.clone();
+
     match name {
         // ── Init/window stubs ────────────────────────────────────────────
         "frontend_ready" | "window_immersive" | "minimize_window" => Ok(Value::Null),
@@ -106,6 +108,65 @@ async fn dispatch(events: std::sync::Arc<EventBus>, name: &str, payload: Value) 
             let mut store = ProfileStore::load();
             store.add_score(&args.song_hash, args.score);
             Ok(Value::Null)
+        }
+
+        // ── Playback queue ───────────────────────────────────────────────
+        "load_playback_queue" => {
+            let entries = state.playback_queue.entries().map_err(ApiError::internal)?;
+            Ok(serde_json::to_value(entries).map_err(serde_err)?)
+        }
+        "add_playback_queue_entry" => {
+            #[derive(Deserialize)]
+            #[serde(rename_all = "camelCase")]
+            struct Args {
+                file_hash: String,
+                tempo: f64,
+                key_offset: i32,
+            }
+            let args: Args = deserialize(payload)?;
+            let entries = state
+                .playback_queue
+                .add(&args.file_hash, args.tempo, args.key_offset)
+                .map_err(ApiError::bad_request)?;
+            events.emit("playback-queue-changed", &entries);
+            Ok(serde_json::to_value(entries).map_err(serde_err)?)
+        }
+        "remove_playback_queue_entry" => {
+            #[derive(Deserialize)]
+            struct Args {
+                id: String,
+            }
+            let args: Args = deserialize(payload)?;
+            let entries = state
+                .playback_queue
+                .remove(&args.id)
+                .map_err(ApiError::internal)?;
+            events.emit("playback-queue-changed", &entries);
+            Ok(serde_json::to_value(entries).map_err(serde_err)?)
+        }
+        "clear_playback_queue" => {
+            let entries = state.playback_queue.clear().map_err(ApiError::internal)?;
+            events.emit("playback-queue-changed", &entries);
+            Ok(serde_json::to_value(entries).map_err(serde_err)?)
+        }
+
+        // ── Playback session ─────────────────────────────────────────────
+        "load_playback_session" => {
+            let session = state.playback_sessions.load().map_err(ApiError::internal)?;
+            Ok(serde_json::to_value(session).map_err(serde_err)?)
+        }
+        "save_playback_session" => {
+            #[derive(Deserialize)]
+            struct Args {
+                session: PlaybackSession,
+            }
+            let args: Args = deserialize(payload)?;
+            let session = state
+                .playback_sessions
+                .save(args.session)
+                .map_err(ApiError::internal)?;
+            events.emit("playback-session-changed", &session);
+            Ok(serde_json::to_value(session).map_err(serde_err)?)
         }
 
         // ── Scanner ──────────────────────────────────────────────────────
@@ -256,6 +317,12 @@ async fn dispatch(events: std::sync::Arc<EventBus>, name: &str, payload: Value) 
             let args: SongTargetArgs = deserialize(payload)?;
             Ok(Value::from(
                 app_core::enqueue(args.target).map_err(ApiError::internal)?,
+            ))
+        }
+        "cancel_analysis" => {
+            let args: SongTargetArgs = deserialize(payload)?;
+            Ok(Value::from(
+                app_core::cancel_analysis(args.target).map_err(ApiError::internal)?,
             ))
         }
         "delete_song_cache" => {

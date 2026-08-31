@@ -1,11 +1,12 @@
 /**
  * Playback session: audio engine, visual background, lyrics HUD, and pause overlay.
- * Route shell (`Playback`) mounts this with a `key` of `file_hash` so state resets per track.
+ * Route shell (`Playback`) keys this session so state resets for every queued entry.
  *
  * `PlaybackInner` itself is the provider shell; `PlaybackLayout` is the
  * presentational tree that consumes the playback contexts via hooks.
  */
 
+import { isTauri } from '@/bridge/runtime';
 import { Background } from '@/features/playback/components/background';
 import { ResultDialog } from '@/features/playback/components/dialogs/result';
 import { LyricsDisplay } from '@/features/playback/components/lyrics-display';
@@ -26,12 +27,11 @@ import type { Song } from '@/types/Song';
 export type PlaybackInnerProps = {
   song: Song;
   config: AppConfig | null;
+  queuePlayback: boolean;
+  sessionPlayback: boolean;
 };
 
-type PlaybackLayoutProps = {
-  song: Song;
-  config: AppConfig | null;
-};
+type PlaybackLayoutProps = PlaybackInnerProps;
 
 function displaySettings(config: AppConfig | null) {
   return {
@@ -42,7 +42,7 @@ function displaySettings(config: AppConfig | null) {
   };
 }
 
-function PlaybackLayout({ song, config }: PlaybackLayoutProps) {
+function PlaybackLayout({ song, config, queuePlayback, sessionPlayback }: PlaybackLayoutProps) {
   const { isReady, paused } = usePlaybackTransportState();
   const { handleContinue, handleExit } = usePlaybackTransportActions();
   const { segments } = usePlaybackTranscriptState();
@@ -50,9 +50,10 @@ function PlaybackLayout({ song, config }: PlaybackLayoutProps) {
   const { lyricsVerticalPosition, lyricsHorizontalPosition, lyricsScale, pitchGraphScale } =
     displaySettings(config);
   const hudPosition = lyricsVerticalPosition === 'top' ? 'bottom' : 'top';
+  const sessionWindowControls = sessionPlayback && isTauri;
 
   usePlaybackInput(config);
-  const result = usePlaybackResult(song);
+  const result = usePlaybackResult(song, queuePlayback);
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-black" style={{ contain: 'strict' }}>
@@ -65,6 +66,7 @@ function PlaybackLayout({ song, config }: PlaybackLayoutProps) {
             artist={song.artist}
             config={config}
             position={hudPosition}
+            windowControls={sessionWindowControls}
           />
           <PitchGraph series={series} position={hudPosition} scale={pitchGraphScale} />
           <LyricsDisplay
@@ -76,7 +78,12 @@ function PlaybackLayout({ song, config }: PlaybackLayoutProps) {
         </>
       )}
 
-      <PauseOverlay open={paused && !result.open} onContinue={handleContinue} onExit={handleExit} />
+      <PauseOverlay
+        open={paused && !result.open}
+        exitLabel={sessionPlayback ? 'Exit Playback' : 'Exit to Menu'}
+        onContinue={handleContinue}
+        onExit={handleExit}
+      />
 
       <ResultDialog
         open={result.open}
@@ -84,16 +91,29 @@ function PlaybackLayout({ song, config }: PlaybackLayoutProps) {
         song={song}
         scores={result.scores}
         activeProfile={result.activeProfile}
-        onFinish={result.onFinish}
+        nextPending={result.nextPending}
+        exitLabel={sessionPlayback ? 'Exit Playback' : 'Back to Menu'}
+        onBack={result.onBack}
+        onNext={result.onNext}
       />
     </div>
   );
 }
 
-export function PlaybackInner({ song, config }: PlaybackInnerProps) {
+export function PlaybackInner({
+  song,
+  config,
+  queuePlayback,
+  sessionPlayback,
+}: PlaybackInnerProps) {
   return (
     <PlaybackProviders song={song} config={config}>
-      <PlaybackLayout song={song} config={config} />
+      <PlaybackLayout
+        song={song}
+        config={config}
+        queuePlayback={queuePlayback}
+        sessionPlayback={sessionPlayback}
+      />
     </PlaybackProviders>
   );
 }

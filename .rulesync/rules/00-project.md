@@ -26,12 +26,13 @@ Treat `.rulesync/rules/*.md` as the only source of truth for agent instructions.
 
 After code or configuration changes:
 
-1. Re-read modified files and remove accidental comments, dead code, broad suppressions, and unrelated edits.
-2. Run `pnpm --dir client format`.
-3. Run `pnpm --dir client quality`.
-4. Run `pnpm --dir client build` when build configuration, frontend production behavior, assets, or packaging changed.
-5. Run `pnpm --dir site build` when website or documentation behavior changed.
-6. Run `pnpm --dir client audit:rust` when Rust dependencies or Cargo policy changed and `cargo-deny` is available.
+1. Add a concise entry under the appropriate `[Unreleased]` subsection in `CHANGELOG.md` for every finished change that affects the product.
+2. Re-read modified files and remove accidental comments, dead code, broad suppressions, and unrelated edits.
+3. Run `pnpm --dir client format`.
+4. Run `pnpm --dir client quality`.
+5. Run `pnpm --dir client build` when build configuration, frontend production behavior, assets, or packaging changed.
+6. Run `pnpm --dir site build` when website or documentation behavior changed.
+7. Run `pnpm --dir client audit:rust` when Rust dependencies or Cargo policy changed and `cargo-deny` is available.
 
 Do not create or request Rust or TypeScript/React tests. This project deliberately relies on strict static analysis, type checking, compilation, and focused manual/product validation instead of automated test suites.
 

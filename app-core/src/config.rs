@@ -180,6 +180,7 @@ pub struct AppConfig {
     pub last_theme: Option<usize>,
     pub guide_volume: Option<f64>,
     pub fullscreen: Option<bool>,
+    pub playback_mode: Option<String>,
     pub dark_mode: Option<bool>,
     pub mic_active: Option<bool>,
     /// `serde(alias = "mic_mirroring")` keeps configs written by builds that
@@ -222,6 +223,7 @@ impl Default for AppConfig {
             last_theme: None,
             guide_volume: None,
             fullscreen: None,
+            playback_mode: None,
             dark_mode: None,
             mic_active: None,
             mic_monitoring: None,

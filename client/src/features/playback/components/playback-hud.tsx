@@ -292,14 +292,35 @@ function notePositionClass(hudPosition: PlaybackHudPosition): string {
   return hudPosition === 'bottom' ? 'top-2' : 'bottom-2';
 }
 
+function hudPositionClass(position: PlaybackHudPosition): string {
+  return position === 'bottom'
+    ? 'bottom-[calc(2rem+env(safe-area-inset-bottom))] items-end md:bottom-3'
+    : 'top-[4.25rem] items-start md:top-3';
+}
+
+function windowControlsOffsetClass(position: PlaybackHudPosition, windowControls: boolean): string {
+  return windowControls && position === 'top' ? 'md:pt-9' : '';
+}
+
+function creditPositionClass(position: PlaybackHudPosition, windowControls: boolean): string {
+  return windowControls && position === 'bottom' ? 'top-12' : notePositionClass(position);
+}
+
 type PlaybackHudProps = {
   title: string;
   artist: string;
   config: AppConfig | null;
   position?: PlaybackHudPosition;
+  windowControls?: boolean;
 };
 
-function PlaybackHudImpl({ title, artist, config, position = 'top' }: PlaybackHudProps) {
+function PlaybackHudImpl({
+  title,
+  artist,
+  config,
+  position = 'top',
+  windowControls = false,
+}: PlaybackHudProps) {
   const { duration, guideVolume, guideAvailable } = usePlaybackTransportState();
   const { subscribe, getCurrentTime } = usePlaybackTransportActions();
   const { themeIndex, videoFlavor } = usePlaybackThemeState();
@@ -374,17 +395,15 @@ function PlaybackHudImpl({ title, artist, config, position = 'top' }: PlaybackHu
     segments,
   ]);
 
-  const hudPositionClass =
-    position === 'bottom'
-      ? 'bottom-[calc(2rem+env(safe-area-inset-bottom))] items-end md:bottom-3'
-      : 'top-[4.25rem] items-start md:top-3';
+  const hudPosition = hudPositionClass(position);
+  const rightHudOffset = windowControlsOffsetClass(position, windowControls);
   const hudFlowClass = position === 'bottom' ? 'flex-col-reverse' : 'flex-col';
   const skipButtonsClass = position === 'bottom' ? 'mb-2' : 'mt-2';
 
   return (
     <>
       <div
-        className={`pointer-events-auto absolute inset-x-0 z-20 flex justify-between gap-3 px-3 md:px-4 ${hudPositionClass}`}
+        className={`pointer-events-auto absolute inset-x-0 z-20 flex justify-between gap-3 px-3 md:px-4 ${hudPosition}`}
       >
         <div
           className={`flex min-w-0 max-w-[58%] overflow-hidden sm:max-w-[34%] lg:max-w-[40%] ${hudFlowClass}`}
@@ -410,7 +429,7 @@ function PlaybackHudImpl({ title, artist, config, position = 'top' }: PlaybackHu
           </div>
         </div>
 
-        <div className={`flex min-w-0 items-end ${hudFlowClass}`}>
+        <div className={`flex min-w-0 items-end ${hudFlowClass} ${rightHudOffset}`}>
           <div
             className={`text-base md:text-lg ${typeof pitchScore === 'number' && pitchScore !== 0 ? 'text-white' : 'text-white/50'}`}
           >
@@ -433,7 +452,9 @@ function PlaybackHudImpl({ title, artist, config, position = 'top' }: PlaybackHu
       </div>
 
       {showPixabayCredit && (
-        <p className={`${NOTE_BASE_CLASS} ${notePositionClass(position)} right-4`}>
+        <p
+          className={`${NOTE_BASE_CLASS} ${creditPositionClass(position, windowControls)} right-4`}
+        >
           Videos by Pixabay
         </p>
       )}

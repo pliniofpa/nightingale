@@ -2,10 +2,10 @@ import { useEffect } from 'react';
 
 import {
   blurActiveTextInput,
+  getHoveredActionsIndex,
   getHoveredSidebarIndex,
   getHoveredSidebarSubTarget,
   getHoveredSongIndex,
-  isActionsTarget,
 } from './dom';
 import type { MenuNavHookOptions } from './types';
 
@@ -68,10 +68,16 @@ export function useMouseMenuFocus({ menuFocus, refs, lock }: MenuNavHookOptions)
         return;
       }
 
-      if (isActionsTarget(target)) {
+      const actionsIndex = getHoveredActionsIndex(target);
+      if (actionsIndex !== null) {
         blurActiveTextInput();
         setFocus((prev) => {
-          if (prev.active && prev.panel === 'songList' && prev.actionsFocused) {
+          if (
+            prev.active &&
+            prev.panel === 'songList' &&
+            prev.actionsFocused &&
+            prev.actionsIndex === actionsIndex
+          ) {
             return prev;
           }
 
@@ -80,6 +86,7 @@ export function useMouseMenuFocus({ menuFocus, refs, lock }: MenuNavHookOptions)
             active: true,
             panel: 'songList',
             actionsFocused: true,
+            actionsIndex,
             source: 'mouse',
           };
         });

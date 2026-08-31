@@ -1,5 +1,6 @@
 use app_core::{
-    delete_cache as core_delete_cache, enqueue as core_enqueue, realign as core_realign,
+    cancel_analysis as core_cancel_analysis, delete_cache as core_delete_cache,
+    enqueue as core_enqueue, realign as core_realign,
     reanalyze_force_transcribe as core_reanalyze_force_transcribe,
     reanalyze_full as core_reanalyze_full, reanalyze_transcript as core_reanalyze_transcript,
     refresh_metadata as core_refresh_metadata, shift_key_done_payload, shift_tempo_done_payload,
@@ -10,6 +11,11 @@ use tauri::{AppHandle, Emitter};
 #[tauri::command]
 pub(crate) fn enqueue(target: SongTarget) -> Result<usize, String> {
     core_enqueue(target)
+}
+
+#[tauri::command]
+pub(crate) fn cancel_analysis(target: SongTarget) -> Result<usize, String> {
+    core_cancel_analysis(target)
 }
 
 #[tauri::command]

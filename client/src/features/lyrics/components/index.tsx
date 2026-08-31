@@ -119,8 +119,12 @@ const timingMeta = (input: TimingMetaInput) => {
   };
 };
 
-const canSaveLyrics = (saving: boolean, loading: boolean, dirty: boolean, text: string): boolean =>
-  !saving && !loading && dirty && text.trim().length > 0;
+const canSaveLyrics = (
+  saving: boolean,
+  loading: boolean,
+  changedOrReanalyzing: boolean,
+  text: string,
+): boolean => !saving && !loading && changedOrReanalyzing && text.trim().length > 0;
 
 const hasSyncedLyrics = (candidate: LrclibCandidate | undefined): boolean =>
   typeof candidate?.synced_lyrics === 'string';
@@ -370,7 +374,12 @@ export const EditLyricsDialog = () => {
     applyTimedMutation.isLoading,
     saveLyricsMutation.isLoading,
   ].some(Boolean);
-  const canSave = canSaveLyrics(saving, editor.loadingInitial, editor.isDirty, editor.text);
+  const canSave = canSaveLyrics(
+    saving,
+    editor.loadingInitial,
+    editor.isDirty || (isAnalyzed && !useProvidedTiming),
+    editor.text,
+  );
 
   const saveLabel = getSaveLabel(useProvidedTiming, willSeparate, isAnalyzed);
 

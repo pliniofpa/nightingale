@@ -13,4 +13,5 @@ export type SongsStore = {
    * the filtered set.
    */
   analyzed_count: number;
+  analysis_busy_count: number;
 };

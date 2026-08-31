@@ -11,6 +11,7 @@ import {
   LYRICS_VERTICAL_POSITIONS,
   MODELS,
   NAV,
+  PLAYBACK_MODES,
   PLAYBACK_SCALE_MAX,
   PLAYBACK_SCALE_MIN,
   PLAYBACK_SCALE_STEP,
@@ -58,6 +59,7 @@ const generalSettings = (config: AppConfig | undefined) => {
 };
 
 const playbackSettings = (config: AppConfig | undefined) => ({
+  mode: config?.playback_mode ?? DEFAULTS.playback_mode,
   lyricsVertical: config?.lyrics_vertical_position ?? DEFAULTS.lyrics_vertical_position,
   lyricsHorizontal: config?.lyrics_horizontal_position ?? DEFAULTS.lyrics_horizontal_position,
   lyricsScale: clampPlaybackScale(config?.lyrics_scale),
@@ -283,6 +285,20 @@ export const SettingsPage = () => {
               </div>
 
               <FieldGroup>
+                <Field>
+                  <Label htmlFor="playback-mode-1">Playback mode</Label>
+                  <Hint>Choose whether playback replaces the menu or runs beside it</Hint>
+                  <SettingsSelect
+                    id="playback-mode-1"
+                    label="Playback mode"
+                    placeholder="Select playback mode"
+                    value={playback.mode}
+                    options={PLAYBACK_MODES}
+                    triggerClassName={getFocusClassName(NAV.playback.mode)}
+                    onValueChange={(playback_mode) => mutate({ playback_mode })}
+                  />
+                </Field>
+
                 <Field>
                   <Label htmlFor="lyrics-vertical-position-1">Lyrics vertical position</Label>
                   <Hint>Top moves playback HUD and pitch graph to the bottom</Hint>

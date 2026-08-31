@@ -1,34 +1,92 @@
 /**
- * Playback route: requires `song` in location state; otherwise redirects home.
- *
- * On reload, Firefox preserves `history.state.song` and Chromium browsers
- * usually do too, so the song reference survives. The playback session itself
- * rebuilds from scratch (`PlaybackInner key={file_hash}` re-mounts a fresh
- * providers tree); the engine reads its inputs from the song hash, which is
- * stable across reloads. The only missing piece historically was a WS race
- * in `PlaybackTransportProvider` (`stems-ready` emitted before the freshly
- * reconnected socket subscribed) — fixed at the source so reloads can resume
- * playback from the beginning.
+ * Classic playback reads the song from location state. Session playback loads
+ * shared state when the same route has the `session` query flag.
  */
 
+import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router';
 
+import {
+  isSessionPlayback,
+  loadPlaybackSession,
+  onPlaybackSessionChanged,
+  type PlaybackSession,
+} from '@/bridge/playback-session';
 import { playbackLocationStateSchema } from '@/bridge/schemas';
 import { useConfig } from '@/shared/config/use-config';
 
 import { PlaybackInner } from './playback-inner';
 
-export const Playback = () => {
-  const location = useLocation();
-  const state: unknown = location.state;
+function PlaybackSessionView({
+  session,
+  sessionPlayback,
+}: {
+  session: PlaybackSession;
+  sessionPlayback: boolean;
+}) {
   const { data: config } = useConfig();
 
+  return (
+    <PlaybackInner
+      key={session.playbackId ?? session.song.file_hash}
+      song={session.song}
+      config={config ?? null}
+      queuePlayback={session.queuePlayback}
+      sessionPlayback={sessionPlayback}
+    />
+  );
+}
+
+export const Playback = () => {
+  const location = useLocation();
+  if (isSessionPlayback()) {
+    return <SessionPlayback />;
+  }
+  const state: unknown = location.state;
   const parsedState = playbackLocationStateSchema.safeParse(state);
 
   if (!parsedState.success) {
     return <Navigate to="/" replace />;
   }
 
-  const { song } = parsedState.data;
-  return <PlaybackInner key={song.file_hash} song={song} config={config ?? null} />;
+  const { song, queuePlayback = false, playbackId } = parsedState.data;
+  return (
+    <PlaybackSessionView session={{ song, queuePlayback, playbackId }} sessionPlayback={false} />
+  );
+};
+
+const SessionPlayback = () => {
+  const [session, setSession] = useState<PlaybackSession | null>();
+
+  useEffect(() => {
+    const lifecycle = { cancelled: false };
+    let unlisten: (() => void) | undefined;
+
+    void (async () => {
+      try {
+        const stop = await onPlaybackSessionChanged(setSession);
+        if (lifecycle.cancelled) {
+          stop();
+          return;
+        }
+        unlisten = stop;
+        setSession(await loadPlaybackSession());
+      } catch {
+        setSession(null);
+      }
+    })();
+
+    return () => {
+      lifecycle.cancelled = true;
+      unlisten?.();
+    };
+  }, []);
+
+  if (session === undefined) {
+    return null;
+  }
+  if (session === null) {
+    return <Navigate to="/" replace />;
+  }
+  return <PlaybackSessionView session={session} sessionPlayback />;
 };

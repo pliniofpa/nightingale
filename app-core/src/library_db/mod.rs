@@ -37,9 +37,10 @@ pub(crate) use analysis_queue::{
 pub(crate) use migrations::rewrite_legacy_jellyfin_paths;
 pub(crate) use playlists::{PlaylistDefinition, PlaylistSongKeyKind, replace_all_playlists};
 pub(crate) use queries::{
-    iter_file_hashes_filtered_full_reanalyzable, iter_file_hashes_filtered_not_analyzed,
-    iter_file_hashes_filtered_realignable, iter_file_hashes_filtered_refreshable, load_meta_sql,
-    load_songs_page, query_library_menu_items,
+    iter_file_hashes_filtered_analysis_busy, iter_file_hashes_filtered_full_reanalyzable,
+    iter_file_hashes_filtered_not_analyzed, iter_file_hashes_filtered_realignable,
+    iter_file_hashes_filtered_refreshable, load_meta_sql, load_songs_page,
+    query_library_menu_items,
 };
 pub(crate) use rebase::{rebase_song_album_art_cache_paths, rebase_song_album_art_paths};
 pub(crate) use songs::{

@@ -21,13 +21,14 @@ export type MenuFocus = {
   sidebarIndex: number;
   sidebarSubIndex: number;
   actionsFocused: boolean;
+  actionsIndex: number;
   source: FocusSource;
 };
 
 export type MenuFocusActions = {
   onConfirmSong: ((index: number) => void) | null;
   onConfirmSidebar: ((index: number) => void) | null;
-  onConfirmActions: (() => void) | null;
+  onConfirmActions: ((index: number) => boolean) | null;
   onSidebarBack: (() => boolean) | null;
   isSidebarBusy: (() => boolean) | null;
   hasSongDetails: boolean;
@@ -59,6 +60,7 @@ const INITIAL_FOCUS: MenuFocus = {
   sidebarIndex: 0,
   sidebarSubIndex: 0,
   actionsFocused: false,
+  actionsIndex: 0,
   source: 'nav',
 };
 

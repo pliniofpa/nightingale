@@ -12,6 +12,7 @@ export type DialogMode =
   | 'about'
   | 'update'
   | 'donate'
+  | 'clear-playback-queue'
   | 'jellyfin-connect'
   | 'navidrome-connect'
   | 'plex-connect'

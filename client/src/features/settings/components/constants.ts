@@ -66,6 +66,19 @@ export const ALIGN_BACKENDS: SettingsOption[] = [
 
 export const MODELS = ['large-v3', 'large-v3-turbo', 'medium', 'small', 'base', 'tiny'];
 
+export const PLAYBACK_MODES: SettingsOption[] = [
+  {
+    value: 'classic',
+    label: 'Classic mode',
+    description: 'Playback replaces the menu in the current window.',
+  },
+  {
+    value: 'session',
+    label: 'Session mode',
+    description: 'Playback uses a separate window while the menu manages the queue.',
+  },
+];
+
 export const LYRICS_VERTICAL_POSITIONS: SettingsOption[] = [
   { value: 'bottom', label: 'Bottom' },
   { value: 'center', label: 'Center' },
@@ -89,6 +102,7 @@ export const DEFAULTS = {
   mic_monitor_gain: 0.65,
   mic_latency_compensation_sec: DEFAULT_MIC_LATENCY_COMPENSATION_SEC,
   auto_analyze: false,
+  playback_mode: 'classic',
   lyrics_vertical_position: 'bottom',
   lyrics_horizontal_position: 'center',
   lyrics_scale: DEFAULT_PLAYBACK_SCALE,
@@ -105,6 +119,7 @@ export const DEFAULTS = {
   | 'mic_monitor_gain'
   | 'mic_latency_compensation_sec'
   | 'auto_analyze'
+  | 'playback_mode'
   | 'lyrics_vertical_position'
   | 'lyrics_horizontal_position'
   | 'lyrics_scale'
@@ -133,10 +148,11 @@ export const NAV = {
     micTest: 5,
   },
   playback: {
-    lyricsVerticalPosition: 1,
-    lyricsHorizontalPosition: 2,
-    lyricsScale: 3,
-    pitchGraphScale: 4,
+    mode: 1,
+    lyricsVerticalPosition: 2,
+    lyricsHorizontalPosition: 3,
+    lyricsScale: 4,
+    pitchGraphScale: 5,
   },
 } as const;
 
@@ -173,7 +189,7 @@ export function getSettingsStops(tab: SettingsTab, isParakeet: boolean) {
     return [3, 2, 1, 1, 2, 2, 2];
   }
   if (tab === 'playback') {
-    return [3, 1, 1, 1, 1, 2];
+    return [3, 1, 1, 1, 1, 1, 2];
   }
 
   return isParakeet

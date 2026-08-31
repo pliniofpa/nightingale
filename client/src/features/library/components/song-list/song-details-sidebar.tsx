@@ -1,8 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { PlayIcon } from 'lucide-react';
+import { ListPlusIcon, PlayIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
 
+import { useAddPlaybackQueueEntry } from '@/features/playback-queue/use-playback-queue';
+import { usePlaybackLauncher } from '@/features/playback/hooks/use-playback-launcher';
 import { usePreparePlaybackMutation } from '@/features/playback/mutations/use-prepare-playback-mutation';
 import { useBestScoresBySongForActiveProfile } from '@/features/profiles/hooks/use-best-scores-by-song';
 import { Button } from '@/shared/components/ui/button';
@@ -24,12 +25,37 @@ type SongDetailsSidebarProps = {
   onClose: () => void;
 };
 
+type AddToQueueButtonProps = {
+  song: Song;
+  tempo: number;
+  keyOffset: number;
+  ready: boolean;
+  preparing: boolean;
+};
+
+function AddToQueueButton({ song, tempo, keyOffset, ready, preparing }: AddToQueueButtonProps) {
+  const { mutate: addToQueue, isLoading } = useAddPlaybackQueueEntry();
+
+  return (
+    <Button
+      variant="outline"
+      size="icon-lg"
+      disabled={!ready || preparing || isLoading}
+      onClick={() => addToQueue({ song, tempo, keyOffset })}
+      aria-label={`Add ${song.title} to playback queue`}
+      title="Add to queue"
+    >
+      <ListPlusIcon />
+    </Button>
+  );
+}
+
 export const SongDetailsSidebar = ({ song, queueStatus, onClose }: SongDetailsSidebarProps) => {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const bestScores = useBestScoresBySongForActiveProfile();
   const { detailsRef, closeDetails } = useSongDetailsNav(onClose);
   const { mutate: preparePlayback, isLoading: preparingPlayback } = usePreparePlaybackMutation();
+  const { launch, reserveTarget } = usePlaybackLauncher();
   const [tempo, setTempo] = useState(song.tempo);
   const [keyOffset, setKeyOffset] = useState(song.key_offset);
 
@@ -56,19 +82,24 @@ export const SongDetailsSidebar = ({ song, queueStatus, onClose }: SongDetailsSi
   }, [keyPending, queryClient]);
 
   const handlePlay = () => {
+    const target = reserveTarget();
+    if (target === undefined) {
+      return;
+    }
+    const start = (preparedSong: Song) =>
+      launch({ song: preparedSong, queuePlayback: false }, target);
     const hasAdjustments = keyOffset !== song.key_offset || tempo !== song.tempo;
 
     if (!hasAdjustments) {
-      void navigate('/playback', { state: { song } });
+      void start(song);
       return;
     }
 
     preparePlayback(
       { song, tempo, keyOffset },
       {
-        onSuccess: (preparedSong) => {
-          void navigate('/playback', { state: { song: preparedSong } });
-        },
+        onSuccess: (preparedSong) => void start(preparedSong),
+        onError: () => target?.close(),
       },
     );
   };
@@ -107,10 +138,13 @@ export const SongDetailsSidebar = ({ song, queueStatus, onClose }: SongDetailsSi
         />
       </div>
 
-      <footer className="border-t p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <footer
+        className="flex gap-2 border-t p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        data-song-details-nav-group
+      >
         <Button
           size="lg"
-          className="h-8 w-full disabled:bg-primary/50 disabled:text-primary-foreground/45 disabled:opacity-100"
+          className="h-8 flex-1 disabled:bg-primary/50 disabled:text-primary-foreground/45 disabled:opacity-100"
           disabled={status.isReady !== true || preparingPlayback}
           aria-busy={preparingPlayback}
           onClick={handlePlay}
@@ -125,6 +159,13 @@ export const SongDetailsSidebar = ({ song, queueStatus, onClose }: SongDetailsSi
             </>
           )}
         </Button>
+        <AddToQueueButton
+          song={song}
+          tempo={tempo}
+          keyOffset={keyOffset}
+          ready={status.isReady === true}
+          preparing={preparingPlayback}
+        />
       </footer>
     </aside>
   );

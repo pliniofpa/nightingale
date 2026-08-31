@@ -4,7 +4,14 @@ import type { NavAction } from '@/app/providers/nav-input-context';
 import type { MenuFocus } from '@/features/menu/providers/menu-focus-context';
 
 import { useNavInput } from '../use-nav-input';
-import { blurActiveTextInput, getSongGridTarget, isSongGrid, type SongGridDirection } from './dom';
+import {
+  blurActiveTextInput,
+  getActionsCount,
+  getActionTarget,
+  getSongGridTarget,
+  isSongGrid,
+  type SongGridDirection,
+} from './dom';
 import type { MenuNavHookOptions } from './types';
 
 const CONFIRM_COOLDOWN_MS = 140;
@@ -36,6 +43,9 @@ export function useMenuNavInput({ menuFocus, refs, lock, scrollToSong }: UseMenu
 
         const handleDirectionalInput = (): void => {
           if (handleSongGridAction(action, menuFocus, scrollToSong)) {
+            return;
+          }
+          if ((action.left || action.right) && handleActionsHorizontal(action, menuFocus)) {
             return;
           }
           if ((action.left || action.right) && handleHorizontalAction(action, menuFocus)) {
@@ -74,6 +84,15 @@ export function useMenuNavInput({ menuFocus, refs, lock, scrollToSong }: UseMenu
   );
 }
 
+function confirmFocusedAction(
+  actionsRef: MenuNavHookOptions['menuFocus']['actionsRef'],
+  index: number,
+): void {
+  if (actionsRef.current.onConfirmActions?.(index) !== true) {
+    getActionTarget(index)?.click();
+  }
+}
+
 function handleConfirmAction(
   { actionsRef, focus }: Pick<MenuNavHookOptions['menuFocus'], 'actionsRef' | 'focus'>,
   refs: MenuNavHookOptions['refs'],
@@ -89,7 +108,7 @@ function handleConfirmAction(
 
   if (focus.panel === 'songList') {
     if (focus.actionsFocused) {
-      actionsRef.current.onConfirmActions?.();
+      confirmFocusedAction(actionsRef, focus.actionsIndex);
     } else {
       actionsRef.current.onConfirmSong?.(focus.songIndex);
     }
@@ -163,6 +182,44 @@ function handleSongGridAction(
       active: true,
       panel,
       actionsFocused,
+      source: 'nav',
+    };
+  });
+  return true;
+}
+
+function handleActionsHorizontal(
+  action: NavAction,
+  {
+    focus,
+    actionsRef,
+    setFocus,
+  }: Pick<MenuNavHookOptions['menuFocus'], 'focus' | 'actionsRef' | 'setFocus'>,
+): boolean {
+  if (focus.panel !== 'songList' || !focus.actionsFocused) {
+    return false;
+  }
+
+  const lastIndex = Math.max(0, getActionsCount() - 1);
+  setFocus((previous) => {
+    if (action.left && previous.actionsIndex > 0) {
+      return { ...previous, actionsIndex: previous.actionsIndex - 1, source: 'nav' };
+    }
+    if (action.right && previous.actionsIndex < lastIndex) {
+      return { ...previous, actionsIndex: previous.actionsIndex + 1, source: 'nav' };
+    }
+
+    let panel = previous.panel;
+    if (action.left) {
+      panel = 'sidebar';
+    } else if (actionsRef.current.hasSongDetails) {
+      panel = 'songDetails';
+    }
+
+    return {
+      ...previous,
+      panel,
+      actionsFocused: false,
       source: 'nav',
     };
   });

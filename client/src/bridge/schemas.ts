@@ -56,6 +56,7 @@ export const appConfigSchema: z.ZodType<AppConfig> = z.object({
   last_theme: nullableNumber,
   guide_volume: nullableNumber,
   fullscreen: nullableBoolean,
+  playback_mode: nullableString,
   dark_mode: nullableBoolean,
   mic_active: nullableBoolean,
   mic_monitoring: nullableBoolean,
@@ -147,4 +148,8 @@ export const webBootstrapSchema = z.object({
   libraryPinned: z.boolean().optional(),
 });
 
-export const playbackLocationStateSchema = z.object({ song: songSchema });
+export const playbackLocationStateSchema = z.object({
+  song: songSchema,
+  queuePlayback: z.boolean().optional(),
+  playbackId: z.string().optional(),
+});
