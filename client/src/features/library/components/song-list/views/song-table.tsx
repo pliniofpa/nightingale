@@ -6,6 +6,7 @@ import type { Song } from '@/types/Song';
 import type { SongSort } from '@/types/SongSort';
 import type { SongSortColumn } from '@/types/SongSortColumn';
 
+import { songKey } from '../shared/song-key';
 import { SONG_COLUMNS, type SongColumn } from '../song-columns';
 import type { SongItemProps } from '../types';
 import { SongTableRow } from './song-table-row';
@@ -33,11 +34,11 @@ const SongTableHeader = ({ column, sort, sortingDisabled, onSort }: SongTableHea
 
   const activeDirection = sortColumn === sort?.column ? sort.direction : undefined;
   const ariaSort = activeDirection ?? 'none';
-  let icon = <ArrowUpDownIcon className="size-3.5 shrink-0" aria-hidden="true" />;
+  let icon = <ArrowUpDownIcon className="size-3 shrink-0 opacity-40" aria-hidden="true" />;
   if (activeDirection === 'ascending') {
-    icon = <ArrowUpIcon className="size-3.5 shrink-0" aria-hidden="true" />;
+    icon = <ArrowUpIcon className="size-3 shrink-0" aria-hidden="true" />;
   } else if (activeDirection === 'descending') {
-    icon = <ArrowDownIcon className="size-3.5 shrink-0" aria-hidden="true" />;
+    icon = <ArrowDownIcon className="size-3 shrink-0" aria-hidden="true" />;
   }
 
   return (
@@ -46,7 +47,7 @@ const SongTableHeader = ({ column, sort, sortingDisabled, onSort }: SongTableHea
         type="button"
         disabled={sortingDisabled}
         className={cn(
-          'flex w-full items-center gap-1 text-left outline-none focus-visible:text-foreground disabled:cursor-wait',
+          'flex w-full items-center gap-0.5 text-left outline-none focus-visible:text-foreground disabled:cursor-wait',
           column.id === 'status' && 'justify-end',
         )}
         onClick={() => onSort(sortColumn)}
@@ -85,7 +86,7 @@ export const SongTable = ({
       <tbody>
         {songs.map((song, index) => (
           <SongTableRow
-            key={song.file_hash}
+            key={songKey(song)}
             {...getItemProps(song, index)}
             bestScore={bestScores.get(song.file_hash)}
           />

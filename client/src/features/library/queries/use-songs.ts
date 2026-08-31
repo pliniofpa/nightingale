@@ -80,6 +80,7 @@ export const useSongs = () => {
       const loaded = allPages.reduce((sum, page) => sum + page.processed.length, 0);
       return loaded < lastPage.processed_count ? loaded : undefined;
     },
+    keepPreviousData: true,
   });
 };
 
