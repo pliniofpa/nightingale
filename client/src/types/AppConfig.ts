@@ -41,6 +41,6 @@ export type AppConfig = {
   vocal_detection_threshold_pct: number | null;
   auto_analyze: boolean | null;
   song_list_view: string | null;
-  song_list_sort: SongSort | null;
+  song_list_sort: SongSort[] | null;
   language_overrides: { [key in string]: string } | null;
 };

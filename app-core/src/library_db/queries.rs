@@ -234,17 +234,19 @@ fn build_song_where_clause(
     }
 }
 
-fn song_order(sort: Option<SongSort>) -> Option<String> {
-    let sort = sort?;
-    let direction = match sort.direction {
+fn sort_direction(direction: SortDirection) -> &'static str {
+    match direction {
         SortDirection::Ascending => "ASC",
         SortDirection::Descending => "DESC",
-    };
-    let expression = match sort.column {
+    }
+}
+
+fn sort_expression(column: SongSortColumn) -> &'static str {
+    match column {
         SongSortColumn::Title => "s.title COLLATE NOCASE",
         SongSortColumn::Artist => "s.artist COLLATE NOCASE",
         SongSortColumn::Album => "s.album COLLATE NOCASE",
-        SongSortColumn::Duration => "s.duration_secs",
+        SongSortColumn::Duration => "CAST(s.duration_secs AS INTEGER)",
         SongSortColumn::Status => {
             "CASE WHEN EXISTS (SELECT 1 FROM analysis_queue aq WHERE aq.file_hash = s.file_hash AND aq.status = 'analyzing') THEN 0 \
              WHEN EXISTS (SELECT 1 FROM analysis_queue aq WHERE aq.file_hash = s.file_hash AND aq.status = 'failed') THEN 1 \
@@ -252,9 +254,24 @@ fn song_order(sort: Option<SongSort>) -> Option<String> {
              WHEN EXISTS (SELECT 1 FROM analysis_queue aq WHERE aq.file_hash = s.file_hash AND aq.status = 'queued') THEN 3 \
              ELSE 4 END"
         }
-    };
+    }
+}
 
-    Some(format!("{expression} {direction}, s.id {direction}"))
+fn song_order(sorts: &[SongSort]) -> Option<String> {
+    let last_sort = sorts.last()?;
+    let mut clauses = sorts
+        .iter()
+        .map(|sort| {
+            format!(
+                "{} {}",
+                sort_expression(sort.column),
+                sort_direction(sort.direction)
+            )
+        })
+        .collect::<Vec<_>>();
+    clauses.push(format!("s.id {}", sort_direction(last_sort.direction)));
+
+    Some(clauses.join(", "))
 }
 
 pub(crate) fn load_songs_page(params: &LoadSongsParams) -> rusqlite::Result<SongsStore> {
@@ -285,7 +302,7 @@ pub(crate) fn load_songs_page(params: &LoadSongsParams) -> rusqlite::Result<Song
     } else {
         ""
     };
-    let requested_order = song_order(params.sort);
+    let requested_order = params.sort.as_deref().and_then(song_order);
     let default_filtered_order =
         format!("{queue_order}{playlist_order}s.artist COLLATE NOCASE, s.title COLLATE NOCASE");
     let filtered_order = requested_order

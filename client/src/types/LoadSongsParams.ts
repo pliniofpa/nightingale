@@ -5,7 +5,7 @@ import type { SongSort } from "./SongSort";
 export type LoadSongsParams = {
   search: string | null;
   filters: LibraryMenuFilters;
-  sort: SongSort | null;
+  sort: SongSort[] | null;
   skip: number;
   take: number;
 };

@@ -43,21 +43,10 @@ export const useSongs = () => {
   const { data: config } = useConfig();
   const { search } = useSearch();
   const { artist, album, playlist, query, status, transcript_source } = useLibraryFilter();
-  const sort = config?.song_list_sort ?? null;
+  const sort = config?.song_list_sort ?? [];
 
   return useInfiniteQuery({
-    queryKey: [
-      ...SONGS,
-      search,
-      artist,
-      album,
-      playlist,
-      query,
-      status,
-      transcript_source,
-      sort?.column,
-      sort?.direction,
-    ],
+    queryKey: [...SONGS, search, artist, album, playlist, query, status, transcript_source, sort],
     queryFn: ({ pageParam = 0 }: { pageParam?: number }) => {
       const params: LoadSongsParams = {
         search: search || null,
@@ -70,7 +59,7 @@ export const useSongs = () => {
           transcript_source: transcript_source ?? null,
           search: null,
         },
-        sort,
+        sort: sort.length === 0 ? null : sort,
         skip: pageParam,
         take: PAGE_SIZE,
       };
@@ -80,7 +69,6 @@ export const useSongs = () => {
       const loaded = allPages.reduce((sum, page) => sum + page.processed.length, 0);
       return loaded < lastPage.processed_count ? loaded : undefined;
     },
-    keepPreviousData: true,
   });
 };
 

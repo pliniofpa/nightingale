@@ -58,7 +58,7 @@ pub struct LoadSongsParams {
     pub search: Option<String>,
     pub filters: LibraryMenuFilters,
     #[serde(default)]
-    pub sort: Option<SongSort>,
+    pub sort: Option<Vec<SongSort>>,
     pub skip: usize,
     pub take: usize,
 }

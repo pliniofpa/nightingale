@@ -78,10 +78,12 @@ export const appConfigSchema: z.ZodType<AppConfig> = z.object({
   auto_analyze: nullableBoolean,
   song_list_view: nullableString,
   song_list_sort: z
-    .object({
-      column: z.enum(['title', 'artist', 'album', 'duration', 'status']),
-      direction: z.enum(['ascending', 'descending']),
-    })
+    .array(
+      z.object({
+        column: z.enum(['title', 'artist', 'album', 'duration', 'status']),
+        direction: z.enum(['ascending', 'descending']),
+      }),
+    )
     .nullable(),
   language_overrides: z.record(z.string(), z.string()).nullable(),
 });
