@@ -24,6 +24,7 @@ below.
 
 ### Improvements
 
+- Source setup now warns that changing the data source clears the current library and its analysis state, with confirmation before choosing a replacement folder.
 - Leaderboard entries now show when each score was achieved beneath the profile name.
 - Long gaps between lyric lines now show a compact countdown beneath the song details, while the circular three-second countdown bubble stays beside the lyric line as the next line approaches. The next lyric block is no longer previewed across an instrumental break.
 - Change "AI generated" to "AI transcribed" in song list.

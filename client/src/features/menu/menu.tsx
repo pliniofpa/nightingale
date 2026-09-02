@@ -22,6 +22,7 @@ import { useShouldRunSetup } from '@/features/setup/hooks/use-should-run-setup';
 import { JellyfinConnectDialog } from '@/features/sources/components/jellyfin-connect';
 import { NavidromeConnectDialog } from '@/features/sources/components/navidrome-connect';
 import { PlexConnectDialog } from '@/features/sources/components/plex-connect';
+import { FolderSourceConfirmDialog } from '@/features/sources/components/source-change-warning';
 import { UpdateDialog } from '@/features/updates/components';
 import { SidebarInset } from '@/shared/components/ui/sidebar';
 
@@ -41,6 +42,7 @@ export const MenuIndex = () => {
 
 const SourceDialogs = ({ mode }: { mode: DialogMode }) => (
   <>
+    {mode === 'folder-source-confirm' && <FolderSourceConfirmDialog />}
     {mode === 'jellyfin-connect' && <JellyfinConnectDialog />}
     {mode === 'navidrome-connect' && <NavidromeConnectDialog />}
     {mode === 'plex-connect' && <PlexConnectDialog />}

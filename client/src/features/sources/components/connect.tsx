@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 
 import { useDialog } from '@/features/menu/hooks/use-dialog';
 import { useDialogNav } from '@/features/menu/hooks/use-dialog-nav';
+import { SourceChangeWarning } from '@/features/sources/components/source-change-warning';
 import { Button } from '@/shared/components/ui/button';
 import { Checkbox } from '@/shared/components/ui/checkbox';
 import {
@@ -252,6 +253,7 @@ export const RemoteSourceConnectDialog = <TLogin extends RemoteLoginResult>({
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
+          <SourceChangeWarning />
           <FieldGroup>
             <Field>
               <Label htmlFor={urlInputId}>Server URL</Label>

@@ -6,6 +6,7 @@ import { openUrl } from '@/bridge/opener';
 import { plexBeginPin, plexManualLogin, plexPollPin } from '@/bridge/source';
 import { useDialog } from '@/features/menu/hooks/use-dialog';
 import { useDialogNav } from '@/features/menu/hooks/use-dialog-nav';
+import { SourceChangeWarning } from '@/features/sources/components/source-change-warning';
 import { useConnectPlex } from '@/features/sources/mutations/use-source-mutations';
 import { Button } from '@/shared/components/ui/button';
 import { Checkbox } from '@/shared/components/ui/checkbox';
@@ -260,6 +261,8 @@ export const PlexConnectDialog = () => {
             Connect through Plex on the web, or use a server URL and API token.
           </DialogDescription>
         </DialogHeader>
+
+        <SourceChangeWarning />
 
         <PlexSignInStatus visible={view.signInStatus} pin={pin} phase={signInPhase} />
 

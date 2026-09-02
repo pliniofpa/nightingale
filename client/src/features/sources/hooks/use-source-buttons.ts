@@ -145,7 +145,7 @@ export const useSourceButtons = (): SourceButton[] => {
             icon: FolderIcon,
             label: 'Select folder',
             tooltip: 'Select folder',
-            handler: selectFolder,
+            handler: hasSource ? () => setMode('folder-source-confirm') : selectFolder,
             disabled: isPending,
           },
         ];
