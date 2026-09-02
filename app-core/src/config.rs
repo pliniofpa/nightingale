@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use ts_rs::TS;
 
 use crate::secret;
@@ -209,12 +209,32 @@ pub struct AppConfig {
     pub vocal_detection_threshold_pct: Option<f64>,
     pub auto_analyze: Option<bool>,
     pub song_list_view: Option<String>,
-    pub song_list_sort: Option<SongSort>,
+    #[serde(default, deserialize_with = "deserialize_song_list_sort")]
+    pub song_list_sort: Option<Vec<SongSort>>,
     pub language_overrides: Option<HashMap<String, String>>,
 }
 
 fn default_data_path_option() -> Option<PathBuf> {
     Some(AppConfig::default_data_path())
+}
+
+fn deserialize_song_list_sort<'de, D>(deserializer: D) -> Result<Option<Vec<SongSort>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum PersistedSongSort {
+        One(SongSort),
+        Many(Vec<SongSort>),
+    }
+
+    Ok(
+        Option::<PersistedSongSort>::deserialize(deserializer)?.map(|sort| match sort {
+            PersistedSongSort::One(sort) => vec![sort],
+            PersistedSongSort::Many(sorts) => sorts,
+        }),
+    )
 }
 
 impl Default for AppConfig {

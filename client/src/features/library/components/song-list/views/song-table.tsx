@@ -13,7 +13,7 @@ import { SongTableRow } from './song-table-row';
 
 type SongTableProps = {
   songs: Song[];
-  sort: SongSort | null;
+  sort: readonly SongSort[];
   sortingDisabled: boolean;
   onSort: (column: SongSortColumn) => void;
   getItemProps: (song: Song, index: number) => SongItemProps;
@@ -21,7 +21,7 @@ type SongTableProps = {
 
 type SongTableHeaderProps = {
   column: SongColumn;
-  sort: SongSort | null;
+  sort: readonly SongSort[];
   sortingDisabled: boolean;
   onSort: (column: SongSortColumn) => void;
 };
@@ -32,8 +32,9 @@ const SongTableHeader = ({ column, sort, sortingDisabled, onSort }: SongTableHea
     return <th className={column.thClassName}>{column.header}</th>;
   }
 
-  const activeDirection = sortColumn === sort?.column ? sort.direction : undefined;
-  const ariaSort = activeDirection ?? 'none';
+  const sortIndex = sort.findIndex(({ column: sortedColumn }) => sortedColumn === sortColumn);
+  const activeDirection = sortIndex === -1 ? undefined : sort[sortIndex].direction;
+  const priority = sortIndex + 1;
   let icon = (
     <ArrowUpDownIcon className="size-3 shrink-0 translate-y-px opacity-40" aria-hidden="true" />
   );
@@ -44,7 +45,7 @@ const SongTableHeader = ({ column, sort, sortingDisabled, onSort }: SongTableHea
   }
 
   return (
-    <th className={column.thClassName} aria-sort={ariaSort}>
+    <th className={column.thClassName} aria-sort={sortIndex === 0 ? activeDirection : undefined}>
       <button
         type="button"
         disabled={sortingDisabled}
@@ -55,7 +56,17 @@ const SongTableHeader = ({ column, sort, sortingDisabled, onSort }: SongTableHea
         onClick={() => onSort(sortColumn)}
       >
         {column.header}
-        {icon}
+        <span className="inline-flex items-start" aria-hidden="true">
+          {icon}
+          {activeDirection && (
+            <sup className="-ml-0.5 text-[0.45rem] leading-none tabular-nums">{priority}</sup>
+          )}
+        </span>
+        {activeDirection && (
+          <span className="sr-only">
+            , sorted {activeDirection}, priority {priority}
+          </span>
+        )}
       </button>
     </th>
   );

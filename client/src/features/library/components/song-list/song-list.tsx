@@ -31,7 +31,7 @@ import { SongTable } from './views/song-table';
 type SongCollectionProps = {
   songs: Song[];
   view: SongListView;
-  sort: SongSort | null;
+  sort: readonly SongSort[];
   sortingDisabled: boolean;
   loading: boolean;
   hasActiveFilter: boolean;
@@ -44,17 +44,22 @@ type SongCollectionProps = {
 const hasFilters = (values: readonly unknown[]): boolean =>
   values.some((value) => (typeof value === 'string' ? value.trim() !== '' : Boolean(value)));
 
-const songListSort = (config: AppConfig | undefined): SongSort | null =>
-  config?.song_list_sort ?? null;
+const songListSort = (config: AppConfig | undefined): readonly SongSort[] =>
+  config?.song_list_sort ?? [];
 
-const nextSongSort = (sort: SongSort | null, column: SongSortColumn): SongSort | null => {
-  if (sort?.column !== column) {
-    return { column, direction: 'ascending' };
+const nextSongSort = (sorts: readonly SongSort[], column: SongSortColumn): SongSort[] | null => {
+  const sortIndex = sorts.findIndex((sort) => sort.column === column);
+  if (sortIndex === -1) {
+    return [...sorts, { column, direction: 'ascending' }];
   }
-  if (sort.direction === 'ascending') {
-    return { column, direction: 'descending' };
+  if (sorts[sortIndex].direction === 'ascending') {
+    return sorts.map((sort, index) =>
+      index === sortIndex ? { ...sort, direction: 'descending' } : sort,
+    );
   }
-  return null;
+
+  const nextSorts = sorts.filter((_, index) => index !== sortIndex);
+  return nextSorts.length === 0 ? null : nextSorts;
 };
 
 const EmptySongs = ({ filtered }: { filtered: boolean }) => (
