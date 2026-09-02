@@ -33,6 +33,7 @@ below.
 
 ### Fixes
 
+- Analyzer setup now keeps WhisperX on a release compatible with `transformers` 5, preventing Windows lyrics analysis failures in pyannote.
 - Video files now use audio-stream title metadata, preventing subtitle titles from replacing song names.
 - The lyrics editor now allows re-aligning analyzed songs without requiring a lyrics change.
 - Empty transcription results now finish without attempting forced alignment.

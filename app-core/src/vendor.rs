@@ -583,11 +583,11 @@ fn detect_gpu() -> GpuInfo {
                 legacy_torch: true,
             };
         }
-        return GpuInfo {
+        GpuInfo {
             device: "mps",
             torch_index: "https://download.pytorch.org/whl/cpu",
             legacy_torch: false,
-        };
+        }
     }
 
     #[cfg(not(target_os = "macos"))]
@@ -664,9 +664,9 @@ pub fn step_install_packages() -> Result<(), String> {
     let (audio_sep_pkg, whisperx_pkg) = if gpu.legacy_torch {
         ("audio-separator>=0.24,<0.25", "whisperx>=3.3.0,<3.3.4")
     } else if gpu.device == "cuda" {
-        ("audio-separator[gpu]>=0.25", "whisperx>=3.3.0")
+        ("audio-separator[gpu]>=0.25", "whisperx>=3.8.7rc1")
     } else {
-        ("audio-separator>=0.25", "whisperx>=3.3.0")
+        ("audio-separator>=0.25", "whisperx>=3.8.7rc1")
     };
 
     let cython_out = silent_command(&uv)
