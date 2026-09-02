@@ -28,8 +28,8 @@
     "quality": "pnpm quality:web && pnpm quality:rust && pnpm rules:check",
     "quality:rust": "pnpm format:rust:check && cd .. && cargo check --workspace --all-targets --all-features --locked && cd client && pnpm lint:rust",
     "quality:web": "pnpm format:check && pnpm lint && pnpm typecheck",
-    "rules:check": "cd .. && client/node_modules/.bin/rulesync doctor --strict && client/node_modules/.bin/rulesync generate --dry-run --silent",
-    "rules:generate": "cd .. && client/node_modules/.bin/rulesync generate",
+    "rules:check": "cd .. && node client/node_modules/rulesync/dist/cli/index.js doctor --strict && node client/node_modules/rulesync/dist/cli/index.js generate --dry-run --silent",
+    "rules:generate": "cd .. && node client/node_modules/rulesync/dist/cli/index.js generate",
     "tauri": "tauri",
     "typecheck": "tsc --noEmit"
   },
