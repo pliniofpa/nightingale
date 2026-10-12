@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { PLAYER_COLOR_VALUES } from '@/shared/player-colors';
 import type { AppConfig } from '@/types/AppConfig';
 import type { CachePaths } from '@/types/CachePaths';
 import type { LibrarySource } from '@/types/LibrarySource';
@@ -64,6 +65,34 @@ const librarySourceSchema: z.ZodType<LibrarySource> = z.discriminatedUnion('kind
   }),
 ]);
 
+const playerColorSchema = z.enum(PLAYER_COLOR_VALUES);
+
+export const playbackPlayerSchema = z.object({
+  id: z.string().min(1),
+  profile: z.string().min(1).nullable(),
+  microphoneId: z.string().min(1),
+  color: playerColorSchema,
+});
+
+export const playbackPlayersSchema = z
+  .array(playbackPlayerSchema)
+  .min(2)
+  .max(4)
+  .superRefine((players, context) => {
+    const playerIds = new Set(players.map((player) => player.id));
+    const microphoneIds = new Set(players.map((player) => player.microphoneId));
+    const profiles = players.flatMap((player) => (player.profile === null ? [] : [player.profile]));
+    if (playerIds.size !== players.length) {
+      context.addIssue({ code: 'custom', message: 'Multiplayer player IDs must be unique' });
+    }
+    if (microphoneIds.size !== players.length) {
+      context.addIssue({ code: 'custom', message: 'Multiplayer microphones must be unique' });
+    }
+    if (new Set(profiles).size !== profiles.length) {
+      context.addIssue({ code: 'custom', message: 'Multiplayer profiles must be unique' });
+    }
+  });
+
 export const appConfigSchema: z.ZodType<AppConfig> = z.object({
   data_path: nullableString,
   cache_paths: cachePathsSchema.nullable(),
@@ -83,6 +112,7 @@ export const appConfigSchema: z.ZodType<AppConfig> = z.object({
   mic_latency_compensation_sec: nullableNumber,
   combine_multi_channel: nullableBoolean,
   preferred_mic: nullableString,
+  multiplayer_players: playbackPlayersSchema.nullable(),
   whisper_model: nullableString,
   beam_size: nullableNumber,
   batch_size: nullableNumber,
@@ -176,31 +206,6 @@ export const webBootstrapSchema = z.object({
   dataPathPinned: z.boolean().optional(),
   libraryPinned: z.boolean().optional(),
 });
-
-export const playbackPlayerSchema = z.object({
-  id: z.string().min(1),
-  profile: z.string().min(1).nullable(),
-  microphoneId: z.string().min(1),
-});
-
-export const playbackPlayersSchema = z
-  .array(playbackPlayerSchema)
-  .min(2)
-  .max(4)
-  .superRefine((players, context) => {
-    const playerIds = new Set(players.map((player) => player.id));
-    const microphoneIds = new Set(players.map((player) => player.microphoneId));
-    const profiles = players.flatMap((player) => (player.profile === null ? [] : [player.profile]));
-    if (playerIds.size !== players.length) {
-      context.addIssue({ code: 'custom', message: 'Multiplayer player IDs must be unique' });
-    }
-    if (microphoneIds.size !== players.length) {
-      context.addIssue({ code: 'custom', message: 'Multiplayer microphones must be unique' });
-    }
-    if (new Set(profiles).size !== profiles.length) {
-      context.addIssue({ code: 'custom', message: 'Multiplayer profiles must be unique' });
-    }
-  });
 
 export const playbackLocationStateSchema = z.object({
   song: songSchema,

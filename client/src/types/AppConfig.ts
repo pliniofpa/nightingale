@@ -3,6 +3,7 @@ import type { BackgroundSelection } from './BackgroundSelection';
 import type { CachePaths } from './CachePaths';
 import type { CustomBackground } from './CustomBackground';
 import type { LibrarySource } from './LibrarySource';
+import type { PlaybackPlayer } from './PlaybackPlayer';
 import type { SongSort } from './SongSort';
 
 export type AppConfig = {
@@ -33,6 +34,7 @@ export type AppConfig = {
   mic_latency_compensation_sec: number | null;
   combine_multi_channel: boolean | null;
   preferred_mic: string | null;
+  multiplayer_players: Array<PlaybackPlayer> | null;
   whisper_model: string | null;
   beam_size: number | null;
   batch_size: number | null;

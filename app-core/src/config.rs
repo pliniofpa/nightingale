@@ -9,6 +9,7 @@ use crate::{
     backgrounds::{BackgroundSelection, CustomBackground},
     cache::{CachePaths, config_path},
     library_model::SongSort,
+    playback_session::PlaybackPlayer,
 };
 
 /// Where the user wants Nightingale to source songs from. Persisted in
@@ -207,6 +208,7 @@ pub struct AppConfig {
     pub mic_latency_compensation_sec: Option<f64>,
     pub combine_multi_channel: Option<bool>,
     pub preferred_mic: Option<String>,
+    pub multiplayer_players: Option<Vec<PlaybackPlayer>>,
     pub whisper_model: Option<String>,
     pub beam_size: Option<u32>,
     pub batch_size: Option<u32>,
@@ -273,6 +275,7 @@ impl Default for AppConfig {
             mic_latency_compensation_sec: None,
             combine_multi_channel: None,
             preferred_mic: None,
+            multiplayer_players: None,
             whisper_model: None,
             beam_size: None,
             batch_size: None,
