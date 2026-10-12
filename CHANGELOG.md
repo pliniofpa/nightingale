@@ -15,6 +15,7 @@ below.
 
 ### Features
 
+- Multiplayer setup now lets players choose a color, remembers profile, microphone, and color assignments in app settings, and closes after starting playback.
 - Desktop and Playback windows now remember their size and whether they were maximized between launches.
 - Added a **Combine multi-channel** microphone setting, allowing desktop users to select an individual audio-interface channel for solo or multiplayer scoring.
 - Added custom playback backgrounds from uploaded files or HTTPS links, automatically recognizing supported static image, Nightingale GLSL shader, and silent looping video extensions.
@@ -32,6 +33,13 @@ below.
 - The playback screen now shows the song's cover art, title, and artist on a loading screen while audio is still downloading/decoding, instead of a blank/shader background.
 
 ### Fixes
+
+- Closing the main desktop window now exits after its native webview is destroyed,
+  preventing a lingering event loop and WebView2 window-class cleanup errors.
+- Multiplayer channels on the same audio interface now share one hardware input
+  stream, preventing duplicate device opens and buffer underruns.
+- Multiplayer setup now retains a remembered microphone assignment when that
+  device is disconnected, so it can be restored when it returns.
 
 - Updated desktop microphone capture to CPAL 0.18.2, which fixes Windows ASIO device enumeration and stream creation from worker threads.
 - Song details now open without re-rendering every loaded song or initializing multiplayer devices.
